@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Remoc: remote channels, objects and RPC for Rust</title>
+    <meta name="description"
+        content="Remoc gives Rust programs channels that work between machines. Send a channel to the other side like any other value. Also does remote function calls, RPC on traits and observable collections.">
+    <meta name="color-scheme" content="light dark">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="canonical" href="https://remoc.rs/">
+    <link rel="preload" href="fonts/Inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/JetBrainsMono-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="style.css">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://remoc.rs/">
+    <meta property="og:title" content="Remoc: remote channels, objects and RPC for Rust">
+    <meta property="og:description"
+        content="Channels that work between machines, plus remote function calls, RPC on traits and observable collections. All of it over one connection.">
+    <meta property="og:image" content="https://remoc.rs/logo.png">
+    <meta name="twitter:card" content="summary">
+</head>
+
+<body>
+    <a class="skip" href="#content">Skip to content</a>
+
+    <header class="hero">
+        <nav aria-label="Primary">
+            <a class="brand" href="/">
+                <img src="logo.png" alt="" width="31" height="32">
+                <span>Remoc</span>
+            </a>
+            <ul>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#example">Example</a></li>
+                <li><a href="benchmarks.html">Benchmarks</a></li>
+                <li><a href="https://docs.rs/remoc">Docs</a></li>
+                <li><a class="icon-link" href="https://github.com/remoc-rs/remoc"><svg viewBox="0 0 16 16"
+                            aria-hidden="true">
+                            <path
+                                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+                        </svg>GitHub</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero-inner">
+            <img class="hero-logo" src="logo.png" alt="Remoc logo: a pink squid" width="467" height="482">
+            <h1>Remoc</h1>
+            <p class="tagline">Remote multiplexed objects and channels for Rust.</p>
+            <p class="lead">
+                Channels are how Rust programs talk between tasks. Remoc lets them talk between machines
+                the same way. Send a channel to the other side like any other value and it is connected,
+                inside the one link you already have. That link can be TCP, TLS, a WebSocket, a pipe or
+                a serial line. On top of the channels you also get remote function calls, RPC on traits
+                and observable collections.
+            </p>
+
+            <div class="cta">
+                <a class="button primary" href="https://docs.rs/remoc">Read the docs</a>
+                <a class="button icon-link" href="https://github.com/remoc-rs/remoc"><svg viewBox="0 0 16 16"
+                        aria-hidden="true">
+                        <path
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+                    </svg>Source on GitHub</a>
+            </div>
+
+            <pre class="install"><code><span class="c">$</span> cargo add remoc</code></pre>
+
+            <p class="badges">
+                <a href="https://crates.io/crates/remoc"><img
+                        src="https://img.shields.io/crates/v/remoc?style=flat-square&amp;color=e6007e" alt="crates.io"
+                        height="20"></a>
+                <a href="https://docs.rs/remoc"><img
+                        src="https://img.shields.io/docsrs/remoc?style=flat-square&amp;color=e6007e" alt="docs.rs"
+                        height="20"></a>
+                <a href="https://github.com/remoc-rs/remoc/blob/master/LICENSE"><img
+                        src="https://img.shields.io/crates/l/remoc?style=flat-square&amp;color=e6007e"
+                        alt="Apache 2.0 license" height="20"></a>
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section id="features" class="section">
+            <div class="wrap">
+                <h2>What it does</h2>
+                <div class="grid">
+                <article>
+                    <h3>Remote channels</h3>
+                    <p>
+                        MPSC, oneshot, watch and broadcast, with the API you already know from Tokio.
+                        They all share one transport and messages are sent in chunks, so a big blob on one
+                        channel does not stall the others.
+                    </p>
+                    <p><a href="https://docs.rs/remoc/latest/remoc/rch/index.html">rch module &rarr;</a></p>
+                </article>
+                <article>
+                    <h3>Channels are values</h3>
+                    <p>
+                        Put a sender into a struct, an enum or another channel and send it away. The new
+                        channel is set up for you inside the connection that is already open. No extra port
+                        to allocate, no service registry, no name lookup.
+                    </p>
+                </article>
+                <article>
+                    <h3>Remote trait calls</h3>
+                    <p>
+                        Write a trait, put <code>#[rtc::remote]</code> on it and you get a client and a server
+                        implementation. Arguments and return values may contain channels, so a method can hand
+                        back a stream of updates instead of a single value.
+                    </p>
+                    <p><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc module &rarr;</a></p>
+                </article>
+                <article>
+                    <h3>Remote functions</h3>
+                    <p>
+                        Send a closure over and let the other side call it. The arguments travel one way,
+                        the result comes back.
+                    </p>
+                    <p><a href="https://docs.rs/remoc/latest/remoc/rfn/index.html">rfn module &rarr;</a></p>
+                </article>
+                <article>
+                    <h3>Observable collections</h3>
+                    <p>
+                        Hash maps, b-tree maps, vectors and sets that publish what happens to them.
+                        A subscriber first gets a snapshot and then every change as it occurs.
+                    </p>
+                    <p><a href="https://docs.rs/remoc/latest/remoc/robs/index.html">robs module &rarr;</a></p>
+                </article>
+                <article>
+                    <h3>Remote objects</h3>
+                    <p>
+                        Locks and read/write locks that also work when the other party is on a different
+                        machine, plus values that are only fetched once somebody actually looks at them.
+                    </p>
+                    <p><a href="https://docs.rs/remoc/latest/remoc/robj/index.html">robj module &rarr;</a></p>
+                </article>
+                <article>
+                    <h3>Bring your own transport</h3>
+                    <p>
+                        Remoc does no networking. Give it an <code>AsyncRead</code> and <code>AsyncWrite</code>
+                        pair, or a <code>Sink</code> and <code>Stream</code> of packets, and you are connected.
+                        There are worked examples for TCP, TLS, WebSockets, a child process over pipes and
+                        links that survive a broken connection.
+                    </p>
+                    <p><a href="https://docs.rs/remoc/latest/remoc/transports/index.html">transports &rarr;</a></p>
+                </article>
+                <article>
+                    <h3>Any Serde format</h3>
+                    <p>
+                        Postbag, Bincode, CBOR, JSON, MessagePack or Postcard, chosen per connection.
+                        Pick a self-describing one and old and new versions of your software keep
+                        understanding each other.
+                    </p>
+                </article>
+                <article>
+                    <h3>100&nbsp;% safe Rust</h3>
+                    <p>
+                        Not a line of <code>unsafe</code>, built on Tokio. It also compiles for
+                        <code>wasm32-unknown-unknown</code> and WASI, so a browser tab can be one end of
+                        the connection.
+                    </p>
+                </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="example" class="section alt">
+            <div class="wrap">
+                <h2>A small example</h2>
+                <p class="section-lead">
+                    The client wants the server to count for it. It creates a channel, puts the sender
+                    into the request and reads the numbers from the receiver. Nothing else has to be
+                    arranged, both channels run through the single TCP connection that was opened at
+                    the start.
+                </p>
+
+                <div class="code-pair">
+                <figure>
+                    <figcaption>Shared</figcaption>
+                    <pre><code><span class="k">use</span> remoc::prelude::*;
+
+<span class="a">#[derive(Serialize, Deserialize)]</span>
+<span class="k">struct</span> <span class="t">CountReq</span> {
+    up_to: <span class="t">u32</span>,
+    <span class="c">// A sender, on its way to the peer.</span>
+    seq_tx: rch::mpsc::<span class="t">Sender</span>&lt;<span class="t">u32</span>&gt;,
+}</code></pre>
+                </figure>
+                <figure>
+                    <figcaption>Client</figcaption>
+                    <pre><code><span class="k">let</span> (seq_tx, <span class="k">mut</span> seq_rx) = rch::mpsc::channel(<span class="n">1</span>);
+tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_tx }).<span class="k">await</span>?;
+
+<span class="c">// The channel is live now, nothing to set up.</span>
+<span class="k">while let</span> <span class="t">Some</span>(i) = seq_rx.recv().<span class="k">await</span>? {
+    <span class="m">println!</span>(<span class="s">"{i}"</span>);
+}</code></pre>
+                </figure>
+                <figure>
+                    <figcaption>Server</figcaption>
+                    <pre><code><span class="k">while let</span> <span class="t">Some</span>(req) = rx.recv().<span class="k">await</span>? {
+    <span class="k">for</span> i <span class="k">in</span> <span class="n">0</span>..req.up_to {
+        req.seq_tx.send(i).<span class="k">await</span>?;
+    }
+}</code></pre>
+                </figure>
+                <figure>
+                    <figcaption>Or call a trait remotely</figcaption>
+                    <pre><code><span class="a">#[rtc::remote]</span>
+<span class="k">trait</span> <span class="t">Counter</span> {
+    <span class="k">async fn</span> <span class="f">value</span>(&amp;<span class="k">self</span>)
+        -&gt; <span class="t">Result</span>&lt;<span class="t">u32</span>, rtc::<span class="t">CallError</span>&gt;;
+
+    <span class="k">async fn</span> <span class="f">watch</span>(&amp;<span class="k">mut self</span>)
+        -&gt; <span class="t">Result</span>&lt;rch::watch::<span class="t">Receiver</span>&lt;<span class="t">u32</span>&gt;, rtc::<span class="t">CallError</span>&gt;;
+}</code></pre>
+                </figure>
+                </div>
+
+                <p class="section-foot">
+                    <a class="button"
+                        href="https://github.com/remoc-rs/remoc/tree/master/examples/rtc">The whole thing,
+                        client and server &rarr;</a>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div>
+                <img src="logo.png" alt="" width="27" height="28">
+                <p>
+                    Remoc is free software under the
+                    <a href="https://github.com/remoc-rs/remoc/blob/master/LICENSE">Apache&nbsp;2.0 license</a>.
+                </p>
+            </div>
+            <nav aria-label="Footer">
+                <ul>
+                    <li><a href="https://docs.rs/remoc">API documentation</a></li>
+                    <li><a href="benchmarks.html">Benchmarks</a></li>
+                    <li><a href="https://crates.io/crates/remoc">crates.io</a></li>
+                    <li><a href="https://github.com/remoc-rs/remoc">Repository</a></li>
+                    <li><a href="https://github.com/remoc-rs/remoc/blob/master/CHANGELOG.md">Changelog</a></li>
+                    <li><a href="https://github.com/remoc-rs/remoc/issues">Issues</a></li>
+                </ul>
+            </nav>
+            <p class="sponsors">
+                Development is partially sponsored by
+                <a href="https://enqt.de/">ENQT&nbsp;GmbH</a> and
+                <a href="https://www.mlilabs.de/">mlilabs&nbsp;GmbH</a>.
+            </p>
+        </div>
+    </footer>
+</body>
+
+</html>
