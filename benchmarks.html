@@ -124,12 +124,9 @@ tx.send(batch).<span class="k">await</span>?;</code></pre>
                             loading="lazy" width="1000" height="660">
                     </picture>
                     <figcaption>
-                        A handful of records per message is enough: from four on, the two curves close in
-                        and the link decides the rest &mdash; 1.9&nbsp;million records per second on the LAN
-                        link, 370&nbsp;thousand on the WAN link. Send them one at a time and the per-message
-                        cost shows: on the LAN link, where nothing but the CPU is in the way, a channel
-                        manages 575&nbsp;thousand against the 1.0&nbsp;million of a plain socket. Batch,
-                        and that difference is gone.
+                        From fours records per message on, the difference between a Remoc mpsc channel and the 
+                        plain connection becomes negligible. Round-trip delays introduced by LTE and WAN
+                        do not affect the throughput.
                     </figcaption>
                 </figure>
             </div>
@@ -153,11 +150,7 @@ tx.send(batch).<span class="k">await</span>?;</code></pre>
                     </picture>
                     <figcaption>
                         From 16 records per message on, a channel and the plain connection both reach what
-                        the link allows on LAN, Wi-Fi and LTE, at 98&ndash;100% of a raw transfer. The WAN
-                        link stops at 95%, where the multiplexer's flow control window rather than the CPU
-                        is the limit. At one record per message the overhead is all there is to measure: a
-                        channel reaches 29% on the LAN link, and 74&ndash;78% on the slower ones, where
-                        there is time to spare between the bytes anyway.
+                        the link allows on LAN, Wi-Fi and LTE, at 98&ndash;100% of a raw transfer.
                     </figcaption>
                 </figure>
             </div>
@@ -167,14 +160,13 @@ tx.send(batch).<span class="k">await</span>?;</code></pre>
             <div class="wrap narrow">
                 <h2>Run it yourself</h2>
                 <p>
-                    The suite is part of the repository. It sweeps every layer, codec and link, prints a
-                    table per link and writes a JSON report. <code>plot.py</code> draws all of it,
-                    <code>plot_web.py</code> draws the two figures above.
+                    The benchmark suite is part of the Remoc repository. It sweeps every layer, codec and
+                    link, prints a table per link and writes a JSON report, which its own
+                    <code>plot.py</code> draws in full.
                 </p>
                 <pre><code><span class="c">$</span> cd bench/perf
 <span class="c">$</span> cargo run --release -- --out results.json
-<span class="c">$</span> ./plot.py results.json
-<span class="c">$</span> ./plot_web.py results.json</code></pre>
+<span class="c">$</span> ./plot.py results.json</code></pre>
                 <p class="section-foot">
                     <a href="https://github.com/remoc-rs/remoc/tree/master/bench/perf">Benchmark suite on GitHub
                         &rarr;</a>
