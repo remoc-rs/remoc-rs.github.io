@@ -1,48 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Benchmarks: Remoc</title>
-    <meta name="description"
-        content="What multiplexing, serialization and flow control cost in Remoc, measured against a plain TCP socket.">
-    <meta name="color-scheme" content="light dark">
-    <link rel="icon" href="favicon.png" type="image/png">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="canonical" href="https://remoc.rs/benchmarks.html">
-    <link rel="preload" href="fonts/Inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="fonts/JetBrainsMono-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-    <a class="skip" href="#content">Skip to content</a>
+---
+layout: base
+title: "Benchmarks: Remoc"
+description: >-
+  How many records per second a Remoc channel gets across, measured against a plain TCP
+  connection doing the same work.
+canonical: /benchmarks.html
+nav: benchmarks
+---
 
     <header class="page-header">
-        <nav aria-label="Primary">
-            <a class="brand" href="index.html">
-                <img src="logo.png" alt="" width="31" height="32">
-                <span>Remoc</span>
-            </a>
-            <ul>
-                <li><a href="index.html#features">Features</a></li>
-                <li><a href="index.html#example">Example</a></li>
-                <li><a href="benchmarks.html" aria-current="page">Benchmarks</a></li>
-                <li><a href="https://docs.rs/remoc">Docs</a></li>
-                <li><a class="icon-link" href="https://github.com/remoc-rs/remoc"><svg viewBox="0 0 16 16"
-                            aria-hidden="true">
-                            <path
-                                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
-                        </svg>GitHub</a></li>
-            </ul>
-        </nav>
+        {% include nav.html %}
 
         <div class="wrap">
             <h1>Benchmarks</h1>
             <p class="lead">
-                What do multiplexing, serialization and flow control actually cost, compared to writing
-                the bytes into a socket yourself?
+                How many records per second does a Remoc channel get across, compared to serializing
+                them and writing the bytes into a socket yourself?
             </p>
         </div>
     </header>
@@ -50,49 +23,162 @@
     <main id="content">
         <section class="section">
             <div class="wrap">
+                <h2>What is measured</h2>
+                <p class="section-lead">
+                    A sender pushes records as fast as it can for five seconds and a receiver reads them.
+                    The same transfer runs twice: once over an <code>rch::mpsc</code> channel, and once
+                    over a plain TCP connection that serializes the same records with the same codec and
+                    frames them itself. That plain connection is the reference every Remoc number is put
+                    next to.
+                </p>
+
+                <div class="code-pair">
+                    <figure>
+                        <figcaption>The record</figcaption>
+                        <pre><code><span class="a">#[derive(Clone, Serialize, Deserialize)]</span>
+<span class="k">struct</span> <span class="t">Sample</span> {
+    id: <span class="t">u64</span>,
+    timestamp: <span class="t">u64</span>,
+    source: <span class="t">String</span>,
+    valid: <span class="t">bool</span>,
+    value: <span class="t">f64</span>,
+}</code></pre>
+                    </figure>
+                    <figure>
+                        <figcaption>One message</figcaption>
+                        <pre><code><span class="c">// A message is a batch of records.</span>
+<span class="k">let</span> batch = <span class="m">vec!</span>[<span class="t">Sample</span>::new(); records_per_message];
+
+<span class="c">// Sent over rch::mpsc, or serialized</span>
+<span class="c">// into the socket by hand.</span>
+tx.send(batch).<span class="k">await</span>?;</code></pre>
+                    </figure>
+                </div>
+
+                <p class="spaced">
+                    With the default <strong>postbag</strong> codec one record encodes to 64&nbsp;bytes, so a
+                    batch of 1024 records is a 64&nbsp;KiB message. The channel is configured with four extra
+                    transfer channels, which lets it serialize several messages at once
+                    (<code>with_parallel(4)</code>).
+                </p>
+
+                <div class="table-scroll spaced">
+                    <table>
+                        <caption>
+                            Bandwidth and round-trip time are emulated in the process, so a slow or distant
+                            connection can be measured without one.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th>Link</th>
+                                <th class="num">Bandwidth</th>
+                                <th class="num">Round-trip time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>LAN</td>
+                                <td class="num">125 MB/s</td>
+                                <td class="num">0 ms</td>
+                            </tr>
+                            <tr>
+                                <td>Wi-Fi</td>
+                                <td class="num">12 MB/s</td>
+                                <td class="num">10 ms</td>
+                            </tr>
+                            <tr>
+                                <td>LTE</td>
+                                <td class="num">6 MB/s</td>
+                                <td class="num">50 ms</td>
+                            </tr>
+                            <tr>
+                                <td>WAN</td>
+                                <td class="num">25 MB/s</td>
+                                <td class="num">100 ms</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <div class="notice">
-                    <p>Numbers are still being collected. They will show up here.</p>
                     <p>
-                        Until then you can run the suite yourself. It compares a plain TCP socket, a raw
-                        multiplexer port and the different channel types, and reports throughput, messages
-                        per second and CPU time per gigabyte. Links with limited bandwidth and added latency
-                        can be emulated, so you can see what happens on a slow or distant connection.
-                    </p>
-                    <p>
-                        <a href="https://github.com/remoc-rs/remoc/tree/master/bench">Benchmark suite on GitHub
-                            &rarr;</a>
+                        Measured on a 13th Gen Intel Core i9-13900K running Linux.
                     </p>
                 </div>
             </div>
         </section>
-    </main>
 
-    <footer>
-        <div class="footer-inner">
-            <div>
-                <img src="logo.png" alt="" width="27" height="28">
+        <section class="section alt">
+            <div class="wrap">
+                <h2>Records per second</h2>
+                <p class="section-lead">
+                    How much you get through depends on how many records you hand over at once. One panel
+                    per link, with the plain TCP reference doing the same serialization.
+                </p>
+
+                <figure class="plot">
+                    <picture>
+                        <source srcset="plots/records-dark.svg" media="(prefers-color-scheme: dark)">
+                        <img src="plots/records.svg"
+                            alt="Records per second against records per message, for a Remoc channel and a plain TCP reference, one panel per link."
+                            loading="lazy" width="1000" height="660">
+                    </picture>
+                    <figcaption>
+                        A handful of records per message is enough: from four on, the two curves close in
+                        and the link decides the rest &mdash; 1.9&nbsp;million records per second on the LAN
+                        link, 370&nbsp;thousand on the WAN link. Send them one at a time and the per-message
+                        cost shows: on the LAN link, where nothing but the CPU is in the way, a channel
+                        manages 575&nbsp;thousand against the 1.0&nbsp;million of a plain socket. Batch,
+                        and that difference is gone.
+                    </figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>What Remoc costs</h2>
+                <p class="section-lead">
+                    The same runs as a share of what a raw TCP transfer reaches on that link, which is the
+                    dotted line. The grey bar is what serializing the records costs; the pink bar adds
+                    multiplexing, chunking and flow control on top.
+                </p>
+
+                <figure class="plot">
+                    <picture>
+                        <source srcset="plots/share-dark.svg" media="(prefers-color-scheme: dark)">
+                        <img src="plots/share.svg"
+                            alt="Throughput as a share of a raw TCP transfer, for a Remoc channel and a plain TCP reference, one panel per link."
+                            loading="lazy" width="1000" height="660">
+                    </picture>
+                    <figcaption>
+                        From 16 records per message on, a channel and the plain connection both reach what
+                        the link allows on LAN, Wi-Fi and LTE, at 98&ndash;100% of a raw transfer. The WAN
+                        link stops at 95%, where the multiplexer's flow control window rather than the CPU
+                        is the limit. At one record per message the overhead is all there is to measure: a
+                        channel reaches 29% on the LAN link, and 74&ndash;78% on the slower ones, where
+                        there is time to spare between the bytes anyway.
+                    </figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Run it yourself</h2>
                 <p>
-                    Remoc is free software under the
-                    <a href="https://github.com/remoc-rs/remoc/blob/master/LICENSE">Apache&nbsp;2.0 license</a>.
+                    The suite is part of the repository. It sweeps every layer, codec and link, prints a
+                    table per link and writes a JSON report. <code>plot.py</code> draws all of it,
+                    <code>plot_web.py</code> draws the two figures above.
+                </p>
+                <pre><code><span class="c">$</span> cd bench/perf
+<span class="c">$</span> cargo run --release -- --out results.json
+<span class="c">$</span> ./plot.py results.json
+<span class="c">$</span> ./plot_web.py results.json</code></pre>
+                <p class="section-foot">
+                    <a href="https://github.com/remoc-rs/remoc/tree/master/bench/perf">Benchmark suite on GitHub
+                        &rarr;</a>
                 </p>
             </div>
-            <nav aria-label="Footer">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="https://docs.rs/remoc">API documentation</a></li>
-                    <li><a href="https://crates.io/crates/remoc">crates.io</a></li>
-                    <li><a href="https://github.com/remoc-rs/remoc">Repository</a></li>
-                    <li><a href="https://github.com/remoc-rs/remoc/blob/master/CHANGELOG.md">Changelog</a></li>
-                    <li><a href="https://github.com/remoc-rs/remoc/issues">Issues</a></li>
-                </ul>
-            </nav>
-            <p class="sponsors">
-                Development is partially sponsored by
-                <a href="https://enqt.de/">ENQT&nbsp;GmbH</a> and
-                <a href="https://www.mlilabs.de/">mlilabs&nbsp;GmbH</a>.
-            </p>
-        </div>
-    </footer>
-</body>
-
-</html>
+        </section>
+    </main>

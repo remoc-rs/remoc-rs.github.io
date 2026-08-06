@@ -1,0 +1,13 @@
+# Site-wide values, available to the templates as `site.*`.
+title: Remoc
+description: Remote multiplexed objects and channels for Rust.
+url: https://remoc.rs
+repo: https://github.com/remoc-rs/remoc
+docs: https://docs.rs/remoc
+
+# GitHub Pages builds this with Jekyll; the layout and includes exist only to keep
+# the shared chrome in one place. Nothing here is a blog, so no plugins are needed.
+plugins: []
+
+exclude:
+  - README.md

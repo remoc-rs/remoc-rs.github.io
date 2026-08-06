@@ -219,12 +219,21 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     gap: 0.4rem;
 }
 
-.icon-link svg {
+/* Icons are masked rather than drawn, so that a referenced file still takes the
+   colour of the text it sits next to. */
+.icon {
     width: 1.15em;
     height: 1.15em;
-    fill: currentColor;
+    flex: none;
+    background: currentColor;
+    -webkit-mask: no-repeat center / contain;
+    mask: no-repeat center / contain;
 }
 
+.icon.github {
+    -webkit-mask-image: url(github.svg);
+    mask-image: url(github.svg);
+}
 /* Subpage header */
 
 .page-header {
@@ -299,12 +308,13 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     margin: 0 auto 2rem;
 }
 
+/* Two by two on anything but a narrow phone, where it falls into one column. */
 .cta {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
     gap: 0.75rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 2rem;
+    max-width: 34rem;
+    margin: 0 auto 2rem;
 }
 
 .button {
@@ -329,6 +339,7 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 .button.icon-link {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
 }
 
@@ -354,18 +365,6 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 .install .c {
     color: var(--com);
     user-select: none;
-}
-
-.badges {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin: 0;
-}
-
-.badges img {
-    display: block;
 }
 
 /* Sections */
@@ -446,9 +445,17 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     gap: 1.25rem;
 }
 
+/* The blocks of a pair are stretched to a common height, so that two listings of
+   unequal length still line up. */
 .code-pair figure {
     margin: 0;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.code-pair pre {
+    flex: 1;
 }
 
 .code-pair figcaption {
@@ -458,6 +465,71 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     text-transform: uppercase;
     color: var(--fg-muted);
     margin-bottom: 0.45rem;
+}
+
+/* Plots and tables */
+
+.plot {
+    margin: 0 0 2.5rem;
+}
+
+/* The plots come in a light and a dark variant, drawn on no background of their own,
+   so they sit on the page rather than on a rectangle of their own colour. */
+.plot img {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+}
+
+.plot figcaption {
+    color: var(--fg-muted);
+    font-size: 0.92rem;
+    margin-top: 0.7rem;
+}
+
+.table-scroll {
+    overflow-x: auto;
+    margin-bottom: 2rem;
+}
+
+.spaced {
+    margin-top: 2.5rem;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.94rem;
+}
+
+caption {
+    caption-side: bottom;
+    color: var(--fg-muted);
+    font-size: 0.92rem;
+    text-align: left;
+    padding-top: 0.7rem;
+}
+
+th,
+td {
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 0.9rem 0.5rem 0;
+    text-align: left;
+    white-space: nowrap;
+}
+
+thead th {
+    border-bottom-width: 2px;
+    font-weight: 600;
+}
+
+td.num,
+th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    padding-right: 1.4rem;
 }
 
 /* Syntax colours */
@@ -499,8 +571,9 @@ footer {
 .footer-inner {
     max-width: var(--measure);
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     gap: 1.5rem 2rem;
     align-items: start;
 }
@@ -509,16 +582,27 @@ footer {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    gap: 0.35rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.25rem;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.footer-brand img {
+    flex: none;
+}
+
+.footer-brand p {
+    margin: 0;
 }
 
 .footer-inner p {
     margin: 0.6rem 0 0;
-}
-
-.sponsors {
-    align-self: end;
 }
 
 @media (prefers-reduced-motion: reduce) {
