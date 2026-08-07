@@ -52,6 +52,10 @@ Dir.children(ROOT).each do |name|
   FileUtils.cp_r(path, File.join(OUT, name))
 end
 
+# Paths the site is configured not to publish, removed after copying so that a nested
+# one is caught as well.
+site.fetch("exclude", []).each { |name| FileUtils.rm_rf(File.join(OUT, name)) }
+
 Dir[File.join(ROOT, "*.html")].sort.each do |path|
   source = File.read(path)
   unless source.start_with?("---\n")

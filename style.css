@@ -231,8 +231,23 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 }
 
 .icon.github {
-    -webkit-mask-image: url(github.svg);
-    mask-image: url(github.svg);
+    -webkit-mask-image: url(icons/github.svg);
+    mask-image: url(icons/github.svg);
+}
+
+.icon.docs {
+    -webkit-mask-image: url(icons/docs.svg);
+    mask-image: url(icons/docs.svg);
+}
+
+.icon.crate {
+    -webkit-mask-image: url(icons/crate.svg);
+    mask-image: url(icons/crate.svg);
+}
+
+.icon.tag {
+    -webkit-mask-image: url(icons/tag.svg);
+    mask-image: url(icons/tag.svg);
 }
 /* Subpage header */
 
@@ -314,7 +329,7 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
     gap: 0.75rem;
     max-width: 34rem;
-    margin: 0 auto 2rem;
+    margin: 0 auto;
 }
 
 .button {
@@ -353,18 +368,6 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     background: var(--accent-strong);
     border-color: var(--accent-strong);
     color: #fff;
-}
-
-.install {
-    display: inline-block;
-    text-align: left;
-    padding: 0.7rem 1.2rem;
-    margin-bottom: 1.5rem;
-}
-
-.install .c {
-    color: var(--com);
-    user-select: none;
 }
 
 /* Sections */

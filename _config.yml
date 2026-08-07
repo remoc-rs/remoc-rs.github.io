@@ -11,3 +11,4 @@ plugins: []
 
 exclude:
   - README.md
+  - icons/README.md

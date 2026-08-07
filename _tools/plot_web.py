@@ -8,11 +8,9 @@ a Remoc channel gets to a plain TCP connection doing the same work, and styles i
 match the site, in a light and a dark variant.
 
 Usage:
-    pip install matplotlib
     python3 _tools/plot_web.py path/to/results.json
 
-The report comes from the benchmark suite:
-    cd ../remoc/bench/perf && cargo run --release -- --out results.json
+See _tools/README.md for the benchmark run that produces the report.
 """
 
 import argparse
