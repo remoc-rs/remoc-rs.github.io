@@ -251,10 +251,12 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 }
 /* Subpage header */
 
+/* The same glow as the hero. The radii are relative to the box, and this header is
+   about a third of the hero's height, so they are scaled up to match it on screen. */
 .page-header {
     border-bottom: 1px solid var(--border);
     background:
-        radial-gradient(ellipse 70% 65% at 50% -30%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%);
+        radial-gradient(ellipse 70% 130% at 50% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%);
 }
 
 .page-header .wrap {
@@ -602,10 +604,6 @@ footer {
 
 .footer-brand p {
     margin: 0;
-}
-
-.footer-inner p {
-    margin: 0.6rem 0 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

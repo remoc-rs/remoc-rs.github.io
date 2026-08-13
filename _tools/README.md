@@ -1,24 +1,26 @@
 # Site tooling
 
-Two scripts, neither of which GitHub Pages runs: the site is built from the committed
-HTML by Jekyll, and these only exist to produce that input.
-
-## `render.rb` — preview the site locally
+## Preview the site locally
 
 GitHub Pages builds the site with Jekyll, resolving the layout in `_layouts` and the
-shared header and footer in `_includes`. Jekyll is awkward to install (one of its
-dependencies needs Ruby headers), so this script renders the same thing with Liquid
-alone, which installs anywhere.
+shared header and footer in `_includes`. Run the same thing locally:
 
 ```
-gem install --user-install liquid    # once
-ruby _tools/render.rb
-python3 -m http.server 8765 --directory _site
+jekyll serve --livereload
 ```
 
-Then open <http://localhost:8765/>. Re-run the script after each edit; `_site/` is
-ignored by git. If you do have Jekyll, `jekyll serve` works as well and rebuilds by
-itself.
+Then open <http://localhost:4000/>. It rebuilds on every save and reloads the open
+tab by itself; `_site/` is ignored by git.
+
+Installing it needs Ruby headers, because two of its dependencies are native. On
+Fedora, once:
+
+```
+sudo dnf install ruby-devel
+gem install --user-install jekyll
+```
+
+The site uses no plugins, so plain Jekyll renders exactly what GitHub Pages publishes.
 
 ## `plot_web.py` — draw the benchmark figures
 

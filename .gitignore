@@ -1,6 +1,7 @@
 # Local Claude Code configuration (machine-specific paths, not for publishing).
 .claude/
 
-# Output of a local `ruby _tools/render.rb`; GitHub Pages builds the published site.
+# Output of a local `jekyll serve`; GitHub Pages builds the published site.
 _site/
 .jekyll-cache/
+.jekyll-metadata
