@@ -1,0 +1,14 @@
+[package]
+name = "postbag-bytes"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# Prints, and checks, the bytes shown in the diagram on the Postbag page.
+# The dependency is the released crate, so what the page shows is what a
+# reader gets from crates.io.
+
+[dependencies]
+postbag = "1.0.0-pre3"
+serde = { version = "1", features = ["derive"] }
+serde_bytes = "0.11"

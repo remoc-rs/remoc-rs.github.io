@@ -55,6 +55,13 @@
     --com: #7a7684;
     --num: #9a5100;
 
+    --slim: #2b5fc7;
+    --slim-strong: #1f4aa0;
+
+    --yes: #2a7a34;
+    --partial: #8a4b00;
+    --no: #b3261e;
+
     --measure: 68rem;
     --radius: 10px;
 }
@@ -75,6 +82,27 @@
         --str: #8fd18a;
         --com: #8b8798;
         --num: #f0b060;
+
+        --slim: #8ab0ff;
+        --slim-strong: #b3caff;
+
+        --yes: #8fd18a;
+        --partial: #f0b060;
+        --no: #ff9b91;
+    }
+}
+
+/* Each project keeps the same layout and takes its accent from its logo. */
+
+.project-postbag {
+    --accent: #a8481a;
+    --accent-strong: #8c3a12;
+}
+
+@media (prefers-color-scheme: dark) {
+    .project-postbag {
+        --accent: #f0904f;
+        --accent-strong: #ffb384;
     }
 }
 
@@ -177,6 +205,32 @@ nav[aria-label="Primary"] {
     justify-content: space-between;
     gap: 1rem;
     flex-wrap: wrap;
+}
+
+.projects {
+    display: flex;
+    align-items: center;
+    gap: 2.25rem;
+    flex-wrap: wrap;
+}
+
+/* The projects you are not looking at stay quiet until you point at them. */
+.projects .brand:not(.current) {
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--fg-muted);
+}
+
+.projects .brand:not(.current) img {
+    opacity: 0.55;
+}
+
+.projects .brand:not(.current):hover {
+    color: var(--fg);
+}
+
+.projects .brand:not(.current):hover img {
+    opacity: 1;
 }
 
 .brand {
@@ -539,6 +593,140 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     text-transform: uppercase;
     color: var(--fg-muted);
     margin-bottom: 0.45rem;
+}
+
+/* One encoding of the data format: a heading, what it buys, and the diagram.
+   The section holds one of these per configuration. */
+
+/* Each encoding is a card, so that the diagram, its heading and its caption
+   read as one thing. The card is drawn with a border rather than a fill: the
+   diagrams have no background of their own and take the colour behind them. */
+
+.mode {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    /* Fluid, like the rest of the page: on a narrow screen the diagram needs
+       the width more than the card needs its margins. */
+    padding: clamp(0.9rem, 3vw, 1.6rem);
+}
+
+.mode + .mode {
+    margin-top: 1.75rem;
+}
+
+/* Each format keeps one colour wherever it appears — the card it is described
+   in, its badge, and its column in the comparison — so the two can be told
+   apart at a glance. Which to reach for first is left to the badges to say. */
+
+.mode.full {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.mode.slim {
+    border-color: color-mix(in srgb, var(--slim) 40%, var(--border));
+}
+
+.badge {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+    padding: 0.05em 0.5em;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--accent-strong);
+}
+
+.badge.slim {
+    background: color-mix(in srgb, var(--slim) 14%, transparent);
+    color: var(--slim-strong);
+    font-size: 0.68em;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+#compatibility col.full {
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+#compatibility col.slim {
+    background: color-mix(in srgb, var(--slim) 5%, transparent);
+}
+
+.mode + #compatibility {
+    margin-top: 3.5rem;
+}
+
+/* Only as wide as it needs to be: at full width the browser spreads the two
+   answers to opposite ends of the page, which is a long way to carry a row. */
+
+#compatibility table {
+    width: auto;
+}
+
+/* The answers sit inside their column rather than against its edge, which is
+   what makes the tinted one read as a column rather than a stripe. */
+
+#compatibility td:not(:first-child),
+#compatibility th:not(:first-child) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+#compatibility th:first-child,
+#compatibility td:first-child {
+    padding-right: 2rem;
+}
+
+/* Structs and enums answer these questions separately, so the rows are
+   grouped rather than interleaved. */
+
+#compatibility th[scope="rowgroup"] {
+    font-weight: 650;
+    padding-bottom: 0.35rem;
+}
+
+#compatibility tbody + tbody th[scope="rowgroup"],
+#compatibility tbody + tbody:last-child th[scope="row"],
+#compatibility tbody + tbody:last-child td {
+    padding-top: 1.5rem;
+}
+
+/* The changes sit under the heading that groups them; the row that is not
+   part of a group is a `th` and stays at the margin. */
+#compatibility tbody td:first-child {
+    padding-left: 1.1rem;
+}
+
+/* The word already says it; the mark is what makes the column readable at a
+   glance. Each answer has its own shape as well as its own colour, so it
+   still reads without colour. */
+
+.mark {
+    display: inline-block;
+    width: 1.2em;
+    font-weight: 700;
+}
+
+.mark.yes {
+    color: var(--yes);
+}
+
+.mark.partial {
+    color: var(--partial);
+}
+
+.mark.no {
+    color: var(--no);
+}
+
+.mode h3 {
+    font-size: 1.25rem;
+}
+
+.mode > p {
+    color: var(--fg-muted);
+    max-width: 46rem;
+    margin-bottom: 1.75rem;
 }
 
 /* Connection diagram, generated by _tools/diagram.py and inlined by the page.

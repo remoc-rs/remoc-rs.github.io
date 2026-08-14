@@ -1,5 +1,6 @@
 ---
 layout: base
+project: remoc
 title: "Remoc: remote channels, objects and RPC for Rust"
 description: >-
   Remoc gives Rust programs channels that work between machines. Send a channel to the
@@ -247,6 +248,14 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
                             into a project.
                         </p>
                         <p><a href="{{ site.docs }}">Documentation &rarr;</a></p>
+                    </article>
+                    <article>
+                        <h3>How your data is encoded</h3>
+                        <p>
+                            Remoc encodes your data using  Postbag, a binary Serde format that is compact yet
+                            backwards and forwards compatible.
+                        </p>
+                        <p><a href="/postbag/">Postbag &rarr;</a></p>
                     </article>
                 </div>
             </div>

@@ -1,0 +1,270 @@
+---
+layout: base
+project: postbag
+title: "Postbag: a binary Serde format that can change"
+description: >-
+  Postbag is a binary Serde codec for Rust. Add, remove and reorder fields and enum variants,
+  and programs built from either version of a type still read each other's data.
+social_description: >-
+  A binary Serde codec for Rust whose data survives its own schema changing: add, remove and
+  reorder fields, and old and new endpoints keep understanding each other.
+canonical: /postbag/
+favicon: /postbag/logo.png
+nav_url: /postbag/
+---
+
+    <header class="hero">
+        {% include nav.html %}
+
+        <div class="hero-inner">
+            <img class="hero-logo" src="logo.png" alt="Postbag logo: a briefcase" width="362" height="362">
+            <h1>Postbag</h1>
+            <p class="tagline">A binary Serde format that lets your types keep changing.</p>
+            <p class="lead">
+                Postbag turns any <a href="https://serde.rs/">Serde</a> type into compact binary
+                with the Rust type system fully intact: <code>Some(None)</code> is not <code>None</code>,
+                a <code>u128</code> stays a number, a map can be keyed by a tuple. And support for 
+                evolving your types in backward and forward compatible ways is built-in.
+            </p>
+
+            <div class="cta">
+                <a class="button icon-link" href="https://docs.rs/postbag"><span class="icon docs"
+                        aria-hidden="true"></span>Documentation</a>
+                <a class="button icon-link" href="https://crates.io/crates/postbag"><span class="icon crate"
+                        aria-hidden="true"></span>crates.io</a>
+                <a class="button icon-link"
+                    href="https://github.com/remoc-rs/postbag/blob/main/CHANGELOG.md"><span class="icon tag"
+                        aria-hidden="true"></span>Release notes</a>
+                <a class="button icon-link" href="https://github.com/remoc-rs/postbag"><span class="icon github"
+                        aria-hidden="true"></span>Source on GitHub</a>
+                <div class="install">
+                    <span class="prompt" aria-hidden="true">$</span>
+                    <code>cargo add postbag</code>
+                    <button class="copy-button" type="button" data-copy="cargo add postbag"
+                        aria-label="Copy the command">
+                        <span class="icon copy" aria-hidden="true"></span>
+                        <span class="icon check" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="content">
+        <section id="format" class="section">
+            <div class="wrap">
+                <h2>Two evolvable format variants</h2>
+
+                <div class="mode full">
+                    <h3>Postbag <code>Full</code> format with field names <span class="badge">recommended</span></h3>
+                    <p>
+                        The Postbag <code>Full</code> format writes each field with its name and
+                        the length of its value. That lets fields be added, removed and
+                        reordered. Writing names as strings usually costs a lot of space but
+                        Postbag reduces it to a <b>single byte</b> when <code>#[serde(rename = "_n")]</code>
+                        is applied to a struct field or enum variant.
+                    </p>
+                    <figure class="diagram">
+                        {% include postbag-full.svg %}
+                        <figcaption>
+                            Numbering a field is optional: <code>_0</code> to <code>_59</code> take a
+                            single byte, any other name is written out; keeping <code>sensor</code> as a
+                            name would cost seven bytes rather than one. Enum variants can be numbered the
+                            same way, and integers are varint-encoded, so a <code>u32</code> of 300 just costs
+                            two bytes.
+                        </figcaption>
+                    </figure>
+                </div>
+
+                <div class="mode slim">
+                    <h3>Postbag <code>Slim</code> format without field names <span class="badge slim">minimal size</span></h3>
+                    <p>
+                        The Postbag <code>Slim</code> format writes the values and nothing else, in the order
+                        the fields are declared. Fields can still be added and removed at the end, but
+                        nothing says which field is which, so backwards compatible changes to structs
+                        and enums are limited.
+                    </p>
+                    <figure class="diagram">
+                        {% include postbag-slim.svg %}
+                        <figcaption>
+                            An enum variant is written as its number rather than its name,
+                            and a string still carries its own length, since nothing else states where
+                            it ends.
+                        </figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="compatibility" class="section alt">
+            <div class="wrap">
+                <h2>Backwards and forwards compatibility</h2>
+                <p class="section-lead">
+                    Serializer and deserializer can work with different versions of your type,
+                    provided that the following rules are respected.
+                </p>
+
+                <div class="table-scroll">
+                    <table>
+                        <colgroup>
+                            <col>
+                            <col class="full">
+                            <col class="slim">
+                        </colgroup>
+                        <caption>
+                            A field a reader expects but does not receive takes its
+                            <code>#[serde(default)]</code>, and a variant it does not know needs a
+                            <code>#[serde(other)]</code> fallback.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th>Change to your types</th>
+                                <th><code>Full</code> format<span class="badge">recommended</span></th>
+                                <th><code>Slim</code> format<span class="badge slim">minimal size</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="rowgroup">Structs</th>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Add a field</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> anywhere</td>
+                                <td><span class="mark partial" aria-hidden="true">±</span> at the end</td>
+                            </tr>
+                            <tr>
+                                <td>Remove a field</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> anywhere</td>
+                                <td><span class="mark partial" aria-hidden="true">±</span> at the end</td>
+                            </tr>
+                            <tr>
+                                <td>Rename a field</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> when numbered</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> always</td>
+                            </tr>
+                            <tr>
+                                <td>Reorder fields</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> yes</td>
+                                <td><span class="mark no" aria-hidden="true">✗</span> no</td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <th scope="rowgroup">Enums</th>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Add a variant</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> anywhere</td>
+                                <td><span class="mark partial" aria-hidden="true">±</span> at the end</td>
+                            </tr>
+                            <tr>
+                                <td>Remove a variant</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> anywhere</td>
+                                <td><span class="mark partial" aria-hidden="true">±</span> at the end</td>
+                            </tr>
+                            <tr>
+                                <td>Rename a variant</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> when numbered</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> always</td>
+                            </tr>
+                            <tr>
+                                <td>Reorder variants</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> yes</td>
+                                <td><span class="mark no" aria-hidden="true">✗</span> no</td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <th scope="row">The struct above</th>
+                                <td>14 bytes</td>
+                                <td>10 bytes</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">When to use</th>
+                                <td>small size, best compatibility</td>
+                                <td>smaller size, less compatibility</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="usage" class="section">
+            <div class="wrap narrow">
+                <h2>Usage</h2>
+                <p class="section-lead">
+                    Derive Serde's traits as usual, then write and read the <code>Reading</code>
+                    from above. Nothing else is added to your types.
+                </p>
+
+                <figure class="code-single">
+                    <figcaption>Writing and reading</figcaption>
+                    <pre><code><span class="c">// Full format</span>
+<span class="k">let</span> bytes = postbag::to_full_vec(&amp;reading)?;
+<span class="k">let</span> reading: <span class="t">Reading</span> = postbag::from_full_slice(&amp;bytes)?;
+
+<span class="c">// Slim format</span>
+<span class="k">let</span> bytes = postbag::to_slim_vec(&amp;reading)?;
+<span class="k">let</span> reading: <span class="t">Reading</span> = postbag::from_slim_slice(&amp;bytes)?;</code></pre>
+                </figure>
+
+                <p class="section-foot">
+                    <b>Limitation:</b> Postbag cannot be used with Serde's <code>untagged</code>, internally tagged and 
+                    <code>flatten</code> attributes.
+                </p>
+            </div>
+        </section>
+
+        <section id="more" class="section alt">
+            <div class="wrap">
+                <h2>Read on</h2>
+                <div class="grid">
+                    <article>
+                        <h3>Where it comes from</h3>
+                        <p>
+                            Postbag began as a fork of postcard, keeping its compact encoding and
+                            adding what schema evolution needs.
+                        </p>
+                        <p><a href="https://github.com/jamesmunns/postcard">postcard &rarr;</a></p>
+                    </article>
+                    <article>
+                        <h3>How to use it</h3>
+                        <p>
+                            The whole API on docs.rs, including the compact representations and the
+                            configuration types.
+                        </p>
+                        <p><a href="https://docs.rs/postbag">Documentation &rarr;</a></p>
+                    </article>
+                    <article>
+                        <h3>Where it is used</h3>
+                        <p>
+                            Postbag is the default codec of Remoc, which uses it for every message
+                            sent between two endpoints.
+                        </p>
+                        <p><a href="/">Remoc &rarr;</a></p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // The only script on this page: copying the install command. The button stays
+        // hidden unless this runs, so it is never a control that does nothing.
+        document.documentElement.classList.add("js");
+        for (const button of document.querySelectorAll("button[data-copy]")) {
+            button.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(button.dataset.copy);
+                    button.classList.add("copied");
+                    setTimeout(() => button.classList.remove("copied"), 1500);
+                } catch {}
+            });
+        }
+    </script>

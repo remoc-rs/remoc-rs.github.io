@@ -5,6 +5,36 @@ url: https://remoc.rs
 repo: https://github.com/remoc-rs/remoc
 docs: https://docs.rs/remoc
 
+# The projects sharing this site. The header switches between them and each page
+# names the one it belongs to in its front matter as `project:`.
+projects:
+  - id: remoc
+    name: Remoc
+    url: /
+    logo: /logo.png
+    repo: https://github.com/remoc-rs/remoc
+    branch: master
+    crate: remoc
+    links:
+      - { title: Features, url: "/#features" }
+      - { title: Usage, url: "/#usage" }
+      - { title: Benchmarks, url: /benchmarks.html }
+      - { title: Docs, url: "https://docs.rs/remoc" }
+      - { title: GitHub, url: "https://github.com/remoc-rs/remoc", icon: github }
+  - id: postbag
+    name: Postbag
+    url: /postbag/
+    logo: /postbag/logo.png
+    repo: https://github.com/remoc-rs/postbag
+    branch: main
+    crate: postbag
+    links:
+      - { title: Format, url: "/postbag/#format" }
+      - { title: Compatibility, url: "/postbag/#compatibility" }
+      - { title: Usage, url: "/postbag/#usage" }
+      - { title: Docs, url: "https://docs.rs/postbag" }
+      - { title: GitHub, url: "https://github.com/remoc-rs/postbag", icon: github }
+
 # GitHub Pages builds this with Jekyll; the layout and includes exist only to keep
 # the shared chrome in one place. Nothing here is a blog, so no plugins are needed.
 plugins: []

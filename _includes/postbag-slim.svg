@@ -1,0 +1,47 @@
+<svg viewBox="0 0 960 434" role="img" aria-labelledby="postbag-slim-title postbag-slim-desc"
+     xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
+  <title id="postbag-slim-title">How Postbag encodes the same struct without identifiers</title>
+  <desc id="postbag-slim-desc">The same Rust struct on the left, and on the right the ten bytes Postbag writes for it in its Slim format: a field count, the length of the whole struct, and then the three values one after another. Nothing names the fields, so they can only be read back in the order they are declared.</desc>
+  <text x="0" y="26" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg-muted)">Your types</text>
+  <text x="390" y="26" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg-muted)">10 bytes</text>
+  <rect x="390" y="52" width="34" height="32" rx="5" fill="var(--fg-muted)"/>
+  <text x="407.0" y="73" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">03</text>
+  <text x="407.0" y="100" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--fg-muted)">three fields</text>
+  <rect x="488.4" y="52" width="34" height="32" rx="5" fill="var(--fg-muted)"/>
+  <text x="505.4" y="73" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">08</text>
+  <text x="505.4" y="100" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--fg-muted)">8 bytes of values</text>
+  <text x="390" y="124" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--fg-muted)">value</text>
+  <text x="0" y="46" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--com)">#[derive(Serialize, Deserialize)]</text>
+  <text x="0" y="68" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">struct Reading {</text>
+  <text x="16" y="160" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">sensor: u32,</text>
+  <text x="182" y="160" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg-muted)">= 300</text>
+  <rect x="390" y="138" width="34" height="32" rx="5" fill="var(--str)"/>
+  <text x="407.0" y="159" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">ac</text>
+  <rect x="429" y="138" width="34" height="32" rx="5" fill="var(--str)"/>
+  <text x="446.0" y="159" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">02</text>
+  <text x="426.5" y="186" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--str)">300 as a varint</text>
+  <text x="16" y="222" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">label: String,</text>
+  <text x="182" y="222" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg-muted)">= "temp"</text>
+  <rect x="390" y="200" width="34" height="32" rx="5" fill="var(--ty)"/>
+  <text x="407.0" y="221" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">04</text>
+  <text x="407.0" y="248" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--ty)">4 bytes</text>
+  <rect x="436" y="200" width="34" height="32" rx="5" fill="var(--str)"/>
+  <text x="453.0" y="221" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">74</text>
+  <rect x="475" y="200" width="34" height="32" rx="5" fill="var(--str)"/>
+  <text x="492.0" y="221" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">65</text>
+  <rect x="514" y="200" width="34" height="32" rx="5" fill="var(--str)"/>
+  <text x="531.0" y="221" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">6d</text>
+  <rect x="553" y="200" width="34" height="32" rx="5" fill="var(--str)"/>
+  <text x="570.0" y="221" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">70</text>
+  <text x="511.5" y="248" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--str)">"temp"</text>
+  <text x="16" y="284" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">unit: Unit,</text>
+  <text x="182" y="284" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg-muted)">= Celsius</text>
+  <rect x="390" y="262" width="34" height="32" rx="5" fill="var(--str)"/>
+  <text x="407.0" y="283" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">00</text>
+  <text x="407.0" y="310" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--str)">variant number 0</text>
+  <text x="0" y="316" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">}</text>
+  <text x="0" y="350" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">enum Unit {</text>
+  <text x="31" y="370" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">Celsius,</text>
+  <text x="31" y="390" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">Other(String),</text>
+  <text x="0" y="410" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">}</text>
+</svg>
