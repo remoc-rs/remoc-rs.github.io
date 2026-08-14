@@ -1,0 +1,61 @@
+<svg viewBox="0 0 960 300" role="img" aria-labelledby="diagram-title diagram-desc"
+     xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
+  <title id="diagram-title">How Remoc uses one connection</title>
+  <desc id="diagram-desc">Two programs, each holding senders and receivers with their own queue of messages: an mpsc sender sending to the right, a watch receiver fed from the right, and an RPC client calling an RPC server. All of them join into a single connection in the middle, which carries their chunks interleaved.</desc>
+  <rect x="0.5" y="30.5" width="249" height="239" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <text x="125.0" y="20" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">Local endpoint</text>
+  <rect x="710.5" y="30.5" width="249" height="239" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <text x="835.0" y="20" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">Remote endpoint</text>
+  <rect x="16" y="77.0" width="218" height="38" rx="8" fill="none" stroke="var(--ty)" stroke-width="1.5"/>
+  <rect x="180" y="87.0" width="12" height="18" rx="2" fill="var(--ty)"/>
+  <rect x="196" y="87.0" width="12" height="18" rx="2" fill="var(--ty)"/>
+  <rect x="212" y="87.0" width="12" height="18" rx="2" fill="var(--ty)"/>
+  <text x="98.0" y="101.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">mpsc::Sender</text>
+  <rect x="726" y="77.0" width="218" height="38" rx="8" fill="none" stroke="var(--ty)" stroke-width="1.5"/>
+  <rect x="736" y="87.0" width="12" height="18" rx="2" fill="var(--ty)"/>
+  <rect x="752" y="87.0" width="12" height="18" rx="2" fill="var(--ty)"/>
+  <rect x="768" y="87.0" width="12" height="18" rx="2" fill="var(--ty)"/>
+  <text x="862.0" y="101.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">mpsc::Receiver</text>
+  <path d="M 234,96.0 C 309,96.0 305,150.0 360,150.0" fill="none" stroke="var(--ty)" stroke-width="2"/>
+  <path d="M 600,150.0 C 655,150.0 651,96.0 726,96.0" fill="none" stroke="var(--ty)" stroke-width="2"/>
+<path d="M 719,91.0 L 726,96.0 L 719,101.0 Z" fill="var(--ty)"/>
+  <rect x="16" y="131.0" width="218" height="38" rx="8" fill="none" stroke="var(--str)" stroke-width="1.5"/>
+  <rect x="212" y="141.0" width="12" height="18" rx="2" fill="var(--str)"/>
+  <text x="114.0" y="155.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">watch::Receiver</text>
+  <rect x="726" y="131.0" width="218" height="38" rx="8" fill="none" stroke="var(--str)" stroke-width="1.5"/>
+  <rect x="736" y="141.0" width="12" height="18" rx="2" fill="var(--str)"/>
+  <text x="846.0" y="155.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">watch::Sender</text>
+  <path d="M 234,150.0 C 309,150.0 305,150.0 360,150.0" fill="none" stroke="var(--str)" stroke-width="2"/>
+  <path d="M 600,150.0 C 655,150.0 651,150.0 726,150.0" fill="none" stroke="var(--str)" stroke-width="2"/>
+<path d="M 241,145.0 L 234,150.0 L 241,155.0 Z" fill="var(--str)"/>
+  <rect x="16" y="185.0" width="218" height="38" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <rect x="196" y="195.0" width="12" height="18" rx="2" fill="var(--accent)"/>
+  <rect x="212" y="195.0" width="12" height="18" rx="2" fill="var(--accent)"/>
+  <text x="106.0" y="209.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">RPC client</text>
+  <rect x="726" y="185.0" width="218" height="38" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <rect x="736" y="195.0" width="12" height="18" rx="2" fill="var(--accent)"/>
+  <rect x="752" y="195.0" width="12" height="18" rx="2" fill="var(--accent)"/>
+  <text x="854.0" y="209.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">RPC server</text>
+  <path d="M 234,204.0 C 309,204.0 305,150.0 360,150.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 600,150.0 C 655,150.0 651,204.0 726,204.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+<path d="M 719,199.0 L 726,204.0 L 719,209.0 Z" fill="var(--accent)"/>
+<path d="M 241,199.0 L 234,204.0 L 241,209.0 Z" fill="var(--accent)"/>
+  <rect x="360" y="132.0" width="240" height="36" rx="6" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <rect x="367.0" y="139.0" width="12.4" height="22" rx="2" fill="var(--ty)"/>
+  <rect x="383.4" y="139.0" width="12.4" height="22" rx="2" fill="var(--accent)"/>
+  <rect x="399.9" y="139.0" width="12.4" height="22" rx="2" fill="var(--str)"/>
+  <rect x="416.3" y="139.0" width="12.4" height="22" rx="2" fill="var(--ty)"/>
+  <rect x="432.7" y="139.0" width="12.4" height="22" rx="2" fill="var(--ty)"/>
+  <rect x="449.1" y="139.0" width="12.4" height="22" rx="2" fill="var(--accent)"/>
+  <rect x="465.6" y="139.0" width="12.4" height="22" rx="2" fill="var(--str)"/>
+  <rect x="482.0" y="139.0" width="12.4" height="22" rx="2" fill="var(--accent)"/>
+  <rect x="498.4" y="139.0" width="12.4" height="22" rx="2" fill="var(--ty)"/>
+  <rect x="514.9" y="139.0" width="12.4" height="22" rx="2" fill="var(--str)"/>
+  <rect x="531.3" y="139.0" width="12.4" height="22" rx="2" fill="var(--str)"/>
+  <rect x="547.7" y="139.0" width="12.4" height="22" rx="2" fill="var(--ty)"/>
+  <rect x="564.1" y="139.0" width="12.4" height="22" rx="2" fill="var(--accent)"/>
+  <rect x="580.6" y="139.0" width="12.4" height="22" rx="2" fill="var(--ty)"/>
+  <text x="480.0" y="118.0" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" fill="var(--fg-muted)">chunks of every channel, interleaved</text>
+  <text x="480.0" y="194.0" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" fill="var(--fg-muted)"><tspan font-weight="700" fill="var(--fg)">one</tspan> connection</text>
+  <text x="480.0" y="216.0" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--fg-muted)">TCP, TLS, a WebSocket or anything else that carries bytes</text>
+</svg>

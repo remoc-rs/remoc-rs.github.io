@@ -1,0 +1,53 @@
+<svg viewBox="0 0 960 450" role="img" aria-labelledby="channels-title channels-desc"
+     xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
+  <title id="channels-title">How a channel is created by sending one</title>
+  <desc id="channels-desc">Two frames. In the first, a request travelling over an existing channel between the two endpoints contains a field holding the sender of a new channel. In the second, that channel is live between the endpoints, running inside the same connection as the first one.</desc>
+  <text x="0" y="210" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg)">1. A request travels over a channel that already exists, carrying the sender of a new one.</text>
+  <text x="0" y="436" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg)">2. The new channel is live, inside the same connection.</text>
+  <rect x="0.5" y="32.5" width="249" height="151" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <rect x="710.5" y="32.5" width="249" height="151" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <text x="125.0" y="20" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg-muted)">Local endpoint</text>
+  <text x="835.0" y="20" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg-muted)">Remote endpoint</text>
+  <rect x="290" y="32.5" width="380" height="151" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <text x="480.0" y="20" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg-muted)">One connection</text>
+  <rect x="16" y="59.0" width="218" height="46" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="125.0" y="82" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">RPC client</text>
+  <text x="125.0" y="98" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11" fill="var(--fg-muted)">or existing mpsc::Sender</text>
+  <rect x="726" y="59.0" width="218" height="46" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="835.0" y="82" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">RPC server</text>
+  <text x="835.0" y="98" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11" fill="var(--fg-muted)">or existing mpsc::Receiver</text>
+  <path d="M 234,82 L 726,82" stroke="var(--accent)" stroke-width="2"/>
+<path d="M 719,77 L 726,82 L 719,87 Z" fill="var(--accent)"/>
+  <rect x="355.0" y="53.0" width="250" height="58" rx="6" fill="var(--bg)" stroke="var(--accent)"/>
+  <text x="355.0" y="45.0" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12" fill="var(--fg-muted)">count(...)</text>
+  <text x="369.0" y="75.0" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--fg-muted)">up_to: 4</text>
+  <text x="369.0" y="98.0" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--fg-muted)">seq_tx:</text>
+  <rect x="421.0" y="82.0" width="108" height="22" rx="5" fill="none" stroke="var(--ty)" stroke-width="1.5"/>
+  <text x="475.0" y="98.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--ty)">mpsc::Sender</text>
+  <text x="480.0" y="131.0" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12.5" fill="var(--fg-muted)">any channel can carry another</text>
+  <rect x="0.5" y="258.5" width="249" height="151" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <rect x="710.5" y="258.5" width="249" height="151" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <rect x="290" y="258.5" width="380" height="151" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <rect x="16" y="285.0" width="218" height="46" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="125.0" y="308" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">RPC client</text>
+  <text x="125.0" y="324" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11" fill="var(--fg-muted)">or existing mpsc::Sender</text>
+  <rect x="726" y="285.0" width="218" height="46" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="835.0" y="308" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">RPC server</text>
+  <text x="835.0" y="324" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11" fill="var(--fg-muted)">or existing mpsc::Receiver</text>
+  <path d="M 234,308 L 726,308" stroke="var(--accent)" stroke-width="2"/>
+<path d="M 719,303 L 726,308 L 719,313 Z" fill="var(--accent)"/>
+  <rect x="16" y="343.0" width="218" height="46" rx="8" fill="none" stroke="var(--ty)" stroke-width="1.5"/>
+  <text x="125.0" y="371" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">mpsc::Receiver</text>
+  <rect x="726" y="343.0" width="218" height="46" rx="8" fill="none" stroke="var(--ty)" stroke-width="1.5"/>
+  <text x="835.0" y="371" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">mpsc::Sender</text>
+  <path d="M 234,366 L 726,366" stroke="var(--ty)" stroke-width="2"/>
+<path d="M 241,361 L 234,366 L 241,371 Z" fill="var(--ty)"/>
+  <rect x="405.0" y="354.0" width="24" height="24" rx="4" fill="var(--ty)"/>
+  <text x="417.0" y="371" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--bg)">0</text>
+  <rect x="447.0" y="354.0" width="24" height="24" rx="4" fill="var(--ty)"/>
+  <text x="459.0" y="371" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--bg)">1</text>
+  <rect x="489.0" y="354.0" width="24" height="24" rx="4" fill="var(--ty)"/>
+  <text x="501.0" y="371" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--bg)">2</text>
+  <rect x="531.0" y="354.0" width="24" height="24" rx="4" fill="var(--ty)"/>
+  <text x="543.0" y="371" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--bg)">3</text>
+</svg>

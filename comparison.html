@@ -1,0 +1,354 @@
+---
+layout: base
+title: "How it compares: Remoc"
+description: >-
+  Remoc is stateful RPC: calls hand over channels and objects that stay alive. How that
+  differs from gRPC, tarpc and Cap'n Proto.
+canonical: /comparison.html
+nav: comparison
+published: false
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>How it compares</h1>
+            <p class="lead">
+                Remoc is stateful. A call can hand the other side a channel or an object that stays
+                alive after the call returns, which puts it in the family of DCOM and CORBA rather
+                than of the request-and-response RPC that grew up on HTTP.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Nothing to generate</h2>
+                <p>
+                    There is no schema file, no compiler to install and no build step to arrange. The
+                    types you send are the ones you already have, with
+                    <code>#[derive(Serialize, Deserialize)]</code> on them. The channels are the ones you
+                    already use —
+                    <a href="https://docs.rs/remoc/latest/remoc/rch/mpsc/index.html"><code>mpsc</code></a>,
+                    <a href="https://docs.rs/remoc/latest/remoc/rch/oneshot/index.html"><code>oneshot</code></a>,
+                    <a href="https://docs.rs/remoc/latest/remoc/rch/watch/index.html"><code>watch</code></a>,
+                    <a href="https://docs.rs/remoc/latest/remoc/rch/broadcast/index.html"><code>broadcast</code></a>
+                    — with the methods they have in
+                    <a href="https://docs.rs/tokio/latest/tokio/sync/index.html">tokio::sync</a>. A trait
+                    becomes remotely callable by putting
+                    <a href="https://docs.rs/remoc/latest/remoc/rtc/attr.remote.html"><code>#[rtc::remote]</code></a>
+                    on it.
+                </p>
+                <p>
+                    When both ends are Rust, a schema would only put a second type system in front of
+                    your own: an enum with data becomes a union and a wrapper message, a
+                    <code>Result</code> becomes a status code and a detail to parse back. That is a
+                    translation you would write in both directions, on both sides, and keep in step
+                    with your types by hand.
+                </p>
+                <p class="section-foot">
+                    The step from a local program to a distributed one is correspondingly small: keep the
+                    types, keep the channels, hand one end of a connection to the other side. What you
+                    have to learn is how the connection is set up, not an interface language — and when a
+                    type changes, the compiler tells both sides.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Stateful, not request and response</h2>
+                <p>
+                    In request-and-response RPC every call stands alone: a method, arguments, a result.
+                    Anything that keeps going needs a stream declared in the schema, or a second
+                    connection, or an identifier you invent and look up on both sides.
+                </p>
+                <p>
+                    A Remoc call can hand over a thing instead. Put an
+                    <a href="https://docs.rs/remoc/latest/remoc/rch/mpsc/struct.Sender.html"><code>rch::mpsc::Sender</code></a>
+                    in the request and the peer holds a live channel it can push into for the next hour;
+                    return an
+                    <a href="https://docs.rs/remoc/latest/remoc/rch/watch/struct.Receiver.html"><code>rch::watch::Receiver</code></a>
+                    and the caller sees every change from then on; hand out an
+                    <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc</a> client and the peer
+                    calls your object. None of it is registered anywhere and none of it needs a port: the
+                    channel exists because you sent one, inside the connection that was already open.
+                </p>
+
+                <figure class="code-single">
+                    <figcaption>One call, an ongoing conversation</figcaption>
+                    <pre><code><span class="a">#[rtc::remote]</span>
+<span class="k">trait</span> <span class="t">Sensor</span> {
+    <span class="c">// Subscribe once; the updates keep coming.</span>
+    <span class="k">async fn</span> <span class="f">readings</span>(&amp;<span class="k">self</span>)
+        -&gt; <span class="t">Result</span>&lt;rch::watch::<span class="t">Receiver</span>&lt;<span class="t">Reading</span>&gt;, rtc::<span class="t">CallError</span>&gt;;
+
+    <span class="c">// Tell it where to put the log, and walk away.</span>
+    <span class="k">async fn</span> <span class="f">stream_log</span>(&amp;<span class="k">self</span>, tx: rch::mpsc::<span class="t">Sender</span>&lt;<span class="t">String</span>&gt;)
+        -&gt; <span class="t">Result</span>&lt;(), rtc::<span class="t">CallError</span>&gt;;
+}
+
+<span class="c">// On the caller, both are live after one await each.</span>
+<span class="k">let mut</span> readings = sensor.readings().<span class="k">await</span>?;
+<span class="k">while</span> readings.changed().<span class="k">await</span>.is_ok() {
+    <span class="m">println!</span>(<span class="s">"{:?}"</span>, *readings.borrow()?);
+}</code></pre>
+                </figure>
+
+                <p>
+                    Two conversations over the one connection, with nothing to correlate: the stream
+                    <em>is</em> the value the call returns or takes. Elsewhere each would be a streaming
+                    method in a schema, or an identifier you mint and look up on both sides.
+                </p>
+
+                <p>
+                    Latency is not the price for it. Channels do not wait for acknowledgement, so values
+                    keep flowing without a round trip between them, and independent calls need not be
+                    made one after another: <code>join!(c.a(), c.b(), c.c())</code> puts three requests
+                    on the wire together and gets three results for one round trip. That holds however
+                    the <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc</a> server was
+                    started — with <code>serve(false)</code> the requests queue and run one after the
+                    other, with <code>serve(true)</code> they run at once, a task each, because
+                    underneath it is an mpsc channel like any other.
+                </p>
+
+                <p class="section-foot">
+                    The model is older than the web, and the systems built on it — CORBA, DCOM, .NET
+                    Remoting — are mostly remembered for failing. What sank them is worth naming: calls
+                    made to look local so that failure arrived unannounced, object lifetime kept by
+                    distributed reference counts, leases and liveness pings, dynamic ports no firewall
+                    would pass, and specifications no two vendors implemented alike. Remoc keeps the
+                    model and drops all four. Every call hands you a <code>Result</code>, lifetime is a
+                    channel closing, everything rides the one connection you already have, and there is
+                    no interface language, no object request broker and no naming service.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>What that gets you</h2>
+                <div class="grid">
+                    <article>
+                        <h3>Back pressure everywhere</h3>
+                        <p>
+                            Every channel, remote function and trait call rides a port with credit of
+                            its own, so a receiver that stops reading stalls its own sender instead of
+                            filling the peer's memory. Nothing to arrange per call site.
+                        </p>
+                        <p><a href="https://docs.rs/remoc/latest/remoc/rch/index.html">rch module &rarr;</a></p>
+                    </article>
+                    <article>
+                        <h3>Errors stay typed</h3>
+                        <p>
+                            A call returns your own error enum, not a status code with a detail to
+                            parse or a string to match on. What can go wrong in the transport arrives
+                            as <code>CallError</code>, which converts into your type.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>Either end can serve</h3>
+                        <p>
+                            Who opened the connection has nothing to do with who offers the service. A
+                            device that dials out through NAT can hand its peer a client and be called
+                            back over the same connection.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>Channels are cheap to open</h3>
+                        <p>
+                            A new one is usable at once: the port is pre-connected, so the first
+                            message leaves without waiting for the other side to accept it. Open one
+                            per request if that is the natural shape.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>The browser can be one end</h3>
+                        <p>
+                            Remoc compiles to <code>wasm32</code> and runs over a WebSocket, so a tab
+                            talks to your server in Rust: the same types, the same traits, no second
+                            implementation of the protocol in TypeScript. Only what the view needs
+                            crosses into JavaScript.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>One connection, whatever it is</h3>
+                        <p>
+                            Every channel, call and object shares the single link you already have —
+                            one port to open, one hole in a firewall. That link can be TCP, TLS, a
+                            WebSocket, a pipe or anything else that carries bytes, and nothing above it changes.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap">
+                <h2>At a glance</h2>
+
+                <div class="table-scroll">
+                    <table>
+                        <caption>
+                            Remoc accounts credit per channel, so a receiver that stops reading stalls
+                            its own sender instead of growing the peer's memory — the same for channel
+                            sends, remote functions and trait calls. Cap'n Proto applies a limit to
+                            streaming calls; other calls queue.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th>Approach</th>
+                                <th>Contract</th>
+                                <th>Non-Rust peers</th>
+                                <th>Who can serve</th>
+                                <th>State across calls</th>
+                                <th>Flow control</th>
+                                <th>Transport</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Remoc</td>
+                                <td>Rust types via Serde</td>
+                                <td>no</td>
+                                <td>either end</td>
+                                <td>channels, objects, traits</td>
+                                <td>per channel credits</td>
+                                <td>any byte stream</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/hyperium/tonic">gRPC (tonic)</a></td>
+                                <td><code>.proto</code> schema</td>
+                                <td>yes</td>
+                                <td>the listener</td>
+                                <td>stateless, streams per method</td>
+                                <td>HTTP/2 windows</td>
+                                <td>HTTP/2 only</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://docs.rs/tarpc">tarpc</a></td>
+                                <td>Rust traits</td>
+                                <td>no</td>
+                                <td>one side only</td>
+                                <td>stateless</td>
+                                <td>request limits only</td>
+                                <td>any, via Serde</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://capnproto.org/rpc.html">Cap'n Proto</a></td>
+                                <td><code>.capnp</code> schema</td>
+                                <td>yes</td>
+                                <td>either end</td>
+                                <td>capabilities</td>
+                                <td>streaming calls only</td>
+                                <td>TCP and others</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>The alternatives</h2>
+
+                <h3>gRPC, through tonic</h3>
+                <p>
+                    The most widely deployed of them. A <code>.proto</code> schema defines the methods,
+                    <a href="https://github.com/hyperium/tonic">tonic</a> generates the Rust from it, and
+                    anything that speaks <a href="https://grpc.io/">gRPC</a> can call you: Go, Python, a
+                    browser through a gRPC-Web proxy.
+                </p>
+                <p>
+                    gRPC is defined over HTTP/2, so the transport is settled for you — which is the point
+                    if your routing, authentication and metrics already live in that layer, and a
+                    constraint if they do not. The roles come with it: the side that dials consumes the
+                    service and cannot offer one back over the same connection.
+                </p>
+                <p>
+                    It is stateless by design, and that is what makes it scale across replicas behind a
+                    load balancer. Streaming exists, but each stream is a method in the schema and nothing
+                    outlives the call it belongs to; anything that has to persist between calls lives in a
+                    store, keyed by an identifier the client carries along.
+                </p>
+
+                <h3>tarpc</h3>
+                <p>
+                    The closest neighbour: <a href="https://docs.rs/tarpc">tarpc</a> puts Rust on both ends,
+                    asks for no schema and turns a trait into a client and a server, which is what
+                    <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc</a> does as well. For
+                    plain request and response the two are interchangeable, and tarpc deliberately stops
+                    there: a call takes values and returns values, and between calls the server holds
+                    nothing for you.
+                </p>
+
+                <h3>Cap'n Proto</h3>
+                <p>
+                    <a href="https://capnproto.org/rpc.html">Cap'n Proto</a> is the exception among the
+                    three, and the other system built on references you can pass around: a message may
+                    carry a capability, and whoever receives it can call it. It works across languages, at
+                    the price of a schema language and its compiler.
+                </p>
+                <p>
+                    Its promise pipelining has no Remoc equivalent — calling a method on a result that has
+                    not arrived yet, so a chain of calls costs one round trip. Remoc usually inverts that
+                    problem instead: you send a channel <em>into</em> the call, so the path for the answer
+                    exists before the call is made. What remains missing is chaining calls onto a result
+                    whose type is only known once the previous one returns.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Where the contract lives</h2>
+                <p>
+                    There is no schema file, but there is a contract: the traits carrying
+                    <code>#[rtc::remote]</code> and the types they pass. Put them in their own crate,
+                    publish it, and both ends depend on a version of it — the same versioning you already
+                    use for everything else in Cargo.
+                </p>
+                <p>
+                    Endpoints on different versions still talk. The default
+                    <a href="https://docs.rs/postbag">Postbag</a> format is self-describing, so a
+                    field added with <code>#[serde(default)]</code> is filled in when an older peer omits
+                    it, and a field it does not know about is ignored rather than fatal. That covers
+                    most of what changes over the life of a program.
+                </p>
+                <p class="section-foot">
+                    When the data itself has to be reshaped rather than extended — a field split in two,
+                    two merged, a type replaced — the
+                    <a href="https://docs.rs/remoc/latest/remoc/versioned/index.html">versioned</a> module
+                    holds the old and the current representation side by side and converts between them,
+                    per value and per peer.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>When Remoc is not the right choice</h2>
+                <div class="grid">
+                    <article>
+                        <h3>A peer is not Rust</h3>
+                        <p>
+                            The contract is Rust types, so both ends are built from them. When one end
+                            cannot be, that is what gRPC and Cap'n Proto are for.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>Policy per call in the network</h3>
+                        <p>
+                            A connection tunnels through HTTP infrastructure happily, as TLS or a
+                            WebSocket. But to a proxy in between it is one stream, not a sequence of
+                            calls, so per-method routing, rate limiting and metrics have to live in your
+                            code rather than in the mesh.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>

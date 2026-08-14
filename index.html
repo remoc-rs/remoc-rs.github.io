@@ -20,11 +20,13 @@ nav: home
             <h1>Remoc</h1>
             <p class="tagline">Remote multiplexed objects and channels for Rust.</p>
             <p class="lead">
-                Channels are how <a href="https://www.rust-lang.org/">Rust</a> programs talk between tasks.
-                Remoc lets them talk between machines the same way. Send a channel to the other side like any
-                other value and it is connected, inside the one link you already have. That link can be TCP,
-                TLS, a WebSocket, a pipe or a serial line. On top of the channels you also get remote function
-                calls, RPC on traits and observable collections.
+                <a href="https://docs.rs/tokio/latest/tokio/sync/index.html">Tokio channels</a> are how async
+                Rust programs talk between tasks.
+                Remoc lets them talk between machines the same way. Send a
+                <a href="https://docs.rs/remoc/latest/remoc/rch/index.html">Remoc channel</a> to the other side
+                like any other value and it is connected, inside the one link you already have. That link can
+                be TCP, TLS, a WebSocket, a pipe or anything else that carries bytes. On top of the channels you also get remote
+                function calls, RPC on traits and observable collections.
             </p>
 
             <div class="cta">
@@ -36,12 +38,51 @@ nav: home
                         aria-hidden="true"></span>Release notes</a>
                 <a class="button icon-link" href="{{ site.repo }}"><span class="icon github"
                         aria-hidden="true"></span>Source on GitHub</a>
+                <div class="install">
+                    <span class="prompt" aria-hidden="true">$</span>
+                    <code>cargo add remoc</code>
+                    <button class="copy-button" type="button" data-copy="cargo add remoc"
+                        aria-label="Copy the command">
+                        <span class="icon copy" aria-hidden="true"></span>
+                        <span class="icon check" aria-hidden="true"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
     <main id="content">
-        <section id="features" class="section">
+        <section id="overview" class="section">
+            <div class="wrap">
+                <h2>One connection, <b>many</b> channels</h2>
+                <figure class="diagram">
+                    {% include diagram.svg %}
+                    <figcaption>
+                        Each channel keeps its own type and its own direction; the connection carries
+                        them all, in chunks, so a large message on one does not hold up the others.
+                        Back pressure is per channel too: a receiver that stops reading slows only its
+                        own sender.
+                    </figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section id="channels" class="section">
+            <div class="wrap">
+                <h2>Channels are cheap, <b>sendable</b> values</h2>
+                <figure class="diagram">
+                    {% include diagram-channels.svg %}
+                    <figcaption>
+                        Any channel can carry another. Here an RPC call hands over the sender of a
+                        new mpsc channel: no port to open, nothing to register, no name to look up
+                        and no acknowledgement to await.
+                        <a href="#usage">See the example</a>.
+                    </figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section id="features" class="section alt">
             <div class="wrap">
                 <h2>Features</h2>
                 <div class="grid">
@@ -54,14 +95,6 @@ nav: home
                         channel does not stall the others.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/rch/index.html">rch module &rarr;</a></p>
-                </article>
-                <article>
-                    <h3>Channels are values</h3>
-                    <p>
-                        Put a sender into a struct, an enum or another channel and send it away. The new
-                        channel is set up for you inside the connection that is already open. No extra port
-                        to allocate, no service registry, no name lookup.
-                    </p>
                 </article>
                 <article>
                     <h3>Remote trait calls</h3>
@@ -101,10 +134,18 @@ nav: home
                     <p>
                         Remoc does no networking. Give it an <code>AsyncRead</code> and <code>AsyncWrite</code>
                         pair, or a <code>Sink</code> and <code>Stream</code> of packets, and you are connected.
-                        There are worked examples for TCP, TLS, WebSockets, a child process over pipes and
-                        links that survive a broken connection.
+                        Worked examples for TCP, TLS, WebSockets and pipes.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/transports/index.html">transports &rarr;</a></p>
+                </article>
+                <article>
+                    <h3>Back pressure everywhere</h3>
+                    <p>
+                        Every channel, remote function and trait call rides a port with credit of its
+                        own, so a receiver that stops reading stalls its own sender instead of filling
+                        your memory. Nothing to arrange per call site.
+                    </p>
+                    <p><a href="https://docs.rs/remoc/latest/remoc/chmux/index.html">chmux module &rarr;</a></p>
                 </article>
                 <article>
                     <h3>The speed of a plain socket</h3>
@@ -126,7 +167,7 @@ nav: home
             </div>
         </section>
 
-        <section id="usage" class="section alt">
+        <section id="usage" class="section">
             <div class="wrap">
                 <h2>Usage</h2>
                 <p class="section-lead">
@@ -186,4 +227,43 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
                 </p>
             </div>
         </section>
+
+        <section id="more" class="section alt">
+            <div class="wrap">
+                <h2>Read on</h2>
+                <div class="grid">
+                    <article>
+                        <h3>How fast it is</h3>
+                        <p>
+                            How many records per second a channel gets across, measured against a plain TCP
+                            connection doing the same work.
+                        </p>
+                        <p><a href="benchmarks.html">Benchmarks &rarr;</a></p>
+                    </article>
+                    <article>
+                        <h3>How to use it</h3>
+                        <p>
+                            The whole API on docs.rs, module by module, with a worked example you can paste
+                            into a project.
+                        </p>
+                        <p><a href="{{ site.docs }}">Documentation &rarr;</a></p>
+                    </article>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <script>
+        // The only script on this page: copying the install command. The button stays
+        // hidden unless this runs, so it is never a control that does nothing.
+        document.documentElement.classList.add("js");
+        for (const button of document.querySelectorAll("button[data-copy]")) {
+            button.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(button.dataset.copy);
+                    button.classList.add("copied");
+                    setTimeout(() => button.classList.remove("copied"), 1500);
+                } catch {}
+            });
+        }
+    </script>
