@@ -93,6 +93,12 @@ nav_url: /postbag/
                         </figcaption>
                     </figure>
                 </div>
+
+                <p class="section-foot">
+                    <b>Use <code>Full</code> by default.</b> Choose <code>Slim</code> only when both
+                    sides evolve together and minimum encoded size is more important than flexible
+                    schema evolution.
+                </p>
             </div>
         </section>
 
@@ -120,8 +126,8 @@ nav_url: /postbag/
                         <thead>
                             <tr>
                                 <th>Change to your types</th>
-                                <th><code>Full</code> format<span class="badge">recommended</span></th>
-                                <th><code>Slim</code> format<span class="badge slim">minimal size</span></th>
+                                <th>Postbag <code>Full</code><span class="badge">recommended</span></th>
+                                <th>Postbag <code>Slim</code><span class="badge slim">minimal size</span></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -221,7 +227,23 @@ nav_url: /postbag/
             </div>
         </section>
 
-        <section id="more" class="section alt">
+        <section id="specifications" class="section alt">
+            <div class="wrap narrow">
+                <h2>Format specifications</h2>
+                <p class="section-lead">
+                    The complete version 1.0 wire formats are specified independently of the
+                    Rust API:
+                </p>
+                <ul>
+                    <li><a href="https://github.com/remoc-rs/postbag/blob/main/POSTBAG-FULL.md">Postbag
+                            Full format 1.0 specification</a></li>
+                    <li><a href="https://github.com/remoc-rs/postbag/blob/main/POSTBAG-SLIM.md">Postbag
+                            Slim format 1.0 specification</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="more" class="section">
             <div class="wrap">
                 <h2>Read on</h2>
                 <div class="grid">

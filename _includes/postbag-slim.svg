@@ -1,4 +1,4 @@
-<svg viewBox="0 0 960 434" role="img" aria-labelledby="postbag-slim-title postbag-slim-desc"
+<svg viewBox="0 0 700 434" role="img" aria-labelledby="postbag-slim-title postbag-slim-desc"
      xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
   <title id="postbag-slim-title">How Postbag encodes the same struct without identifiers</title>
   <desc id="postbag-slim-desc">The same Rust struct on the left, and on the right the ten bytes Postbag writes for it in its Slim format: a field count, the length of the whole struct, and then the three values one after another. Nothing names the fields, so they can only be read back in the order they are declared.</desc>

@@ -161,7 +161,9 @@ TITLE_LEFT = "Your types"
 # Drawing                                                                      #
 # --------------------------------------------------------------------------- #
 
-W = 960
+# Keep both diagrams at the same scale while leaving only a small margin after
+# the wider Full encoding.
+W = 700
 LEFT_W = 330  # the source listing
 VALUE_X = 182  # where the values line up beside it
 GAP = 60  # between the listing and the bytes

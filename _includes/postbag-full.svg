@@ -1,4 +1,4 @@
-<svg viewBox="0 0 960 496" role="img" aria-labelledby="postbag-full-title postbag-full-desc"
+<svg viewBox="0 0 700 496" role="img" aria-labelledby="postbag-full-title postbag-full-desc"
      xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
   <title id="postbag-full-title">How Postbag encodes a struct with identifiers</title>
   <desc id="postbag-full-desc">A Rust struct with three fields on the left, and on the right the fourteen bytes Postbag writes for it in its Full format, in three columns: the identifier of each field, the length of its value in bytes, and the value. Every field is numbered, so each identifier takes a single byte.</desc>
