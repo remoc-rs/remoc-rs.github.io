@@ -1,3 +1,5 @@
+{%- assign project = site.projects | where: "id", page.project | first %}
+{%- unless project %}{% assign project = site.projects | first %}{% endunless %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -18,7 +20,8 @@
     <meta property="og:url" content="{{ site.url }}{{ page.canonical }}">
     <meta property="og:title" content="{{ page.title }}">
     <meta property="og:description" content="{{ page.social_description | default: page.description }}">
-    <meta property="og:image" content="{{ site.url }}/logo.png">
+    <!-- Each project's card carries its own logo, like its favicon does. -->
+    <meta property="og:image" content="{{ site.url }}{{ project.logo }}">
     <meta name="twitter:card" content="summary">
 </head>
 

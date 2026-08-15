@@ -1,0 +1,56 @@
+<svg viewBox="0 0 960 330" role="img" aria-labelledby="agg-title agg-desc"
+     xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
+  <title id="agg-title">How Aggligator aggregates links</title>
+  <desc id="agg-desc">Two programs, each holding one byte stream. Between them run four links: Ethernet, Wi-Fi and USB, each carrying part of the same stream, and a Bluetooth link that has failed and carries nothing, its share taken over by the others.</desc>
+  <rect x="0.5" y="44.5" width="209" height="231" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <text x="105.0" y="34" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">Local endpoint</text>
+  <rect x="16" y="128.0" width="178" height="64" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="105.0" y="156.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">alc::Stream</text>
+  <text x="105.0" y="177.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11" fill="var(--fg-muted)">AsyncRead + AsyncWrite</text>
+  <rect x="750.5" y="44.5" width="209" height="231" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <text x="855.0" y="34" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">Remote endpoint</text>
+  <rect x="766" y="128.0" width="178" height="64" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="855.0" y="156.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">alc::Stream</text>
+  <text x="855.0" y="177.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11" fill="var(--fg-muted)">AsyncRead + AsyncWrite</text>
+  <text x="480.0" y="34" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">Many links</text>
+  <rect x="250" y="59.0" width="460" height="34" rx="8" fill="var(--bg-alt)" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="262" y="81.0" font-family="Inter, system-ui, sans-serif" font-size="14" fill="var(--fg)">Ethernet</text>
+  <rect x="380" y="68.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="398" y="68.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="416" y="68.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="434" y="68.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="452" y="68.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="470" y="68.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="488" y="68.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="506" y="68.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="524" y="68.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <path d="M 194,160.0 C 224,160.0 220,76.0 250,76.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 710,76.0 C 740,76.0 736,160.0 766,160.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <rect x="250" y="115.0" width="460" height="34" rx="8" fill="var(--bg-alt)" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="262" y="137.0" font-family="Inter, system-ui, sans-serif" font-size="14" fill="var(--fg)">Wi-Fi</text>
+  <rect x="380" y="124.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="398" y="124.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="416" y="124.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="434" y="124.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="452" y="124.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <path d="M 194,160.0 C 224,160.0 220,132.0 250,132.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 710,132.0 C 740,132.0 736,160.0 766,160.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <rect x="250" y="171.0" width="460" height="34" rx="8" fill="var(--bg-alt)" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="262" y="193.0" font-family="Inter, system-ui, sans-serif" font-size="14" fill="var(--fg)">USB</text>
+  <rect x="380" y="180.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="398" y="180.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="416" y="180.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="434" y="180.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="452" y="180.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="470" y="180.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="488" y="180.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <path d="M 194,160.0 C 224,160.0 220,188.0 250,188.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 710,188.0 C 740,188.0 736,160.0 766,160.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <rect x="250" y="227.0" width="460" height="34" rx="8" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <text x="262" y="249.0" font-family="Inter, system-ui, sans-serif" font-size="14" fill="var(--fg-muted)">Bluetooth</text>
+  <text x="380" y="248.0" font-family="Inter, system-ui, sans-serif" font-size="12.5" fill="var(--fg-muted)">gone — its share moved to the others</text>
+  <path d="M 194,160.0 C 224,160.0 220,244.0 250,244.0" fill="none" stroke="var(--border)" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M 710,244.0 C 740,244.0 736,160.0 766,160.0" fill="none" stroke="var(--border)" stroke-width="2" stroke-dasharray="5 5"/>
+  <text x="480.0" y="302" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" fill="var(--fg-muted)"><tspan font-weight="700" fill="var(--fg)">one</tspan> connection, carried by <tspan font-weight="700" fill="var(--fg)">every</tspan> link that works</text>
+  <text x="480.0" y="324" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--fg-muted)">TCP, TLS, WebSockets, USB or Bluetooth, mixed freely and changed while it runs</text>
+</svg>

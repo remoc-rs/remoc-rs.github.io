@@ -15,6 +15,7 @@ projects:
     repo: https://github.com/remoc-rs/remoc
     branch: master
     crate: remoc
+    changelog: https://github.com/remoc-rs/remoc/blob/master/CHANGELOG.md
     links:
       - { title: Features, url: "/#features" }
       - { title: Usage, url: "/#usage" }
@@ -28,6 +29,7 @@ projects:
     repo: https://github.com/remoc-rs/postbag
     branch: main
     crate: postbag
+    changelog: https://github.com/remoc-rs/postbag/blob/main/CHANGELOG.md
     links:
       - { title: Format, url: "/postbag/#format" }
       - { title: Compatibility, url: "/postbag/#compatibility" }
@@ -35,6 +37,24 @@ projects:
       - { title: Wire format, url: "/postbag/#specifications" }
       - { title: Docs, url: "https://docs.rs/postbag" }
       - { title: GitHub, url: "https://github.com/remoc-rs/postbag", icon: github }
+  - id: aggligator
+    name: Aggligator
+    url: /aggligator/
+    logo: /aggligator/logo.png
+    repo: https://github.com/remoc-rs/aggligator
+    branch: master
+    crate: aggligator
+    # The workspace keeps one changelog per crate, so the footer needs to be told
+    # which one is the project's.
+    changelog: https://github.com/remoc-rs/aggligator/blob/master/aggligator/CHANGELOG.md
+    links:
+      - { title: Features, url: "/aggligator/#features" }
+      - { title: Design, url: "/aggligator/#design" }
+      - { title: Transports, url: "/aggligator/#transports" }
+      - { title: Usage, url: "/aggligator/#usage" }
+      - { title: Tools, url: "/aggligator/#tools" }
+      - { title: Docs, url: "https://docs.rs/aggligator" }
+      - { title: GitHub, url: "https://github.com/remoc-rs/aggligator", icon: github }
 
 # GitHub Pages builds this with Jekyll; the layout and includes exist only to keep
 # the shared chrome in one place. Nothing here is a blog, so no plugins are needed.

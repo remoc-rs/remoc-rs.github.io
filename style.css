@@ -99,10 +99,20 @@
     --accent-strong: #8c3a12;
 }
 
+.project-aggligator {
+    --accent: #3e721d;
+    --accent-strong: #2d5413;
+}
+
 @media (prefers-color-scheme: dark) {
     .project-postbag {
         --accent: #f0904f;
         --accent-strong: #ffb384;
+    }
+
+    .project-aggligator {
+        --accent: #86c95f;
+        --accent-strong: #a9dd8a;
     }
 }
 
@@ -304,6 +314,11 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     -webkit-mask-image: url(icons/tag.svg);
     mask-image: url(icons/tag.svg);
 }
+
+.icon.download {
+    -webkit-mask-image: url(icons/download.svg);
+    mask-image: url(icons/download.svg);
+}
 /* Subpage header */
 
 /* The same glow as the hero. The radii are relative to the box, and this header is
@@ -495,6 +510,21 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     mask-image: url(icons/check.svg);
 }
 
+/* Ready-made binaries: one button per platform, wrapping on a narrow screen rather
+   than shrinking. The install line below them is the same control as in the hero,
+   but outside that grid, so it is given a width of its own. */
+
+.downloads {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.install.standalone {
+    max-width: 34rem;
+}
+
 /* Sections */
 
 .section {
@@ -539,6 +569,11 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     gap: 1.5rem 2rem;
 }
 
+/* Four short cards sit better in one row than in a row of three and a stray. */
+.grid.four {
+    grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+}
+
 .grid article {
     border-top: 2px solid var(--accent);
     padding-top: 0.9rem;
@@ -563,6 +598,14 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 
 .grid code {
     overflow-wrap: anywhere;
+}
+
+/* A card named after a program: the name is the heading, so it is set like one
+   rather than as a chip in the middle of a sentence. */
+.grid h3 code {
+    font-size: 0.94em;
+    background: none;
+    padding: 0;
 }
 
 /* Code examples */
@@ -642,6 +685,30 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     font-size: 0.68em;
     font-weight: 600;
     letter-spacing: 0.01em;
+}
+
+/* The design section is prose rather than a grid, so it keeps the page's left
+   margin but not its full measure: long lines are hard to read. */
+
+#design p,
+#design h3,
+#design .table-scroll {
+    max-width: 46rem;
+}
+
+#design h3 {
+    margin-top: 2rem;
+}
+
+/* What a table says in prose, set like its caption but kept outside it, so that on
+   a narrow screen it wraps to the page instead of scrolling with the table. */
+.note {
+    color: var(--fg-muted);
+    font-size: 0.92rem;
+}
+
+#design .table-scroll {
+    margin-bottom: 0.7rem;
 }
 
 #compatibility col.full {
@@ -786,6 +853,28 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     color: var(--fg-muted);
     font-size: 0.92rem;
     margin-top: 0.7rem;
+}
+
+/* A screenshot of a terminal. It brings its own dark background, so it gets a
+   border rather than padding, and is never shown larger than it was taken. */
+
+.shot {
+    margin: 0;
+}
+
+.shot img {
+    display: block;
+    width: 100%;
+    max-width: 50rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.shot figcaption {
+    color: var(--fg-muted);
+    font-size: 0.92rem;
+    margin-top: 0.7rem;
+    max-width: 50rem;
 }
 
 .table-scroll {
