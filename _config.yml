@@ -15,7 +15,6 @@ projects:
     repo: https://github.com/remoc-rs/remoc
     branch: master
     crate: remoc
-    changelog: https://github.com/remoc-rs/remoc/blob/master/CHANGELOG.md
     links:
       - { title: Features, url: "/#features" }
       - { title: Usage, url: "/#usage" }
@@ -29,7 +28,6 @@ projects:
     repo: https://github.com/remoc-rs/postbag
     branch: main
     crate: postbag
-    changelog: https://github.com/remoc-rs/postbag/blob/main/CHANGELOG.md
     links:
       - { title: Format, url: "/postbag/#format" }
       - { title: Compatibility, url: "/postbag/#compatibility" }
@@ -44,9 +42,6 @@ projects:
     repo: https://github.com/remoc-rs/aggligator
     branch: master
     crate: aggligator
-    # The workspace keeps one changelog per crate, so the footer needs to be told
-    # which one is the project's.
-    changelog: https://github.com/remoc-rs/aggligator/blob/master/aggligator/CHANGELOG.md
     links:
       - { title: Features, url: "/aggligator/#features" }
       - { title: Design, url: "/aggligator/#design" }

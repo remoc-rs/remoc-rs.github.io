@@ -5,15 +5,14 @@
         <div class="footer-brand">
             <img src="{{ project.logo }}" alt="" width="27" height="28">
             <p>
-                {{ project.name }} is free software under the
-                <a href="{{ project.repo }}/blob/{{ project.branch }}/LICENSE">Apache&nbsp;2.0 license</a>.
+                {{ project.name }} is <a href="{{ project.repo }}/blob/{{ project.branch }}/LICENSE">Apache 2.0-licensed</a> software developed by
+                <a href="https://github.com/surban">Sebastian Urban</a> and contributors.
             </p>
         </div>
         <nav aria-label="Footer">
             <ul>
                 <li><a href="https://crates.io/crates/{{ project.crate }}">crates.io</a></li>
                 <li><a href="https://docs.rs/{{ project.crate }}">docs.rs</a></li>
-                <li><a href="{{ project.changelog }}">Changelog</a></li>
                 <li><a href="{{ project.repo }}/issues">Issues</a></li>
                 <li><a href="/impressum.html">Imprint</a></li>
             </ul>

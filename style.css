@@ -988,10 +988,16 @@ footer {
     gap: 0.35rem 1.25rem;
 }
 
+.footer-inner nav {
+    flex: none;
+}
+
 .footer-brand {
     display: flex;
     align-items: center;
     gap: 0.7rem;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .footer-brand img {
@@ -1000,6 +1006,12 @@ footer {
 
 .footer-brand p {
     margin: 0;
+}
+
+@media (min-width: 70rem) {
+    .footer-brand p {
+        white-space: nowrap;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
