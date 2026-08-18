@@ -284,6 +284,71 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     font-weight: 600;
 }
 
+@media (max-width: 62rem) {
+    nav[aria-label="Primary"] {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.85rem;
+    }
+
+    .projects {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        gap: 1rem;
+    }
+
+    .projects .brand:first-child {
+        justify-self: start;
+    }
+
+    .projects .brand:nth-child(2) {
+        justify-self: center;
+    }
+
+    .projects .brand:last-child {
+        justify-self: end;
+    }
+
+    nav[aria-label="Primary"] ul {
+        width: 100%;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 0.65rem clamp(0.75rem, 2.5vw, 1.5rem);
+        border-top: 1px solid var(--border);
+        padding-top: 0.75rem;
+    }
+
+    nav[aria-label="Primary"] li:last-child {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 36rem) {
+    nav[aria-label="Primary"] {
+        padding-inline: 0.9rem;
+    }
+
+    .projects {
+        gap: 0.35rem;
+    }
+
+    .brand,
+    .projects .brand:not(.current) {
+        gap: 0.35rem;
+        font-size: 0.92rem;
+    }
+
+    .brand img {
+        width: 27px;
+        height: 28px;
+    }
+
+    nav[aria-label="Primary"] ul {
+        flex-wrap: wrap;
+    }
+}
+
 .icon-link {
     display: inline-flex;
     align-items: center;
@@ -1027,6 +1092,33 @@ footer {
 
 .footer-brand p {
     margin: 0;
+}
+
+@media (max-width: 64rem) {
+    .footer-inner {
+        justify-content: center;
+        gap: 1.1rem;
+    }
+
+    .footer-brand {
+        flex-basis: 100%;
+        justify-content: center;
+    }
+
+    .footer-inner nav {
+        width: 100%;
+    }
+
+    .footer-inner ul {
+        justify-content: center;
+    }
+}
+
+@media (min-width: 42rem) and (max-width: 64rem) {
+    .footer-brand p {
+        font-size: 0.88rem;
+        white-space: nowrap;
+    }
 }
 
 @media (min-width: 70rem) {
