@@ -11,17 +11,17 @@
   <text x="505.4" y="73" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">08</text>
   <text x="505.4" y="100" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--fg-muted)">8 bytes of values</text>
   <text x="390" y="124" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--fg-muted)">value</text>
-  <text x="0" y="46" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--com)">#[derive(Serialize, Deserialize)]</text>
-  <text x="0" y="68" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">struct Reading {</text>
-  <text x="16" y="160" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">sensor: u32,</text>
-  <text x="182" y="160" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg-muted)">= 300</text>
+  <text x="0" y="46" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--attr)">#[derive(</tspan><tspan fill="var(--ty)">Serialize</tspan><tspan fill="var(--attr)">, </tspan><tspan fill="var(--ty)">Deserialize</tspan><tspan fill="var(--attr)">)]</tspan></text>
+  <text x="0" y="68" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--kw)">struct</tspan><tspan fill="var(--fg)"> </tspan><tspan fill="var(--ty)">Reading</tspan><tspan fill="var(--fg)"> {</tspan></text>
+  <text x="16" y="160" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg)">sensor: </tspan><tspan fill="var(--ty)">u32</tspan><tspan fill="var(--fg)">,</tspan></text>
+  <text x="182" y="160" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg-muted)">= </tspan><tspan fill="var(--num)">300</tspan></text>
   <rect x="390" y="138" width="34" height="32" rx="5" fill="var(--str)"/>
   <text x="407.0" y="159" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">ac</text>
   <rect x="429" y="138" width="34" height="32" rx="5" fill="var(--str)"/>
   <text x="446.0" y="159" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">02</text>
   <text x="426.5" y="186" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--str)">300 as a varint</text>
-  <text x="16" y="222" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">label: String,</text>
-  <text x="182" y="222" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg-muted)">= "temp"</text>
+  <text x="16" y="222" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg)">label: </tspan><tspan fill="var(--ty)">String</tspan><tspan fill="var(--fg)">,</tspan></text>
+  <text x="182" y="222" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg-muted)">= </tspan><tspan fill="var(--str)">&quot;temp&quot;</tspan></text>
   <rect x="390" y="200" width="34" height="32" rx="5" fill="var(--ty)"/>
   <text x="407.0" y="221" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">04</text>
   <text x="407.0" y="248" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--ty)">4 bytes</text>
@@ -34,14 +34,14 @@
   <rect x="553" y="200" width="34" height="32" rx="5" fill="var(--str)"/>
   <text x="570.0" y="221" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">70</text>
   <text x="511.5" y="248" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--str)">"temp"</text>
-  <text x="16" y="284" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">unit: Unit,</text>
-  <text x="182" y="284" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg-muted)">= Celsius</text>
+  <text x="16" y="284" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg)">unit: </tspan><tspan fill="var(--ty)">Unit</tspan><tspan fill="var(--fg)">,</tspan></text>
+  <text x="182" y="284" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg-muted)">= </tspan><tspan fill="var(--ty)">Celsius</tspan></text>
   <rect x="390" y="262" width="34" height="32" rx="5" fill="var(--str)"/>
   <text x="407.0" y="283" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">00</text>
   <text x="407.0" y="310" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--str)">variant number 0</text>
   <text x="0" y="316" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">}</text>
-  <text x="0" y="350" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">enum Unit {</text>
-  <text x="31" y="370" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">Celsius,</text>
-  <text x="31" y="390" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">Other(String),</text>
-  <text x="0" y="410" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--fg)">}</text>
+  <text x="0" y="350" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--kw)">enum</tspan><tspan fill="var(--fg)"> </tspan><tspan fill="var(--ty)">Unit</tspan><tspan fill="var(--fg)"> {</tspan></text>
+  <text x="31" y="370" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--ty)">Celsius</tspan><tspan fill="var(--fg)">,</tspan></text>
+  <text x="31" y="390" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--ty)">Other</tspan><tspan fill="var(--fg)">(</tspan><tspan fill="var(--ty)">String</tspan><tspan fill="var(--fg)">),</tspan></text>
+  <text x="0" y="410" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg)">}</tspan></text>
 </svg>

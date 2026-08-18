@@ -13,7 +13,9 @@ and checks against Postbag itself, so they cannot drift away from the format.
 """
 
 from dataclasses import dataclass, field
+from html import escape
 from pathlib import Path
+import re
 
 # --------------------------------------------------------------------------- #
 # What the pictures show                                                       #
@@ -175,6 +177,36 @@ MONO = "'JetBrains Mono', ui-monospace, monospace"
 
 BYTES_X = LEFT_W + GAP
 
+RUST_TOKEN = re.compile(
+    r'"[^"]*"|\b(?:struct|enum)\b|'
+    r"\b(?:Serialize|Deserialize|Reading|u32|String|Unit|Celsius|Other)\b|\b\d+\b"
+)
+
+
+def rust_markup(source: str, default: str = "--fg") -> str:
+    """Add lightweight, editor-like syntax colours to a Rust source line."""
+    runs: list[str] = []
+    start = 0
+    for match in RUST_TOKEN.finditer(source):
+        if match.start() > start:
+            runs.append(f'<tspan fill="var({default})">{escape(source[start:match.start()])}</tspan>')
+
+        token = match.group()
+        if token.startswith('"'):
+            colour = "--str"
+        elif token in {"struct", "enum"}:
+            colour = "--kw"
+        elif token.isdigit():
+            colour = "--num"
+        else:
+            colour = "--ty"
+        runs.append(f'<tspan fill="var({colour})">{escape(token)}</tspan>')
+        start = match.end()
+
+    if start < len(source):
+        runs.append(f'<tspan fill="var({default})">{escape(source[start:])}</tspan>')
+    return "".join(runs)
+
 
 def parts_width(parts: list[Part]) -> float:
     """How wide a run of parts is, including the gaps between its cells."""
@@ -258,11 +290,12 @@ def svg(diagram: Diagram) -> str:
         )
 
     out.append(
-        f'  <text x="0" y="46" font-family="{MONO}" font-size="13" fill="var(--com)">{DERIVE}</text>'
+        f'  <text x="0" y="46" font-family="{MONO}" font-size="13">'
+        f'{rust_markup(DERIVE, "--attr")}</text>'
     )
     out.append(
-        f'  <text x="0" y="68" font-family="{MONO}" font-size="14"'
-        f' fill="var(--fg)">{STRUCT_HEAD}</text>'
+        f'  <text x="0" y="68" font-family="{MONO}" font-size="14">'
+        f"{rust_markup(STRUCT_HEAD)}</text>"
     )
 
     for index, row in enumerate(diagram.rows):
@@ -270,13 +303,14 @@ def svg(diagram: Diagram) -> str:
         # The declaration lines up with the bytes; its attribute hangs above it.
         decl_y = y + 22
         for line_no, line in enumerate(reversed(row.source)):
+            default = "--attr" if line.startswith("#") else "--fg"
             out.append(
-                f'  <text x="16" y="{decl_y - line_no * 20}" font-family="{MONO}" font-size="13"'
-                f' fill="var({"--com" if line.startswith("#") else "--fg"})">{line}</text>'
+                f'  <text x="16" y="{decl_y - line_no * 20}" font-family="{MONO}"'
+                f' font-size="13">{rust_markup(line, default)}</text>'
             )
         out.append(
             f'  <text x="{VALUE_X}" y="{decl_y}" font-family="{MONO}" font-size="13"'
-            f' fill="var(--fg-muted)">{row.value_shown}</text>'
+            f'>{rust_markup(row.value_shown, "--fg-muted")}</text>'
         )
         for x, (attribute, _) in zip(xs, diagram.columns):
             out += draw_parts(getattr(row, attribute), x, y)
@@ -289,10 +323,11 @@ def svg(diagram: Diagram) -> str:
     for line_no, line in enumerate(diagram.enum_lines):
         # SVG collapses leading spaces, so indentation becomes an offset.
         indent = (len(line) - len(line.lstrip())) * 7.8
+        source = line.strip()
+        default = "--attr" if source.startswith("#") else "--fg"
         out.append(
             f'  <text x="{indent:.0f}" y="{tail_y + 34 + line_no * 20}" font-family="{MONO}"'
-            f' font-size="13" fill="var({"--com" if line.strip().startswith("#") else "--fg"})">'
-            f"{line.strip()}</text>"
+            f' font-size="13">{rust_markup(source, default)}</text>'
         )
 
     out.append("</svg>")

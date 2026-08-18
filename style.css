@@ -49,11 +49,14 @@
     --border: #e6e1e6;
     --code-bg: #f6f3f5;
     --code-fg: #24222b;
-    --kw: #a8005f;
-    --ty: #0a6b74;
-    --str: #2a7a34;
-    --com: #7a7684;
-    --num: #9a5100;
+    --kw: #0000c0;
+    --ty: #267f99;
+    --str: #a31515;
+    --com: #397300;
+    --num: #098658;
+    --fn: #795e26;
+    --attr: #af00db;
+    --macro: #795e26;
 
     --slim: #2b5fc7;
     --slim-strong: #1f4aa0;
@@ -77,11 +80,14 @@
         --border: #2c2a33;
         --code-bg: #1e1c24;
         --code-fg: #e6e4ec;
-        --kw: #ff7ac2;
-        --ty: #6fd3dc;
-        --str: #8fd18a;
-        --com: #8b8798;
-        --num: #f0b060;
+        --kw: #c586c0;
+        --ty: #4ec9b0;
+        --str: #ce9178;
+        --com: #6a9955;
+        --num: #b5cea8;
+        --fn: #dcdcaa;
+        --attr: #9cdcfe;
+        --macro: #dcdcaa;
 
         --slim: #8ab0ff;
         --slim-strong: #b3caff;
@@ -943,9 +949,16 @@ th.num {
     color: var(--num);
 }
 
-.a,
+.f {
+    color: var(--fn);
+}
+
+.a {
+    color: var(--attr);
+}
+
 .m {
-    color: var(--fg-muted);
+    color: var(--macro);
 }
 
 /* Footer */

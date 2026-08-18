@@ -33,7 +33,7 @@ projects:
     links:
       - { title: Format, url: "/postbag/#format" }
       - { title: Compatibility, url: "/postbag/#compatibility" }
-      - { title: Usage, url: "/postbag/#usage" }
+      - { title: Recovery, url: "/postbag/#recoverable" }
       - { title: Wire format, url: "/postbag/#specifications" }
       - { title: Docs, url: "https://docs.rs/postbag" }
       - { title: GitHub, url: "https://github.com/remoc-rs/postbag", icon: github }

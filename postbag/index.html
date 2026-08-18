@@ -33,7 +33,7 @@ nav_url: /postbag/
                 <a class="button icon-link" href="https://crates.io/crates/postbag"><span class="icon crate"
                         aria-hidden="true"></span>crates.io</a>
                 <a class="button icon-link"
-                    href="https://github.com/remoc-rs/postbag/blob/main/CHANGELOG.md"><span class="icon tag"
+                    href="https://github.com/remoc-rs/postbag/releases"><span class="icon tag"
                         aria-hidden="true"></span>Release notes</a>
                 <a class="button icon-link" href="https://github.com/remoc-rs/postbag"><span class="icon github"
                         aria-hidden="true"></span>Source on GitHub</a>
@@ -227,8 +227,8 @@ nav_url: /postbag/
     count: <span class="t">u16</span>,
 }
 
-<span class="k">let</span> bytes = postbag::to_full_vec(&amp;reading)?;
-<span class="k">let</span> restored: <span class="t">Reading</span> = postbag::from_full_slice(&amp;bytes)?;
+<span class="k">let</span> bytes = postbag::<span class="f">to_full_vec</span>(&amp;reading)?;
+<span class="k">let</span> restored: <span class="t">Reading</span> = postbag::<span class="f">from_full_slice</span>(&amp;bytes)?;
 
 <span class="c">// If Details changed incompatibly, sensor and count are still</span>
 <span class="c">// restored, while details becomes Details::default().</span></code></pre>
