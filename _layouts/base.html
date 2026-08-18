@@ -8,6 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ page.title }}</title>
     <meta name="description" content="{{ page.description }}">
+    {%- if page.noindex %}
+    <meta name="robots" content="noindex,follow">
+    {%- endif %}
     <meta name="color-scheme" content="light dark">
     <link rel="icon" href="{{ page.favicon | default: '/favicon.png' }}" type="image/png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -17,12 +20,21 @@
     <link rel="stylesheet" href="/style.css">
 
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ site.title }}">
     <meta property="og:url" content="{{ site.url }}{{ page.canonical }}">
     <meta property="og:title" content="{{ page.title }}">
     <meta property="og:description" content="{{ page.social_description | default: page.description }}">
-    <!-- Each project's card carries its own logo, like its favicon does. -->
-    <meta property="og:image" content="{{ site.url }}{{ project.logo }}">
-    <meta name="twitter:card" content="summary">
+    <meta property="og:image" content="{{ site.url }}{{ project.social_image }}">
+    <meta property="og:image:secure_url" content="{{ site.url }}{{ project.social_image }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ project.social_image_alt }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ page.title }}">
+    <meta name="twitter:description" content="{{ page.social_description | default: page.description }}">
+    <meta name="twitter:image" content="{{ site.url }}{{ project.social_image }}">
+    <meta name="twitter:image:alt" content="{{ project.social_image_alt }}">
 </head>
 
 <body class="project-{{ page.project | default: 'remoc' }}">

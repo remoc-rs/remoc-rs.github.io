@@ -22,6 +22,20 @@ gem install --user-install jekyll
 
 The site uses no plugins, so plain Jekyll renders exactly what GitHub Pages publishes.
 
+## Social cards
+
+The three 1200 by 630 social preview images are rendered from editable SVG sources:
+
+```
+mkdir -p social
+magick _tools/social-remoc.svg \( logo.png -resize 230x238 \) \
+    -gravity northwest -geometry +90+170 -composite social/remoc.png
+magick _tools/social-postbag.svg \( postbag/logo.png -resize 230x230 \) \
+    -gravity northwest -geometry +90+170 -composite social/postbag.png
+magick _tools/social-aggligator.svg \( aggligator/logo.png -resize 230x238 \) \
+    -gravity northwest -geometry +90+170 -composite social/aggligator.png
+```
+
 ## `plot_web.py` — draw the benchmark figures
 
 Draws the two figures on the benchmarks page into `plots/`, in a light and a dark

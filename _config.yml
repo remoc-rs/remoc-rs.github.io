@@ -12,6 +12,8 @@ projects:
     name: Remoc
     url: /
     logo: /logo.png
+    social_image: /social/remoc.png
+    social_image_alt: "Remoc: remote channels, objects and RPC for Rust"
     repo: https://github.com/remoc-rs/remoc
     branch: master
     crate: remoc
@@ -25,6 +27,8 @@ projects:
     name: Postbag
     url: /postbag/
     logo: /postbag/logo.png
+    social_image: /social/postbag.png
+    social_image_alt: "Postbag: compact binary Serde with built-in schema evolution"
     repo: https://github.com/remoc-rs/postbag
     branch: main
     crate: postbag
@@ -39,6 +43,8 @@ projects:
     name: Aggligator
     url: /aggligator/
     logo: /aggligator/logo.png
+    social_image: /social/aggligator.png
+    social_image_alt: "Aggligator: many links, one resilient connection for Rust"
     repo: https://github.com/remoc-rs/aggligator
     branch: master
     crate: aggligator
