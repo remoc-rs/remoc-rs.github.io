@@ -22,10 +22,9 @@ nav_url: /postbag/
             <p class="tagline">A binary Serde format that lets your types keep changing.</p>
             <p class="lead">
                 Postbag is a compact binary <a href="https://serde.rs/">Serde</a> codec with built-in
-                support for schema evolution. It preserves Rust's data model&mdash;including distinctions
-                such as <code>Some(None)</code> and <code>None</code>&mdash;and allows programs built with
-                different versions of a type to exchange data as fields and enum variants are added,
-                removed, renamed or reordered.
+                support for schema evolution. It preserves Rust's data model, including distinctions such as <code>Some(None) != None</code>,
+                and allows programs built with different versions of a type to exchange data as fields 
+                and enum variants are added, removed, renamed or reordered.
             </p>
 
             <div class="cta">
