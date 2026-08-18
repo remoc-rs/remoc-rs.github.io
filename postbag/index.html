@@ -21,10 +21,11 @@ nav_url: /postbag/
             <h1>Postbag</h1>
             <p class="tagline">A binary Serde format that lets your types keep changing.</p>
             <p class="lead">
-                Postbag turns any <a href="https://serde.rs/">Serde</a> type into compact binary
-                with the Rust type system fully intact: <code>Some(None)</code> is not <code>None</code>,
-                a <code>u128</code> stays a number, a map can be keyed by a tuple. And support for 
-                evolving your types in backward and forward compatible ways is built-in.
+                Postbag is a compact binary <a href="https://serde.rs/">Serde</a> codec with built-in
+                support for schema evolution. It preserves Rust's data model&mdash;including distinctions
+                such as <code>Some(None)</code> and <code>None</code>&mdash;and allows programs built with
+                different versions of a type to exchange data as fields and enum variants are added,
+                removed, renamed or reordered.
             </p>
 
             <div class="cta">
@@ -54,6 +55,10 @@ nav_url: /postbag/
         <section id="format" class="section">
             <div class="wrap">
                 <h2>Two evolvable format variants</h2>
+                <p class="section-lead">
+                    Postbag provides two wire formats with different trade-offs between schema
+                    flexibility and encoded size.
+                </p>
 
                 <div class="mode full">
                     <h3>Postbag <code>Full</code> format with field names <span class="badge">recommended</span></h3>
@@ -104,7 +109,7 @@ nav_url: /postbag/
 
 
         <section id="compatibility" class="section alt">
-            <div class="wrap">
+            <div class="wrap narrow">
                 <h2>Backwards and forwards compatibility</h2>
                 <p class="section-lead">
                     Serializer and deserializer can work with different versions of your type,
@@ -256,37 +261,6 @@ nav_url: /postbag/
             </div>
         </section>
 
-        <section id="more" class="section">
-            <div class="wrap">
-                <h2>Read on</h2>
-                <div class="grid">
-                    <article>
-                        <h3>Where it comes from</h3>
-                        <p>
-                            Postbag began as a fork of postcard, keeping its compact encoding and
-                            adding what schema evolution needs.
-                        </p>
-                        <p><a href="https://github.com/jamesmunns/postcard">postcard &rarr;</a></p>
-                    </article>
-                    <article>
-                        <h3>How to use it</h3>
-                        <p>
-                            The whole API on docs.rs, including the compact representations and the
-                            configuration types.
-                        </p>
-                        <p><a href="https://docs.rs/postbag">Documentation &rarr;</a></p>
-                    </article>
-                    <article>
-                        <h3>Where it is used</h3>
-                        <p>
-                            Postbag is the default codec of Remoc, which uses it for every message
-                            sent between two endpoints.
-                        </p>
-                        <p><a href="/">Remoc &rarr;</a></p>
-                    </article>
-                </div>
-            </div>
-        </section>
     </main>
 
     <script>
