@@ -201,28 +201,41 @@ nav_url: /postbag/
             </div>
         </section>
 
-        <section id="usage" class="section">
+        <section id="recoverable" class="section">
             <div class="wrap narrow">
-                <h2>Usage</h2>
+                <h2>Recover from incompatible values</h2>
                 <p class="section-lead">
-                    Derive Serde's traits as usual, then write and read the <code>Reading</code>
-                    from above. Nothing else is added to your types.
+                    Sometimes a type has to change incompatibly. With the <code>Full</code> format,
+                    Postbag can confine a deserialization failure to a marked field, recover the
+                    rest of the enclosing value, and replace that field with its default.
                 </p>
 
                 <figure class="code-single">
-                    <figcaption>Writing and reading</figcaption>
-                    <pre><code><span class="c">// Full format</span>
-<span class="k">let</span> bytes = postbag::to_full_vec(&amp;reading)?;
-<span class="k">let</span> reading: <span class="t">Reading</span> = postbag::from_full_slice(&amp;bytes)?;
+                    <figcaption>Make one field recoverable</figcaption>
+                    <pre><code><span class="k">use</span> serde::{Deserialize, Serialize};
 
-<span class="c">// Slim format</span>
-<span class="k">let</span> bytes = postbag::to_slim_vec(&amp;reading)?;
-<span class="k">let</span> reading: <span class="t">Reading</span> = postbag::from_slim_slice(&amp;bytes)?;</code></pre>
+<span class="a">#[derive(Default, Deserialize, Serialize)]</span>
+<span class="k">struct</span> <span class="t">Details</span> {
+    size: <span class="t">u32</span>,
+}
+
+<span class="a">#[derive(Deserialize, Serialize)]</span>
+<span class="k">struct</span> <span class="t">Reading</span> {
+    sensor: <span class="t">String</span>,
+    <span class="a">#[serde(with = "postbag::recoverable")]</span>
+    details: <span class="t">Details</span>,
+    count: <span class="t">u16</span>,
+}
+
+<span class="k">let</span> bytes = postbag::to_full_vec(&amp;reading)?;
+<span class="k">let</span> restored: <span class="t">Reading</span> = postbag::from_full_slice(&amp;bytes)?;
+
+<span class="c">// If Details changed incompatibly, sensor and count are still</span>
+<span class="c">// restored, while details becomes Details::default().</span></code></pre>
                 </figure>
 
                 <p class="section-foot">
-                    <b>Limitation:</b> Postbag cannot be used with Serde's <code>untagged</code>, internally tagged and 
-                    <code>flatten</code> attributes.
+                    Recoverable values can be added to an existing field without changing its wire representation.
                 </p>
             </div>
         </section>
