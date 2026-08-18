@@ -56,6 +56,10 @@ nav: home
         <section id="overview" class="section">
             <div class="wrap">
                 <h2>One connection, <b>many</b> channels</h2>
+                <p class="section-lead">
+                    A single transport connection carries any number of independent, typed channels
+                    in either direction.
+                </p>
                 <figure class="diagram">
                     {% include diagram.svg %}
                     <figcaption>
@@ -71,6 +75,11 @@ nav: home
         <section id="channels" class="section">
             <div class="wrap">
                 <h2>Channels are cheap, <b>sendable</b> values</h2>
+                <p class="section-lead">
+                    Channel endpoints can be sent inside messages, creating new communication paths
+                    without another transport connection. Here, the client asks the server to count
+                    and sends a channel for returning the numbers.
+                </p>
                 <figure class="diagram">
                     {% include diagram-channels.svg %}
                     <figcaption>
@@ -80,6 +89,22 @@ nav: home
                         <a href="#usage">See the example</a>.
                     </figcaption>
                 </figure>
+            </div>
+        </section>
+
+        <section id="schema-evolution" class="section">
+            <div class="wrap">
+                <h2>Messages that evolve with your application</h2>
+                <p class="section-lead">
+                    Remoc uses Postbag to encode your data, allowing independently deployed versions
+                    to keep communicating as their message types change. Fields and enum variants can
+                    be <strong>added, removed, renamed or reordered</strong>, while
+                    <strong>recoverable fields</strong> can isolate an incompatible change instead of
+                    losing the entire enclosing message.
+                </p>
+                <p class="section-foot">
+                    <a href="/postbag/">How Postbag handles schema evolution &rarr;</a>
+                </p>
             </div>
         </section>
 
@@ -231,37 +256,21 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
 
         <section id="more" class="section alt">
             <div class="wrap">
-                <h2>Read on</h2>
-                <div class="grid four">
+                <h2>More about Remoc</h2>
+                <div class="grid">
                     <article>
-                        <h3>How fast it is</h3>
+                        <h3>Benchmarks</h3>
                         <p>
-                            How many records per second a channel gets across, measured against a plain TCP
-                            connection doing the same work.
+                            Compare Remoc channel throughput with a plain TCP connection using the
+                            same records, codec and network conditions.
                         </p>
                         <p><a href="benchmarks.html">Benchmarks &rarr;</a></p>
                     </article>
                     <article>
-                        <h3>How to use it</h3>
+                        <h3>Aggligator</h3>
                         <p>
-                            The whole API on docs.rs, module by module, with a worked example you can paste
-                            into a project.
-                        </p>
-                        <p><a href="{{ site.docs }}">Documentation &rarr;</a></p>
-                    </article>
-                    <article>
-                        <h3>How your data is encoded</h3>
-                        <p>
-                            Remoc encodes your data using  Postbag, a binary Serde format that is compact yet
-                            backwards and forwards compatible.
-                        </p>
-                        <p><a href="/postbag/">Postbag &rarr;</a></p>
-                    </article>
-                    <article>
-                        <h3>How to use every link</h3>
-                        <p>
-                            The one connection Remoc needs can itself be made of every link between the two
-                            machines, with their combined bandwidth, courtesy of Aggligator.
+                            Aggligator combines multiple links and reconnects automatically while
+                            preserving Remoc's stateful session across connection changes.
                         </p>
                         <p><a href="/aggligator/">Aggligator &rarr;</a></p>
                     </article>
