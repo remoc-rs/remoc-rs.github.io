@@ -3,8 +3,8 @@ layout: base
 project: remoc
 title: "Benchmarks: Remoc"
 description: >-
-  How many records per second a Remoc channel gets across, measured against a plain TCP
-  connection doing the same work.
+  Throughput of a Remoc channel compared with serializing and writing the same records
+  directly over TCP.
 canonical: /benchmarks.html
 nav: benchmarks
 ---
@@ -15,8 +15,8 @@ nav: benchmarks
         <div class="wrap">
             <h1>Benchmarks</h1>
             <p class="lead">
-                How many records per second does a Remoc channel get across, compared to serializing
-                them and writing the bytes into a socket yourself?
+                This benchmark compares the throughput of a Remoc channel with serializing and
+                writing the same records directly over TCP.
             </p>
         </div>
     </header>
@@ -24,13 +24,13 @@ nav: benchmarks
     <main id="content">
         <section class="section">
             <div class="wrap">
-                <h2>What is measured</h2>
+                <h2>Benchmark setup</h2>
                 <p class="section-lead">
                     A sender pushes records as fast as it can for five seconds and a receiver reads them.
                     The same transfer runs twice: once over an <code>rch::mpsc</code> channel, and once
                     over a plain TCP connection that serializes the same records with the same codec and
-                    frames them itself. That plain connection is the reference every Remoc number is put
-                    next to.
+                    frames them itself. The plain TCP implementation provides the reference for each
+                    Remoc result.
                 </p>
 
                 <div class="code-pair">
@@ -57,10 +57,10 @@ tx.send(batch).<span class="k">await</span>?;</code></pre>
                 </div>
 
                 <p class="spaced">
-                    With the default <strong>postbag</strong> codec one record encodes to 64&nbsp;bytes, so a
-                    batch of 1024 records is a 64&nbsp;KiB message. The channel is configured with four extra
-                    transfer channels, which lets it serialize several messages at once
-                    (<code>with_parallel(4)</code>).
+                    With <strong>Postbag</strong>, one record encodes to 64&nbsp;bytes, so a batch of
+                    1024 records is a 64&nbsp;KiB message. Parallel transfer is configured with
+                    <code>with_parallel(4)</code>, allowing several messages to be encoded and decoded
+                    concurrently to keep up with high-bandwidth links.
                 </p>
 
                 <div class="table-scroll spaced">
@@ -103,7 +103,8 @@ tx.send(batch).<span class="k">await</span>?;</code></pre>
 
                 <div class="notice">
                     <p>
-                        Measured on a 13th Gen Intel Core i9-13900K running Linux.
+                        Results generated with Remoc 0.20.0 compiled with Rust 1.97.1, on a 13th Gen
+                        Intel Core i9-13900K running Linux 7.1.
                     </p>
                 </div>
             </div>
@@ -113,8 +114,9 @@ tx.send(batch).<span class="k">await</span>?;</code></pre>
             <div class="wrap">
                 <h2>Records per second</h2>
                 <p class="section-lead">
-                    How much you get through depends on how many records you hand over at once. One panel
-                    per link, with the plain TCP reference doing the same serialization.
+                    Throughput depends on the number of records batched into each message. Each panel
+                    represents one emulated link and compares Remoc with the plain TCP implementation
+                    using the same serialization.
                 </p>
 
                 <figure class="plot">
@@ -125,9 +127,9 @@ tx.send(batch).<span class="k">await</span>?;</code></pre>
                             loading="lazy" width="1000" height="660">
                     </picture>
                     <figcaption>
-                        From four records per message on, the difference between a Remoc
-                        <code>rch::mpsc</code> channel and the plain connection becomes negligible.
-                        Round-trip delays introduced by LTE and WAN do not affect the throughput.
+                        From four records per message, the Remoc <code>rch::mpsc</code> channel and
+                        plain TCP results converge. In these tests, the configured LTE and WAN
+                        round-trip delays do not reduce throughput.
                     </figcaption>
                 </figure>
             </div>
@@ -135,11 +137,11 @@ tx.send(batch).<span class="k">await</span>?;</code></pre>
 
         <section class="section">
             <div class="wrap">
-                <h2>What Remoc costs</h2>
+                <h2>Throughput relative to plain TCP</h2>
                 <p class="section-lead">
-                    The same runs as a share of what a raw TCP transfer reaches on that link, which is the
-                    dotted line. The grey bar is what serializing the records costs; the pink bar adds
-                    multiplexing, chunking and flow control on top.
+                    The results are shown as a share of the raw TCP throughput available on each link,
+                    represented by the dotted line. The grey bars include serialization and framing;
+                    the pink bars additionally include Remoc's multiplexing, chunking and flow control.
                 </p>
 
                 <figure class="plot">
@@ -159,11 +161,11 @@ tx.send(batch).<span class="k">await</span>?;</code></pre>
 
         <section class="section alt">
             <div class="wrap narrow">
-                <h2>Run it yourself</h2>
+                <h2>Reproduce the results</h2>
                 <p>
-                    The benchmark suite is part of the Remoc repository. It sweeps every layer, codec and
-                    link, prints a table per link and writes a JSON report, which its own
-                    <code>plot.py</code> draws in full.
+                    The benchmark suite is part of the Remoc repository. It tests each configured
+                    layer, codec and link, prints the results per link, and writes a JSON report from
+                    which <code>plot.py</code> generates the charts.
                 </p>
                 <pre><code><span class="c">$</span> cd bench/perf
 <span class="c">$</span> cargo run --release -- --out results.json

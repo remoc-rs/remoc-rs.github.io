@@ -21,13 +21,12 @@ nav: home
             <h1>Remoc</h1>
             <p class="tagline">Remote multiplexed objects and channels for Rust.</p>
             <p class="lead">
-                <a href="https://docs.rs/tokio/latest/tokio/sync/index.html">Tokio channels</a> are how async
-                Rust programs talk between tasks.
-                Remoc lets them talk between machines the same way. Send a
-                <a href="https://docs.rs/remoc/latest/remoc/rch/index.html">Remoc channel</a> to the other side
-                like any other value and it is connected, inside the one link you already have. That link can
-                be TCP, TLS, a WebSocket, a pipe or anything else that carries bytes. On top of the channels you also get remote
-                function calls, RPC on traits and observable collections.
+                <a href="https://docs.rs/tokio/latest/tokio/sync/index.html">Tokio channels</a> connect
+                tasks within an async Rust program. Remoc extends the same channel model across machines:
+                sending a <a href="https://docs.rs/remoc/latest/remoc/rch/index.html">channel endpoint</a>
+                to the remote side connects it over the existing transport. That transport may be TCP,
+                TLS, a WebSocket, a pipe or another byte or packet stream. Remoc also provides remote
+                functions, RPC on traits and observable collections.
             </p>
 
             <div class="cta">
@@ -126,13 +125,13 @@ nav: home
                     <p><a href="https://docs.rs/remoc/latest/remoc/rch/index.html">rch module &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Remote trait calls
+                    <h3>Remote trait calls (RPC)
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-traits"/></svg>
                     </h3>
                     <p>
-                        Write a trait, put <code>#[rtc::remote]</code> on it and you get a client and a server
-                        implementation. Arguments and return values may contain channels, so a method can hand
-                        back a stream of updates instead of a single value.
+                        Putting <code>#[rtc::remote]</code> on a trait generates client and server
+                        implementations. Arguments and return values may contain channels, allowing a
+                        method to return a stream of updates instead of a single value.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc module &rarr;</a></p>
                 </article>
@@ -151,8 +150,8 @@ nav: home
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-collections"/></svg>
                     </h3>
                     <p>
-                        Hash maps, b-tree maps, vectors and sets that publish what happens to them.
-                        A subscriber first gets a snapshot and then every change as it occurs.
+                        Hash maps, B-tree maps, vectors and sets that publish their changes.
+                        A subscriber receives an initial snapshot followed by each change as it occurs.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/robs/index.html">robs module &rarr;</a></p>
                 </article>
@@ -161,8 +160,8 @@ nav: home
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-objects"/></svg>
                     </h3>
                     <p>
-                        Locks and read/write locks that also work when the other party is on a different
-                        machine, plus values that are only fetched once somebody actually looks at them.
+                        Locks and read/write locks accessible from another machine, plus lazy values
+                        that are fetched only when accessed.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/robj/index.html">robj module &rarr;</a></p>
                 </article>
@@ -171,9 +170,9 @@ nav: home
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-transport"/></svg>
                     </h3>
                     <p>
-                        Remoc does no networking. Give it an <code>AsyncRead</code> and <code>AsyncWrite</code>
-                        pair, or a <code>Sink</code> and <code>Stream</code> of packets, and you are connected.
-                        Worked examples for TCP, TLS, WebSockets and pipes.
+                        Remoc is transport-independent. It operates over an <code>AsyncRead</code> and
+                        <code>AsyncWrite</code> pair or a <code>Sink</code> and <code>Stream</code> of
+                        packets. Worked examples cover TCP, TLS, WebSockets and pipes.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/transports/index.html">transports &rarr;</a></p>
                 </article>
@@ -182,9 +181,9 @@ nav: home
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-pressure"/></svg>
                     </h3>
                     <p>
-                        Every channel, remote function and trait call rides a port with credit of its
-                        own, so a receiver that stops reading stalls its own sender instead of filling
-                        your memory. Nothing to arrange per call site.
+                        Each channel, remote function and trait call has independent flow control.
+                        A receiver that stops reading stalls only its own sender. Buffering remains
+                        bounded without per-call configuration.
                     </p>
                 </article>
                 <article>
@@ -192,8 +191,8 @@ nav: home
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-speed"/></svg>
                     </h3>
                     <p>
-                        Remoc has an overhead of less than 2&nbsp;% in most circumstances and works well over
-                        LAN, WAN, Wi-Fi and LTE connections. It can easily saturate a gigabit network link.
+                        In the published benchmarks, Remoc remains within 2&nbsp;% of a plain TCP
+                        implementation in most tested configurations and saturates a 1&nbsp;Gbit/s link.
                     </p>
                     <p><a href="benchmarks.html">Benchmarks &rarr;</a></p>
                 </article>
@@ -202,9 +201,9 @@ nav: home
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-safe"/></svg>
                     </h3>
                     <p>
-                        Not a line of <code>unsafe</code>, built on Tokio. It also compiles for
-                        <code>wasm32-unknown-unknown</code> and <a href="https://wasi.dev/">WASI</a>, so a
-                        browser tab can be one end of the connection.
+                        Remoc contains no <code>unsafe</code> code and is built on Tokio. It also targets
+                        <code>wasm32-unknown-unknown</code> and <a href="https://wasi.dev/">WASI</a>,
+                        allowing a browser tab to be one endpoint of a connection.
                     </p>
                 </article>
                 </div>
@@ -215,10 +214,9 @@ nav: home
             <div class="wrap">
                 <h2>Usage</h2>
                 <p class="section-lead">
-                    The client wants the server to count for it. It creates a channel, puts the sender
-                    into the request and reads the numbers from the receiver. Nothing else has to be
-                    arranged, both channels run through the single TCP connection that was opened at
-                    the start.
+                    The client asks the server to count for it. It creates a channel, includes the
+                    sender in the request and reads the numbers from the receiver. The request and
+                    returned sequence both use the single TCP connection opened at the start.
                 </p>
 
                 <div class="code-pair">
@@ -272,27 +270,19 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
             </div>
         </section>
 
-        <section id="more" class="section alt">
+        <section id="connection-resilience" class="section alt">
             <div class="wrap">
-                <h2>Resources</h2>
-                <div class="grid">
-                    <article>
-                        <h3>Benchmarks</h3>
-                        <p>
-                            Compare Remoc channel throughput with a plain TCP connection using the
-                            same records, codec and network conditions.
-                        </p>
-                        <p><a href="benchmarks.html">Benchmarks &rarr;</a></p>
-                    </article>
-                    <article>
-                        <h3>Aggligator</h3>
-                        <p>
-                            Aggligator combines multiple links and reconnects automatically while
-                            preserving Remoc's stateful session across connection changes.
-                        </p>
-                        <p><a href="/aggligator/">Aggligator &rarr;</a></p>
-                    </article>
-                </div>
+                <h2>Keep connections alive across link failures</h2>
+                <p class="section-lead">
+                    Remoc sessions are <strong>stateful</strong>: channels and remote objects remain
+                    connected for as long as the session does. The Aggligator crate provides a
+                    transport that <strong>keeps Remoc's logical connection alive</strong> when
+                    underlying links fail, reconnecting automatically without requiring the session
+                    to start over. It can also combine the bandwidth of multiple links.
+                </p>
+                <p class="section-foot">
+                    <a href="/aggligator/">How Aggligator keeps connections alive &rarr;</a>
+                </p>
             </div>
         </section>
     </main>
