@@ -292,22 +292,10 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     }
 
     .projects {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
         width: 100%;
+        flex-wrap: nowrap;
+        justify-content: space-between;
         gap: 1rem;
-    }
-
-    .projects .brand:first-child {
-        justify-self: start;
-    }
-
-    .projects .brand:nth-child(2) {
-        justify-self: center;
-    }
-
-    .projects .brand:last-child {
-        justify-self: end;
     }
 
     nav[aria-label="Primary"] ul {
