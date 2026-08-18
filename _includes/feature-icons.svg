@@ -1,0 +1,72 @@
+<svg class="feature-icon-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="feature-channels" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="4" cy="7" r="2"/>
+        <circle cx="20" cy="7" r="2"/>
+        <path d="M6 7h11m-3-3 3 3-3 3"/>
+        <circle cx="4" cy="17" r="2"/>
+        <circle cx="20" cy="17" r="2"/>
+        <path d="M18 17H7m3-3-3 3 3 3"/>
+    </symbol>
+
+    <symbol id="feature-traits" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="11" height="18" rx="2"/>
+        <path d="M6 8h5M6 12h5M6 16h3"/>
+        <path d="M16 8h5m-2-2 2 2-2 2M21 16h-5m2-2-2 2 2 2"/>
+    </symbol>
+
+    <symbol id="feature-functions" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19c2.5 0 3.4-1.8 3.8-4.5l.9-5.2C9.1 6.5 10.2 5 13 5"/>
+        <path d="M5.5 11h6"/>
+        <circle cx="15" cy="14" r="2"/>
+        <path d="M17 14h4m-2-2 2 2-2 2"/>
+    </symbol>
+
+    <symbol id="feature-collections" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="12" height="4" rx="1"/>
+        <rect x="3" y="10" width="12" height="4" rx="1"/>
+        <rect x="3" y="16" width="12" height="4" rx="1"/>
+        <path d="M18 8c1.5.9 2.2 2.2 2.2 4S19.5 15.1 18 16"/>
+        <path d="M20 5c2 1.7 3 4 3 7s-1 5.3-3 7"/>
+    </symbol>
+
+    <symbol id="feature-objects" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m4 7 7-4 7 4-7 4-7-4Z"/>
+        <path d="M4 7v8l7 4 7-4V7M11 11v8"/>
+        <circle cx="21" cy="12" r="2"/>
+        <path d="M18 11.3 16 10"/>
+    </symbol>
+
+    <symbol id="feature-transport" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="7" height="14" rx="1.5"/>
+        <path d="M4.5 9h2M4.5 12h2M4.5 15h2M9 12h5.5"/>
+        <circle cx="19" cy="12" r="4.5"/>
+        <circle cx="19" cy="12" r="1.5"/>
+    </symbol>
+
+    <symbol id="feature-pressure" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12h5M17 12h5"/>
+        <path d="m7 7 5 5-5 5V7Zm10 0-5 5 5 5V7Z"/>
+        <path d="M12 7V3M9 3h6"/>
+    </symbol>
+
+    <symbol id="feature-speed" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 18a9 9 0 1 1 16 0"/>
+        <path d="m12 12 5-4M6.5 14.5l-2-1M8 9 6.5 7.5M12 7V4m4 5 1.5-1.5M19.5 14.5l2-1"/>
+        <circle cx="12" cy="12" r="1.5"/>
+        <path d="M7 20h10"/>
+    </symbol>
+
+    <symbol id="feature-safe" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2.5 20 6v5.5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6l8-3.5Z"/>
+        <path d="m8 12 2.5 2.5L16 9"/>
+    </symbol>
+</svg>

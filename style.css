@@ -591,6 +591,27 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     margin-bottom: 0.4em;
 }
 
+.feature-icon-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+#features .grid h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.feature-icon {
+    width: 1.65rem;
+    height: 1.65rem;
+    flex: none;
+    color: var(--accent);
+}
+
 .grid p {
     color: var(--fg-muted);
     font-size: 0.96rem;

@@ -111,9 +111,12 @@ nav: home
         <section id="features" class="section alt">
             <div class="wrap">
                 <h2>Features</h2>
+                {% include feature-icons.svg %}
                 <div class="grid">
                 <article>
-                    <h3>Remote channels</h3>
+                    <h3>Remote channels
+                        <svg class="feature-icon" aria-hidden="true"><use href="#feature-channels"/></svg>
+                    </h3>
                     <p>
                         MPSC, oneshot, watch and broadcast, with the API you already know from
                         <a href="https://tokio.rs/">Tokio</a>.
@@ -123,7 +126,9 @@ nav: home
                     <p><a href="https://docs.rs/remoc/latest/remoc/rch/index.html">rch module &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Remote trait calls</h3>
+                    <h3>Remote trait calls
+                        <svg class="feature-icon" aria-hidden="true"><use href="#feature-traits"/></svg>
+                    </h3>
                     <p>
                         Write a trait, put <code>#[rtc::remote]</code> on it and you get a client and a server
                         implementation. Arguments and return values may contain channels, so a method can hand
@@ -132,7 +137,9 @@ nav: home
                     <p><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc module &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Remote functions</h3>
+                    <h3>Remote functions
+                        <svg class="feature-icon" aria-hidden="true"><use href="#feature-functions"/></svg>
+                    </h3>
                     <p>
                         Send a closure over and let the other side call it. The arguments travel one way,
                         the result comes back.
@@ -140,7 +147,9 @@ nav: home
                     <p><a href="https://docs.rs/remoc/latest/remoc/rfn/index.html">rfn module &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Observable collections</h3>
+                    <h3>Observable collections
+                        <svg class="feature-icon" aria-hidden="true"><use href="#feature-collections"/></svg>
+                    </h3>
                     <p>
                         Hash maps, b-tree maps, vectors and sets that publish what happens to them.
                         A subscriber first gets a snapshot and then every change as it occurs.
@@ -148,7 +157,9 @@ nav: home
                     <p><a href="https://docs.rs/remoc/latest/remoc/robs/index.html">robs module &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Remote objects</h3>
+                    <h3>Remote objects
+                        <svg class="feature-icon" aria-hidden="true"><use href="#feature-objects"/></svg>
+                    </h3>
                     <p>
                         Locks and read/write locks that also work when the other party is on a different
                         machine, plus values that are only fetched once somebody actually looks at them.
@@ -156,7 +167,9 @@ nav: home
                     <p><a href="https://docs.rs/remoc/latest/remoc/robj/index.html">robj module &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Bring your own transport</h3>
+                    <h3>Bring your own transport
+                        <svg class="feature-icon" aria-hidden="true"><use href="#feature-transport"/></svg>
+                    </h3>
                     <p>
                         Remoc does no networking. Give it an <code>AsyncRead</code> and <code>AsyncWrite</code>
                         pair, or a <code>Sink</code> and <code>Stream</code> of packets, and you are connected.
@@ -165,16 +178,19 @@ nav: home
                     <p><a href="https://docs.rs/remoc/latest/remoc/transports/index.html">transports &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Back pressure everywhere</h3>
+                    <h3>Back pressure everywhere
+                        <svg class="feature-icon" aria-hidden="true"><use href="#feature-pressure"/></svg>
+                    </h3>
                     <p>
                         Every channel, remote function and trait call rides a port with credit of its
                         own, so a receiver that stops reading stalls its own sender instead of filling
                         your memory. Nothing to arrange per call site.
                     </p>
-                    <p><a href="https://docs.rs/remoc/latest/remoc/chmux/index.html">chmux module &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>The speed of a plain socket</h3>
+                    <h3>The speed of a plain socket
+                        <svg class="feature-icon" aria-hidden="true"><use href="#feature-speed"/></svg>
+                    </h3>
                     <p>
                         Remoc has an overhead of less than 2&nbsp;% in most circumstances and works well over
                         LAN, WAN, Wi-Fi and LTE connections. It can easily saturate a gigabit network link.
@@ -182,7 +198,9 @@ nav: home
                     <p><a href="benchmarks.html">Benchmarks &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>100&nbsp;% safe Rust</h3>
+                    <h3>100&nbsp;% safe Rust
+                        <svg class="feature-icon" aria-hidden="true"><use href="#feature-safe"/></svg>
+                    </h3>
                     <p>
                         Not a line of <code>unsafe</code>, built on Tokio. It also compiles for
                         <code>wasm32-unknown-unknown</code> and <a href="https://wasi.dev/">WASI</a>, so a
@@ -256,7 +274,7 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
 
         <section id="more" class="section alt">
             <div class="wrap">
-                <h2>More about Remoc</h2>
+                <h2>Resources</h2>
                 <div class="grid">
                     <article>
                         <h3>Benchmarks</h3>
