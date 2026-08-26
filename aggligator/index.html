@@ -9,6 +9,7 @@ social_description: >-
   Aggligator combines TCP, WebSocket, USB or Bluetooth links and keeps one logical connection
   alive as devices move between networks.
 canonical: /aggligator/
+schema: software
 favicon: /aggligator/logo.png
 nav_url: /aggligator/
 ---
@@ -153,6 +154,7 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                             Faster links become ready for more data sooner and therefore carry more.
                             The distribution changes as link conditions change.
                         </p>
+                        <p><a href="/aggligator/bonding.html">Combining multiple internet connections &rarr;</a></p>
                     </article>
                     <article>
                         <h3>Connection survives network changes
@@ -163,6 +165,7 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                             When none remain, transport connectors keep reconnecting for a configurable
                             time instead of immediately closing the logical connection.
                         </p>
+                        <p><a href="/aggligator/network-switching.html">Switching between Wi-Fi and mobile data &rarr;</a></p>
                     </article>
                     <article>
                         <h3>Bring your own links

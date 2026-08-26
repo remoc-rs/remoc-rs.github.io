@@ -1,0 +1,63 @@
+---
+layout: null
+permalink: /llms.txt
+---
+# remoc.rs
+
+> Three Rust libraries for communication between programs: Remoc provides typed
+> channels, remote functions and trait RPC over a single connection; Aggligator
+> combines multiple network links into one resilient connection; Postbag is a
+> compact binary Serde codec with built-in schema evolution.
+
+All three are Apache 2.0-licensed open source, written in 100% safe Rust and
+built on Tokio.
+
+## Remoc
+
+- [Overview](https://remoc.rs/): remote multiplexed objects and channels for Rust.
+- [Channels between processes and machines](https://remoc.rs/remote-channels.html):
+  mpsc, oneshot, watch and broadcast channels with the API known from Tokio,
+  working over a network connection, socket or pipe.
+- [IPC between Rust processes](https://remoc.rs/ipc.html): typed channels and
+  trait calls between a daemon and its clients over a UNIX socket, a pipe to a
+  child process or local TCP.
+- [Server push and callbacks](https://remoc.rs/server-push.html): calls that
+  return or accept channels, and clients that serve traits of their own, so the
+  server can push events and call back through NAT.
+- [Multiplexing typed channels](https://remoc.rs/multiplexing.html): many
+  independent, typed channels over one TCP, TLS or WebSocket connection, with
+  per-channel flow control.
+- [Comparison with other RPC libraries](https://remoc.rs/comparison.html): how
+  Remoc differs from tarpc, gRPC (tonic) and Cap'n Proto.
+- [Benchmarks](https://remoc.rs/benchmarks.html): throughput of a Remoc channel
+  compared with plain TCP.
+- [Examples](https://remoc.rs/examples/channels.html): remote channels, remote
+  trait calls and a web browser endpoint.
+- [API documentation](https://docs.rs/remoc)
+
+## Aggligator
+
+- [Overview](https://remoc.rs/aggligator/): combines network links (TCP,
+  WebSocket, USB, Bluetooth) between two endpoints into one connection with
+  their combined bandwidth.
+- [Keeping connections alive while switching networks](https://remoc.rs/aggligator/network-switching.html):
+  a connection that survives a device moving between Wi-Fi, mobile data and
+  Ethernet, even when its IP address changes.
+- [Combining multiple internet connections](https://remoc.rs/aggligator/bonding.html):
+  link bonding in user space, without Multipath TCP or special routers.
+- [agg-tunnel](https://remoc.rs/aggligator/tunnel.html): forward TCP ports of
+  existing, unmodified applications over an aggregated connection.
+- [API documentation](https://docs.rs/aggligator)
+
+## Postbag
+
+- [Overview](https://remoc.rs/postbag/): a binary Serde format that lets your
+  types keep changing.
+- [Schema evolution](https://remoc.rs/postbag/schema-evolution.html): why binary
+  formats like bincode break when types change and how Postbag allows fields and
+  enum variants to be added, removed and reordered.
+- [File formats](https://remoc.rs/postbag/file-formats.html): config and save
+  files that stay readable across application versions, in both directions and
+  without migration code. Recoverable fields, unique to Postbag, confine an
+  incompatible change to one field instead of losing the whole file.
+- [API documentation](https://docs.rs/postbag)

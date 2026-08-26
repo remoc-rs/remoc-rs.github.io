@@ -1,0 +1,156 @@
+---
+layout: base
+project: aggligator
+title: "Keep a TCP connection alive when switching from Wi-Fi to mobile data"
+description: >-
+  Why connections drop when a device changes networks, and how Aggligator keeps one
+  logical connection alive for seamless roaming across Wi-Fi, mobile data and Ethernet,
+  even when the IP address changes.
+social_description: >-
+  A connection that survives the device switching from Wi-Fi to mobile data, without
+  Multipath TCP or operating system support.
+canonical: /aggligator/network-switching.html
+favicon: /aggligator/logo.png
+footer_alt: true
+faq:
+  - q: "Does this need Multipath TCP or support from the operating system?"
+    a: >-
+      No. Aggligator is completely implemented in user space and works over ordinary
+      transports such as TCP, TLS or WebSockets. It serves the same purpose as Multipath
+      TCP, but neither the operating system nor the network in between needs to know
+      about it.
+  - q: "Does the connection survive an IP address change?"
+    a: >-
+      Yes. A new link authenticates itself to the existing connection using a secret
+      that was established when the connection was opened. It can therefore attach from
+      any address and the logical connection continues unchanged.
+  - q: "What happens while no network is available at all?"
+    a: >-
+      The logical connection is kept open for a configurable time while the transport
+      connectors keep trying to establish a new link. The application's stream stalls
+      during that time and resumes when a link becomes available again. No data is lost.
+  - q: "Can I use this with an existing application without changing its code?"
+    a: >-
+      Yes. The <code>agg-tunnel</code> utility runs on both machines and forwards
+      ordinary TCP ports over an aggregated connection. The client and server
+      applications do not need to be modified.
+  - q: "Do both ends have to run Aggligator?"
+    a: >-
+      Yes. Aggregation happens between the two endpoints of the connection, so the
+      server side must run Aggligator or <code>agg-tunnel</code> as well. Connections
+      to third-party services that you do not control cannot be made to survive a
+      network change.
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Keep connections alive while switching networks</h1>
+            <p class="lead">
+                When a laptop moves from Wi-Fi to a phone's hotspot, or a phone leaves the house
+                and switches to mobile data, all established TCP connections break.
+                <a href="/aggligator/">Aggligator</a> keeps your connection alive through such
+                network changes.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Why connections drop when the network changes</h2>
+                <p>
+                    A TCP connection is identified by the IP addresses and ports of its two
+                    endpoints. When a device switches from Wi-Fi to mobile data, it gets a new IP
+                    address, so the existing connection becomes unusable and eventually times out.
+                    The application sees an error or a hang and has to reconnect. Any state that
+                    was associated with the connection, such as a login session or a transfer in
+                    progress, is lost.
+                </p>
+                <p>
+                    There are several ways to deal with this. You can implement reconnect logic
+                    in your application, but it must detect the failure, resume the session and
+                    handle data that was in flight when the connection broke.
+                    <a href="https://en.wikipedia.org/wiki/Multipath_TCP">Multipath TCP</a>
+                    solves the problem in the kernel, but requires support from both operating
+                    systems and must be let through by the middleboxes on the path. QUIC supports
+                    connection migration, but requires your application to use QUIC and only
+                    helps with address changes, not with using several networks at the same time.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>How Aggligator handles it</h2>
+                <p>
+                    Aggligator separates the logical connection from the network links that carry
+                    it. Each link is an ordinary transport connection, for example TCP, TLS, a
+                    WebSocket, USB or Bluetooth. Links can fail, return, be added or be removed
+                    while the logical connection runs. Data that a failed link did not deliver is
+                    resent over the remaining links.
+                </p>
+                <p>
+                    While Wi-Fi and mobile data are both available, both carry data and the
+                    connection has their combined bandwidth. When the device leaves Wi-Fi
+                    coverage, the Wi-Fi link fails and traffic continues over mobile data alone;
+                    the handover needs no involvement from the application.
+                    If all links are gone, the connection is kept open for a configurable time
+                    while the transport connectors keep trying to establish a new link. A link
+                    that comes back, possibly from a new IP address or a different network,
+                    authenticates itself to the existing connection and traffic resumes where it
+                    stopped. For the application this roaming between networks is seamless; it
+                    just keeps reading and writing its one stream.
+                </p>
+                <p>
+                    All of this happens in user space, without any support from the operating
+                    system or the network in between.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>From Rust, it is a socket</h2>
+                <p class="section-lead">
+                    The TCP transport discovers the usable routes between the two hosts and
+                    maintains a link over each of them. Your application reads and writes one
+                    stream.
+                </p>
+
+                <figure class="code-single">
+                    <figcaption>Client</figcaption>
+                    <pre><code><span class="k">use</span> aggligator_transport_tcp::simple::tcp_connect;
+<span class="k">use</span> tokio::io::<span class="t">AsyncWriteExt</span>;
+
+<span class="c">// One stream over all interfaces: Wi-Fi, mobile data, Ethernet.</span>
+<span class="k">let</span> <span class="k">mut</span> stream = tcp_connect([<span class="s">"server"</span>], <span class="n">5900</span>).<span class="k">await</span>?;
+
+stream.write_all(<span class="s">b"hello"</span>).<span class="k">await</span>?;</code></pre>
+                </figure>
+
+                <p class="section-foot">
+                    If your application is not written in Rust, you can use
+                    <a href="/aggligator/tunnel.html"><code>agg-tunnel</code> to tunnel existing
+                    TCP applications &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        {% include faq.html alt=true %}
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Where to go next</h2>
+                <p>
+                    The <a href="/aggligator/">Aggligator overview</a> shows how data is
+                    distributed over unequal links and which
+                    <a href="/aggligator/#transports">transports</a> are available. If you want
+                    to combine links for bandwidth rather than resiliency, see
+                    <a href="/aggligator/bonding.html">combining multiple internet
+                    connections</a>.
+                </p>
+            </div>
+        </section>
+    </main>

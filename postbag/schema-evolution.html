@@ -1,0 +1,145 @@
+---
+layout: base
+project: postbag
+title: "Binary serialization that survives schema changes in Rust"
+description: >-
+  Formats like bincode break when a struct changes. How Postbag encodes Serde types so
+  that fields and enum variants can be added, removed and reordered while old and new
+  programs keep reading each other's data.
+social_description: >-
+  Binary Serde serialization whose data stays readable while your structs and enums
+  keep changing.
+canonical: /postbag/schema-evolution.html
+favicon: /postbag/logo.png
+footer_alt: true
+faq:
+  - q: "What happens when a reader meets a field it does not know?"
+    a: >-
+      In the Full format every field carries its identifier and the length of its value,
+      so an unknown field is simply skipped. A field the reader expects but does not
+      receive takes its <code>#[serde(default)]</code>, and an unknown enum variant is
+      caught by a variant marked with <code>#[serde(other)]</code>.
+  - q: "Do I need a schema file or explicit version numbers?"
+    a: >-
+      No. Your Rust types are the schema and there is no version negotiation. Each side
+      simply serializes its own version of the type, and the compatibility rules ensure
+      that both sides can read each other's data.
+  - q: "How does this compare to bincode or postcard?"
+    a: >-
+      Bincode and postcard write the values only, in declaration order, so most changes
+      to a type make old data unreadable. Postbag Slim makes the same trade-off with
+      limited evolvability, while Postbag Full spends a few extra bytes on identifiers
+      and lengths so that fields and variants can change freely.
+  - q: "What about a change the rules do not cover?"
+    a: >-
+      You can mark such a field as recoverable. If its type has changed incompatibly,
+      the rest of the enclosing value is still deserialized and the field takes its
+      default value instead of failing the whole read.
+  - q: "Does it preserve Rust's data model exactly?"
+    a: >-
+      Yes. Postbag round-trips Serde's data model without flattening it, including
+      distinctions such as <code>Some(None)</code> versus <code>None</code>, which many
+      self-describing formats lose.
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Binary data that survives schema changes</h1>
+            <p class="lead">
+                Serialized data often outlives the version of the program that wrote it, be it
+                as files on disk, messages between services deployed at different times or
+                records in a queue. <a href="/postbag/">Postbag</a> is a binary Serde codec that
+                is built to keep both directions of this version gap working.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Why binary formats break when types change</h2>
+                <p>
+                    Compact binary formats such as bincode and postcard write the field values
+                    one after another in declaration order and nothing else. This is fast and
+                    small, but the encoding can only be read by the exact type that wrote it. If
+                    you add a field, remove one or reorder them, every reader must be updated in
+                    the same release and previously written data becomes unreadable.
+                </p>
+                <p>
+                    The usual alternatives are JSON, which tolerates change but is large, slow
+                    and flattens Rust's data model, and Protocol Buffers, which evolve well but
+                    bring a separate <code>.proto</code> schema, generated types and their own
+                    data model. Postbag sits in between. It is a compact binary format for plain
+                    Serde types that supports schema evolution without a schema language and
+                    without explicit versioning.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>How Postbag encodes for change</h2>
+                <p>
+                    Postbag's <code>Full</code> format writes each field together with its
+                    identifier and the length of its value. A reader matches fields by
+                    identifier instead of position. Unknown fields are skipped over, missing
+                    fields take their <code>#[serde(default)]</code> and the order of fields
+                    does not matter. The same applies to enum variants, with
+                    <code>#[serde(other)]</code> catching variants the reader does not know. You
+                    can therefore add, remove, rename and reorder fields and variants while old
+                    and new programs exchange data. Backward and forward compatibility both
+                    hold: old programs read new data and new programs read old data.
+                </p>
+                <p>
+                    The identifiers are normally the field names; to save space they can be
+                    <a href="/postbag/#format">numbered</a> without giving up evolvability. If
+                    minimal size matters more than free evolution, the <code>Slim</code> format
+                    writes the values only and still allows appending fields and variants at the
+                    end. Both formats use variable-length integer encoding and both are
+                    <a href="/postbag/#specifications">specified</a> independently of the
+                    implementation.
+                </p>
+
+                <p class="section-foot">
+                    <a href="/postbag/#compatibility">The full table of supported type changes
+                        &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>When a change is not covered</h2>
+                <p>
+                    Some changes are incompatible under any rule set, for example completely
+                    changing the type of a field. For these cases a field can be wrapped with
+                    <code>#[serde(with = "postbag::recoverable")]</code>. If deserialization of
+                    such a field fails, the failure is confined to it, the rest of the value is
+                    recovered and the field takes its default value. Marking an existing field
+                    as recoverable does not change its wire representation.
+                </p>
+
+                <p class="section-foot">
+                    <a href="/postbag/#recoverable">How recoverable fields work &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        {% include faq.html alt=true %}
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Where to go next</h2>
+                <p>
+                    The <a href="/postbag/">Postbag overview</a> has a quick start and the
+                    complete compatibility rules, and
+                    <a href="/postbag/file-formats.html">file formats that survive upgrades</a>
+                    covers the case of config and save files. Postbag is also the codec used by
+                    <a href="/">Remoc</a>, where it allows communicating programs to be upgraded
+                    one at a time.
+                </p>
+            </div>
+        </section>
+    </main>

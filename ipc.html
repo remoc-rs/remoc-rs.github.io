@@ -1,0 +1,157 @@
+---
+layout: base
+project: remoc
+title: "IPC in Rust: typed channels and RPC between processes over a UNIX socket"
+description: >-
+  How to build inter-process communication between a Rust daemon and its clients with
+  typed channels and trait calls over a UNIX socket, a pipe to a child process or a
+  local TCP connection, without a hand-rolled protocol or schema files.
+social_description: >-
+  Inter-process communication for Rust with typed channels and trait calls over a UNIX
+  socket or pipe.
+canonical: /ipc.html
+footer_alt: true
+faq:
+  - q: "Does this work on Windows?"
+    a: >-
+      Yes. Remoc runs over anything implementing <code>AsyncRead</code> and
+      <code>AsyncWrite</code>, which includes Tokio's named pipes on Windows. A TCP
+      connection on localhost works on every platform.
+  - q: "Can I talk to a child process I spawned?"
+    a: >-
+      Yes. The standard input and output pipes of a child process form a byte stream
+      that Remoc can run over. The transports module of the documentation contains a
+      worked example for this.
+  - q: "Can several clients connect to one daemon?"
+    a: >-
+      Yes. The daemon accepts connections on its socket as usual and establishes one
+      Remoc connection per client. Each client gets its own channels and trait clients,
+      isolated from the others.
+  - q: "What happens when daemon and client are different versions?"
+    a: >-
+      Remoc serializes with the Postbag codec, which supports schema evolution. Fields
+      and enum variants can be added, removed and reordered, so an updated daemon keeps
+      working with an already installed older client and vice versa.
+  - q: "How does this compare to D-Bus?"
+    a: >-
+      D-Bus is the right choice for talking to system services and desktop components,
+      since it is a shared bus with cross-language support. Remoc fits when both
+      processes are your own Rust code and you want your Rust types as the interface,
+      without a bus daemon in between.
+  - q: "Can a non-Rust process participate?"
+    a: >-
+      No. The protocol is defined by Rust types serialized with Serde, so both
+      processes must be written in Rust.
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>IPC between Rust processes</h1>
+            <p class="lead">
+                Many programs are really several processes that need to talk, for example a
+                daemon and its command-line client, a privileged helper and a user interface,
+                or a plugin running as a subprocess. <a href="/">Remoc</a> runs its typed
+                channels and trait calls over a UNIX socket, a pipe or any other local byte
+                stream.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>More than a byte pipe</h2>
+                <p>
+                    The operating system gives you a byte stream for inter-process
+                    communication, but what the processes actually need are commands with typed
+                    arguments and results,
+                    progress and event notifications, and an interface that can grow without
+                    breaking installed clients.
+                </p>
+                <p>
+                    The usual approaches each carry a burden. A hand-rolled protocol over a UNIX
+                    socket means framing, a message enum and dispatch code that grow with every
+                    command. JSON over stdin and stdout is quick to start with, but untyped and
+                    without a versioning story. D-Bus integrates well with system services, but
+                    brings a bus daemon and its own type system. gRPC over a UNIX socket works,
+                    but maintaining a <code>.proto</code> schema and generated code is a lot of
+                    machinery for two programs that you compile yourself.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Your Rust traits as the interface</h2>
+                <p>
+                    With Remoc, the daemon's interface is a Rust trait carrying
+                    <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html"><code>#[rtc::remote]</code></a>,
+                    which generates the client and server implementations. Arguments and results
+                    are ordinary Serde types. Where the daemon needs to push, a method returns a
+                    channel, for example a stream of log lines, progress values or state
+                    changes; the <a href="/remote-channels.html">channels</a> work in both
+                    directions over the same socket.
+                </p>
+                <p>
+                    Since Remoc serializes with the <a href="/postbag/">Postbag</a> codec, the
+                    interface can evolve. You can add fields, methods and enum variants and an
+                    updated daemon keeps understanding an older installed client, without
+                    version negotiation code.
+                </p>
+                <p>
+                    The transport is whatever local byte stream suits you: a UNIX socket, the
+                    stdin and stdout pipes of a child process, a named pipe on Windows or a TCP
+                    connection on localhost. Remoc implements no transport itself, so nothing
+                    else is pulled in.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>Connecting to the daemon</h2>
+                <p class="section-lead">
+                    The client connects to the daemon's socket and receives a typed client for
+                    the daemon's interface trait. One call sets up the connection and delivers
+                    it.
+                </p>
+
+                <figure class="code-single">
+                    <figcaption>Client side</figcaption>
+                    <pre><code><span class="k">use</span> tokio::net::<span class="t">UnixStream</span>;
+
+<span class="k">let</span> socket = <span class="t">UnixStream</span>::connect(<span class="s">"/run/myapp.sock"</span>).<span class="k">await</span>?;
+<span class="k">let</span> (socket_rx, socket_tx) = socket.into_split();
+
+<span class="c">// Receive the client for the daemon's interface trait.</span>
+<span class="k">let</span> <span class="k">mut</span> daemon: <span class="t">DaemonClient</span> =
+    remoc::<span class="t">Connect</span>::io(remoc::<span class="t">Cfg</span>::default(), socket_rx, socket_tx).consume().<span class="k">await</span>?;
+
+daemon.status().<span class="k">await</span>?;</code></pre>
+                </figure>
+
+                <p class="section-foot">
+                    <a href="https://docs.rs/remoc/latest/remoc/transports/index.html">Worked
+                        transport examples, including pipes to a child process &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        {% include faq.html alt=true %}
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Where to go next</h2>
+                <p>
+                    The <a href="/examples/rtc.html">remote trait calling example</a> shows a
+                    complete service with client and server crates. If the daemon needs to
+                    notify its clients, <a href="/server-push.html">server push and
+                    callbacks</a> covers the patterns, and
+                    <a href="/remote-channels.html">channels between processes</a> explains the
+                    underlying channel model.
+                </p>
+            </div>
+        </section>
+    </main>

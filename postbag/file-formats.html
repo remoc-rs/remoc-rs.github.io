@@ -1,0 +1,168 @@
+---
+layout: base
+project: postbag
+title: "File format versioning in Rust: config and save files that survive upgrades"
+description: >-
+  How to store config files, save files and documents so that new releases of your
+  application still read old files and old releases tolerate new ones, using Postbag
+  instead of migration code for every change.
+social_description: >-
+  Config and save files that stay readable across application versions, in both
+  directions and without migration code for every change.
+canonical: /postbag/file-formats.html
+favicon: /postbag/logo.png
+footer_alt: true
+faq:
+  - q: "My format is MessagePack or CBOR. Is that not already self-describing?"
+    a: >-
+      The format is, but the way Serde uses it may not be. rmp-serde, for example,
+      writes structs positionally as arrays by default, so adding or removing a field
+      breaks old files although MessagePack could express field names. In named mode
+      field changes work, but every value carries its full field name, renames break
+      without aliases, and a field whose type changed still fails the whole file.
+  - q: "Do I need a version number in my files?"
+    a: >-
+      Not for the covered changes; old and new types read each other without version
+      negotiation. Starting the file with a few magic bytes that identify your
+      application and format is still good practice, and independent of Postbag.
+  - q: "Can an old release of my application read files written by a new one?"
+    a: >-
+      Yes, this is the forward direction of compatibility. Fields the old release does
+      not know are skipped, and enum variants it does not know are caught by a variant
+      marked with <code>#[serde(other)]</code>.
+  - q: "What if a field's type changes completely?"
+    a: >-
+      Wrap the field with <code>#[serde(with = "postbag::recoverable")]</code>. If it
+      cannot be deserialized, the rest of the file is still read and the field takes
+      its default value, so the user loses one setting instead of the whole document.
+  - q: "How large are the files?"
+    a: >-
+      Postbag uses variable-length integer encoding and can number field identifiers
+      so that each costs a single byte instead of its name. Where minimal size matters
+      more than free evolution, the Slim format writes the values only.
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>File formats that survive upgrades</h1>
+            <p class="lead">
+                Config files, save files and documents outlive the release that wrote them. A
+                new version of your application must read the old files, and ideally an old
+                version tolerates files from a newer one. <a href="/postbag/">Postbag</a> gives
+                your Serde types a file format where this is the normal case.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Why the next release breaks old files</h2>
+                <p>
+                    When a file is written by serializing your structs, the file format is your
+                    structs, and every release changes them. With a positional binary format
+                    such as bincode or postcard, any added, removed or reordered field makes old
+                    files unreadable. MessagePack and CBOR can carry field names, but the Serde
+                    libraries do not always use them; rmp-serde writes structs as arrays by
+                    default, which breaks in exactly the same way.
+                </p>
+                <p>
+                    The usual escapes are keeping every struct frozen and adding
+                    <code>ConfigV2</code>, <code>ConfigV3</code> and migration code for each
+                    step, or moving to JSON and accepting larger files and a flattened data
+                    model. Both grow with every release, and neither helps when a user opens a
+                    file from a version newer than the installed one.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Evolving the format instead of migrating files</h2>
+                <p>
+                    Postbag's <code>Full</code> format writes each field with its identifier
+                    and the length of its value, so a reader matches fields by identifier
+                    instead of position. A field added in version 2 is skipped by version 1 and
+                    takes its <code>#[serde(default)]</code> when version 2 reads an old file.
+                    Removed fields, reordered fields and new enum variants work likewise, so
+                    the files stay backward and forward compatible. For these changes no version field, no migration ladder
+                    and no frozen struct copies are needed; you just change your types.
+                </p>
+                <p>
+                    Furthermore, a field can be marked recoverable. If it changed incompatibly,
+                    reading the file does not fail; the rest of the document is loaded and that
+                    field takes its default. For a settings file this means one setting resets
+                    instead of the user losing the whole configuration.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>Evolution and recovery in practice</h2>
+                <p class="section-lead">
+                    Version 2 of this config added <code>font_size</code>; files load in both
+                    directions, with version 1 skipping the unknown field. The key bindings are
+                    additionally marked recoverable, which is unique to Postbag: even a change
+                    to them that no rule covers does not lose the file.
+                </p>
+
+                <div class="code-pair">
+                    <figure>
+                        <figcaption>An added field</figcaption>
+                        <pre><code><span class="k">use</span> serde::{Deserialize, Serialize};
+
+<span class="a">#[derive(Serialize, Deserialize)]</span>
+<span class="k">struct</span> <span class="t">Config</span> {
+    theme: <span class="t">String</span>,
+    <span class="c">// Added in version 2. Files from</span>
+    <span class="c">// version 1 use the default.</span>
+    <span class="a">#[serde(default)]</span>
+    font_size: <span class="t">u32</span>,
+}
+
+<span class="k">let</span> config: <span class="t">Config</span> =
+    postbag::from_full_slice(&amp;bytes)?;</code></pre>
+                    </figure>
+                    <figure>
+                        <figcaption>A recoverable field</figcaption>
+                        <pre><code><span class="a">#[derive(Serialize, Deserialize)]</span>
+<span class="k">struct</span> <span class="t">Config</span> {
+    theme: <span class="t">String</span>,
+    <span class="a">#[serde(with = "postbag::recoverable")]</span>
+    bindings: <span class="t">KeyBindings</span>,
+}
+
+<span class="c">// If KeyBindings changed incompatibly,</span>
+<span class="c">// theme is still loaded and bindings</span>
+<span class="c">// becomes KeyBindings::default().</span>
+<span class="k">let</span> config: <span class="t">Config</span> =
+    postbag::from_full_slice(&amp;bytes)?;</code></pre>
+                    </figure>
+                </div>
+
+                <p class="section-foot">
+                    <a href="/postbag/#compatibility">All supported type changes &rarr;</a><br>
+                    <a href="/postbag/#recoverable">How recoverable fields work &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        {% include faq.html alt=true %}
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Where to go next</h2>
+                <p>
+                    <a href="/postbag/schema-evolution.html">Binary data that survives schema
+                    changes</a> explains how the encoding achieves this, and the
+                    <a href="/postbag/">Postbag overview</a> has the quick start and the
+                    complete compatibility rules. The same properties apply when the bytes
+                    travel between programs instead of into a file, as
+                    <a href="/">Remoc</a> uses them.
+                </p>
+            </div>
+        </section>
+    </main>

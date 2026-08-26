@@ -1,0 +1,143 @@
+---
+layout: base
+project: remoc
+title: "RPC with server push and client callbacks in Rust"
+description: >-
+  Request/response RPC breaks down when the server must notify its clients. How Remoc
+  makes RPC bidirectional: a call can return or accept a channel and the client can
+  serve a trait of its own, so the server pushes events and calls back, even through
+  NAT.
+social_description: >-
+  RPC where a call can hand over a channel and the server can call the client back,
+  over the one connection the client opened.
+canonical: /server-push.html
+footer_alt: true
+faq:
+  - q: "Does server push work when the client is behind NAT?"
+    a: >-
+      Yes. Everything runs over the one connection that the client opened, and channels
+      and calls work in both directions on it. The server never has to connect to the
+      client, so NAT and firewalls on the client side are no obstacle.
+  - q: "How is this different from gRPC server streaming?"
+    a: >-
+      A gRPC stream is tied to the method that declared it. A Remoc channel is a value:
+      a call can return it, a message can carry it, and it can be stored and used long
+      after the call completed. Additionally the client can serve a trait of its own,
+      which gRPC has no equivalent for.
+  - q: "What happens when the client disconnects?"
+    a: >-
+      Sending into a channel whose remote end is gone fails with an error, and calls on
+      a disconnected client fail likewise. The server notices at the point of use and
+      can drop its state for that client.
+  - q: "Can the server push without the client asking first?"
+    a: >-
+      The client has to hand the server a way in once, by calling a method that returns
+      a channel, by including a sender in a message or by providing a client for its
+      own trait. From then on the server pushes whenever it wants.
+  - q: "Can I use this between Rust and another language?"
+    a: >-
+      No. Remoc's protocol is defined by Rust types serialized with Serde, so both
+      peers must be Rust programs. For cross-language services a schema-based system
+      such as gRPC is the better fit.
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>RPC with server push and callbacks</h1>
+            <p class="lead">
+                Classical RPC is request and response: the client asks and the server answers.
+                But often the server has something to say on its own, for example a finished
+                job, a changed value or an incoming event. <a href="/">Remoc</a> lets calls
+                carry channels in both directions and lets the client serve a trait of its own,
+                so the server can call back.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>The limits of request and response</h2>
+                <p>
+                    In a request/response framework the server cannot start a conversation. The
+                    usual workarounds all have costs. Polling wastes requests and adds latency.
+                    Server-streaming methods, as gRPC offers them, cover subscriptions, but the
+                    stream is tied to the method that opened it and cannot be passed around, and
+                    they still do not let the server invoke anything on the client. A second
+                    connection in the reverse direction requires the client to be reachable,
+                    which fails as soon as it sits behind NAT or a firewall.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Channels make push natural</h2>
+                <p>
+                    In Remoc, channel endpoints are values that calls can return and accept. A
+                    method returns an <code>rch::mpsc::Receiver</code> and the client has a
+                    subscription; it returns an <code>rch::watch::Receiver</code> and the client
+                    always sees the latest value; the client puts a sender into a request and
+                    the server reports progress into it. Each channel keeps working after the
+                    call that created it has returned.
+                </p>
+                <p>
+                    For real callbacks, the roles can simply be reversed. The client implements
+                    a trait carrying <code>#[rtc::remote]</code> itself and sends its client
+                    object to the server, which then invokes methods on it like on any remote
+                    object. Communication is therefore fully bidirectional over the single
+                    connection that the client opened, so a device behind NAT can expose an
+                    interface to its server.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>A pushing method is just a signature</h2>
+                <p class="section-lead">
+                    This trait is from the <a href="/examples/rtc.html">counter example</a>. The
+                    <code>watch</code> method returns a watch channel receiver, giving the
+                    client immediate notification of every change.
+                </p>
+
+                <figure class="code-single">
+                    <figcaption>Service definition</figcaption>
+                    <pre><code><span class="a">#[rtc::remote(server(SharedMut))]</span>
+<span class="k">pub</span> <span class="k">trait</span> Counter {
+    <span class="c">/// Obtain the current value of the counter.</span>
+    <span class="k">async</span> <span class="k">fn</span> <span class="f">value</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">u32</span>, rtc::CallError&gt;;
+
+    <span class="c">/// Watch the current value of the counter for immediate</span>
+    <span class="c">/// notification when it changes.</span>
+    <span class="k">async</span> <span class="k">fn</span> <span class="f">watch</span>(&amp;<span class="k">mut</span> <span class="k">self</span>)
+        -&gt; <span class="t">Result</span>&lt;rch::watch::Receiver&lt;<span class="t">u32</span>&gt;, rtc::CallError&gt;;
+}</code></pre>
+                </figure>
+
+                <p class="section-foot">
+                    <a class="button" href="/examples/rtc.html">Complete trait calling example
+                        &rarr;</a>
+                    <a class="button" href="/#pipelining">Pipelined calls save the round trips
+                        &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        {% include faq.html alt=true %}
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Where to go next</h2>
+                <p>
+                    <a href="/comparison.html">Remoc vs. other RPC libraries</a> positions this
+                    model against tarpc, gRPC and Cap'n Proto.
+                    <a href="/remote-channels.html">Channels between processes and machines</a>
+                    explains the channels that make the pushing work, and for a daemon notifying
+                    local clients see <a href="/ipc.html">IPC between Rust processes</a>.
+                </p>
+            </div>
+        </section>
+    </main>

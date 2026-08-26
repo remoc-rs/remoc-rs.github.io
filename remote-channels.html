@@ -1,0 +1,163 @@
+---
+layout: base
+project: remoc
+title: "Rust channels over the network: remote mpsc, oneshot and watch between processes and machines"
+description: >-
+  How to keep using the channel model when a Rust program is split into two processes
+  or machines. Remoc provides mpsc, oneshot, watch and broadcast channels that work
+  over a network connection, pipe or socket.
+social_description: >-
+  Channels with the API you know from Tokio, working between processes and machines
+  instead of only between tasks.
+canonical: /remote-channels.html
+footer_alt: true
+faq:
+  - q: "Can I send a <code>tokio::sync</code> sender or receiver directly?"
+    a: >-
+      No. Tokio's channel endpoints are bound to one process and cannot be serialized.
+      Instead you declare the field with the corresponding <code>remoc::rch</code>
+      type, which can travel inside messages. Its usage stays as you know it from
+      Tokio.
+  - q: "What happens when the connection is lost?"
+    a: >-
+      Pending and future send and receive calls fail with an error, so both sides
+      notice. Channels do not silently drop data. If you need the connection itself to
+      survive link failures, Aggligator provides a transport that does that.
+  - q: "Does every channel need its own connection?"
+    a: >-
+      No. All channels between two peers are multiplexed over one connection. Opening
+      another channel just sends its endpoint inside a message; there is no additional
+      socket or handshake.
+  - q: "Is there backpressure?"
+    a: >-
+      Yes. Each channel has its own bounded buffer and flow control, like a Tokio
+      channel with a capacity. A receiver that stops reading only stalls its own
+      sender, and large messages are sent in chunks so they do not block other
+      channels.
+  - q: "Which transports can I use?"
+    a: >-
+      Any ordered byte or packet stream, for example TCP, TLS, a WebSocket, a UNIX
+      socket, a pipe to a child process or a serial link. Remoc implements no transport
+      itself and runs over the connection you already have.
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Channels between processes and machines</h1>
+            <p class="lead">
+                A common pattern in Rust programs is to use channels to communicate between
+                tasks. When a program grows into two processes or two machines,
+                <a href="/">Remoc</a> provides channels that work the same way over the
+                network connection between them.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>When channels meet a process boundary</h2>
+                <p>
+                    Programs get split for good reasons. Work moves to another machine, a
+                    privileged part is separated from a user interface, or a component becomes a
+                    service of its own. The channels that connected the tasks cannot cross the
+                    new boundary, and what used to be a single <code>send</code> now requires a
+                    socket, a wire format, framing and dispatch code.
+                </p>
+                <p>
+                    The usual answers change the shape of your program. A hand-rolled protocol
+                    grows a message enum and match statements on both sides, and every new
+                    interaction touches all of them. An RPC framework such as gRPC restructures
+                    the code into request and response services, which is a different model than
+                    the tasks and channels you started with.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>The same model, over a connection</h2>
+                <p>
+                    Remoc provides <a href="https://docs.rs/remoc/latest/remoc/rch/index.html">MPSC,
+                    oneshot, watch and broadcast channels</a> with the API you already know from
+                    Tokio. Their endpoints are ordinary Serde values, so you can send a channel
+                    over the network inside a message, like you would hand its endpoint to
+                    another task. Each
+                    channel is typed and all channels between two peers are multiplexed over one
+                    connection, which may be TCP, TLS, a WebSocket, a UNIX socket or a pipe.
+                </p>
+                <p>
+                    The program keeps its architecture. Tasks still talk through channels;
+                    some of those channels now happen to cross a process or machine boundary.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>What changes in your code</h2>
+                <p class="section-lead">
+                    The channel type comes from <code>remoc::rch</code> instead of
+                    <code>tokio::sync</code> and the message derives Serde. Sending and
+                    receiving stay the same.
+                </p>
+
+                <div class="code-pair">
+                    <figure>
+                        <figcaption>Within one process</figcaption>
+                        <pre><code><span class="k">use</span> tokio::sync::mpsc;
+
+<span class="k">struct</span> <span class="t">Request</span> {
+    reply_tx: mpsc::<span class="t">Sender</span>&lt;<span class="t">Item</span>&gt;,
+}
+
+<span class="k">let</span> (tx, <span class="k">mut</span> rx) = mpsc::channel(<span class="n">16</span>);
+task_tx.send(<span class="t">Request</span> { reply_tx: tx }).<span class="k">await</span>?;
+
+<span class="k">while let</span> <span class="t">Some</span>(item) = rx.recv().<span class="k">await</span> {
+    <span class="c">// ...</span>
+}</code></pre>
+                    </figure>
+                    <figure>
+                        <figcaption>Between two processes</figcaption>
+                        <pre><code><span class="k">use</span> remoc::prelude::*;
+
+<span class="a">#[derive(Serialize, Deserialize)]</span>
+<span class="k">struct</span> <span class="t">Request</span> {
+    reply_tx: rch::mpsc::<span class="t">Sender</span>&lt;<span class="t">Item</span>&gt;,
+}
+
+<span class="k">let</span> (tx, <span class="k">mut</span> rx) = rch::mpsc::channel(<span class="n">16</span>);
+remote_tx.send(<span class="t">Request</span> { reply_tx: tx }).<span class="k">await</span>?;
+
+<span class="k">while let</span> <span class="t">Some</span>(item) = rx.recv().<span class="k">await</span>? {
+    <span class="c">// ...</span>
+}</code></pre>
+                    </figure>
+                </div>
+
+                <p class="section-foot">
+                    <a class="button" href="/examples/channels.html">Complete channels example
+                        &rarr;</a>
+                    <a class="button" href="/#channels">How sendable channels work &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        {% include faq.html alt=true %}
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Where to go next</h2>
+                <p>
+                    <a href="/multiplexing.html">Multiplexing typed channels</a> explains how
+                    the channels share one connection, and <a href="/ipc.html">IPC between Rust
+                    processes</a> covers the local case of a daemon and its clients. Building
+                    upon the channels, the <a href="/">Remoc overview</a> shows remote trait
+                    calls and observable collections.
+                </p>
+            </div>
+        </section>
+    </main>

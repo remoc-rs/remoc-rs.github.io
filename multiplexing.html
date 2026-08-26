@@ -1,0 +1,153 @@
+---
+layout: base
+project: remoc
+title: "Multiplex many typed channels over one TCP connection in Rust"
+description: >-
+  How to run many independent streams over a single TCP, TLS or WebSocket connection in
+  Rust: what stream multiplexing involves, and how Remoc multiplexes typed channels with
+  per-channel flow control instead of raw byte streams.
+social_description: >-
+  Many independent, typed channels over one TCP connection, with per-channel flow
+  control and no framing code to write.
+canonical: /multiplexing.html
+footer_alt: true
+faq:
+  - q: "How is this different from yamux or QUIC streams?"
+    a: >-
+      Stream multiplexers such as yamux and QUIC provide additional byte streams, so
+      serialization, framing and dispatch remain the job of the application. Remoc
+      multiplexes typed channels instead. Each channel carries values of one Serde type,
+      and remote functions, trait calls and observable collections build on the same
+      connection.
+  - q: "Does a slow channel block the others?"
+    a: >-
+      No. Each channel has its own flow control, so a receiver that stops reading only
+      stalls its own sender. The channels still share the underlying transport and
+      therefore its total bandwidth.
+  - q: "Which transports can carry the multiplexed connection?"
+    a: >-
+      Any ordered byte or packet stream can be used, for example TCP, TLS, a WebSocket,
+      a UNIX pipe or a serial link. Remoc's channel multiplexer runs on top of it and
+      does not depend on a particular transport type.
+  - q: "Do both ends have to be written in Rust?"
+    a: >-
+      Yes. The protocol is defined by the Rust types serialized with Serde, so both
+      peers must be Rust programs. For services that cross language boundaries a
+      schema-based system such as gRPC is the better fit.
+  - q: "How many channels can one connection carry?"
+    a: >-
+      As many as you like. Channels are cheap values rather than sockets; opening one
+      just sends its endpoint inside a message, without a port, handshake or
+      registration. It is perfectly normal to create one channel per request or per
+      subscriber.
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Many typed channels, one connection</h1>
+            <p class="lead">
+                <a href="/">Remoc</a> multiplexes any number of typed channels over a single
+                TCP connection between two Rust programs. Requests, responses, events and file
+                transfers each get their own channel, and you do not have to write any framing
+                or dispatch code.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>The problem with one stream</h2>
+                <p>
+                    A TCP or TLS connection provides a single byte stream. As soon as two
+                    independent conversations share it, for example commands and a bulk file
+                    transfer, or requests and server-initiated events, your application needs
+                    message framing, tags to route each message to its handler, and care that a
+                    large transfer does not starve everything queued behind it. Opening a
+                    separate connection for each conversation avoids this, but multiplies
+                    handshakes and TLS sessions, causes trouble with firewalls and NATs, and the
+                    connections no longer fail together.
+                </p>
+                <p>
+                    Stream multiplexers such as <a href="https://docs.rs/yamux">yamux</a> or the
+                    streams of QUIC solve one half of the problem by providing many byte streams
+                    over one connection. However, the streams still carry raw bytes, so
+                    serialization, framing and matching a stream to its purpose remain your job.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Channels instead of byte streams</h2>
+                <p>
+                    Remoc multiplexes at the level that Rust programs already use internally:
+                    channels. A connection starts with a base channel. To open a further
+                    channel, you just send one of its endpoints inside a message, like you would
+                    hand a <a href="https://docs.rs/tokio/latest/tokio/sync/index.html">Tokio
+                    channel</a> endpoint to another task. There is no port to open, no stream
+                    number to agree on and no registry to consult; the endpoint simply arrives
+                    where it is needed.
+                </p>
+                <p>
+                    Each channel is typed and carries values of a single Serde type, serialized
+                    with the <a href="/postbag/">Postbag</a> codec, so the compiler checks what
+                    may be sent over it. Every channel has its own flow control, meaning that a
+                    receiver which stops reading only stalls its own sender and does not affect
+                    unrelated traffic. Large messages are transmitted in chunks to avoid one
+                    channel blocking another. Building upon its channels, Remoc also provides
+                    <a href="https://docs.rs/remoc/latest/remoc/rfn/index.html">remote
+                    functions</a>, <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">RPC
+                    on traits</a> and
+                    <a href="https://docs.rs/remoc/latest/remoc/robs/index.html">observable
+                    collections</a> over the same connection.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>What it looks like</h2>
+                <p>
+                    A request type can carry the sender of a new channel and the server replies
+                    into it. Setting up a new communication path over the existing connection
+                    takes two lines.
+                </p>
+
+                <figure class="code-single">
+                    <figcaption>A channel inside a message</figcaption>
+                    <pre><code><span class="a">#[derive(Serialize, Deserialize)]</span>
+<span class="k">struct</span> <span class="t">CountReq</span> {
+    up_to: <span class="t">u32</span>,
+    <span class="c">// A sender, on its way to the peer.</span>
+    seq_tx: rch::mpsc::<span class="t">Sender</span>&lt;<span class="t">u32</span>&gt;,
+}</code></pre>
+                </figure>
+
+                <p class="section-foot">
+                    <a class="button" href="/examples/channels.html">Complete channels example
+                        &rarr;</a>
+                    <a class="button" href="/#channels">How sendable channels work &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        {% include faq.html alt=true %}
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Where to go next</h2>
+                <p>
+                    <a href="/remote-channels.html">Channels between processes and machines</a>
+                    shows how little code the channels need, and the <a href="/">Remoc
+                    overview</a> walks through remote trait calls and pipelining.
+                    <a href="/comparison.html">Remoc vs. other RPC libraries</a> compares it
+                    with tarpc, gRPC and Cap'n Proto, and the
+                    <a href="/benchmarks.html">benchmarks</a> compare a Remoc channel with
+                    serializing directly to plain TCP.
+                </p>
+            </div>
+        </section>
+    </main>

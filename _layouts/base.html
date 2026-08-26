@@ -35,6 +35,41 @@
     <meta name="twitter:description" content="{{ page.social_description | default: page.description }}">
     <meta name="twitter:image" content="{{ site.url }}{{ project.social_image }}">
     <meta name="twitter:image:alt" content="{{ project.social_image_alt }}">
+    {%- if page.schema == "software" %}
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "{{ project.name }}",
+        "description": {{ page.description | strip | jsonify }},
+        "url": "{{ site.url }}{{ page.canonical }}",
+        "image": "{{ site.url }}{{ project.logo }}",
+        "codeRepository": "{{ project.repo }}",
+        "programmingLanguage": "Rust",
+        "license": "https://www.apache.org/licenses/LICENSE-2.0",
+        "author": { "@type": "Person", "name": "Sebastian Urban", "url": "https://github.com/surban" }
+    }
+    </script>
+    {%- endif %}
+    {%- if page.faq %}
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {%- for item in page.faq %}
+            {
+                "@type": "Question",
+                "name": {{ item.q | strip_html | jsonify }},
+                "acceptedAnswer": { "@type": "Answer", "text": {{ item.a | strip_html | jsonify }} }
+            }{% unless forloop.last %},{% endunless %}
+            {%- endfor %}
+        ]
+    }
+    </script>
+    {%- endif %}
 </head>
 
 <body class="project-{{ page.project | default: 'remoc' }}">

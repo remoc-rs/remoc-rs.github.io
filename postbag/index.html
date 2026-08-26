@@ -9,6 +9,7 @@ social_description: >-
   A binary Serde codec for Rust whose data survives its own schema changing: add, remove and
   reorder fields, and old and new endpoints keep understanding each other.
 canonical: /postbag/
+schema: software
 favicon: /postbag/logo.png
 nav_url: /postbag/
 ---
@@ -202,6 +203,10 @@ nav_url: /postbag/
                         </tbody>
                     </table>
                 </div>
+                <p class="section-foot">
+                    <a href="/postbag/schema-evolution.html">Why binary formats break when types change,
+                        and how Postbag avoids it &rarr;</a>
+                </p>
             </div>
         </section>
 
@@ -240,6 +245,10 @@ nav_url: /postbag/
 
                 <p class="section-foot">
                     Recoverable values can be added to an existing field without changing its wire representation.
+                </p>
+                <p class="section-foot">
+                    <a href="/postbag/file-formats.html">Keeping config and save files readable
+                        across versions &rarr;</a>
                 </p>
             </div>
         </section>

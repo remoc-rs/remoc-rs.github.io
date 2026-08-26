@@ -9,6 +9,7 @@ social_description: >-
   Channels that work between machines, plus remote function calls, RPC on traits and
   observable collections. All of it over one connection.
 canonical: /
+schema: software
 nav: home
 footer_alt: true
 ---
@@ -68,6 +69,10 @@ footer_alt: true
                         own sender.
                     </figcaption>
                 </figure>
+                <p class="section-foot">
+                    <a href="/multiplexing.html">Multiplexing typed channels over one TCP connection
+                        &rarr;</a>
+                </p>
             </div>
         </section>
 
@@ -83,8 +88,8 @@ footer_alt: true
                     {% include diagram-channels.svg %}
                     <figcaption>
                         Any channel can carry another. Here an RPC call hands over the sender of a
-                        new mpsc channel: no port to open, nothing to register, no name to look up
-                        and no acknowledgement to await.
+                        new mpsc channel; there is no port to open, no name to look up and nothing
+                        to register or await.
                     </figcaption>
                 </figure>
 
@@ -230,7 +235,8 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     </h3>
                     <p>
                         MPSC, oneshot, watch and broadcast, with the API you already know from
-                        <a href="https://tokio.rs/">Tokio</a>.
+                        <a href="https://tokio.rs/">Tokio</a>, working
+                        <a href="/remote-channels.html">between processes and machines</a>.
                         They all share one transport and messages are sent in chunks, so a big blob on one
                         channel does not stall the others.
                     </p>
@@ -242,8 +248,9 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     </h3>
                     <p>
                         Putting <code>#[rtc::remote]</code> on a trait generates client and server
-                        implementations. Arguments and return values may contain channels, allowing a
-                        method to return a stream of updates instead of a single value.
+                        implementations. Arguments and return values may contain channels, allowing
+                        <a href="/server-push.html">server push and callbacks</a> instead of only
+                        request and response.
                         Multiple calls can be pipelined, saving round trips.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc module &rarr;</a></p>
@@ -285,7 +292,9 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     <p>
                         Remoc is transport-independent. It operates over an <code>AsyncRead</code> and
                         <code>AsyncWrite</code> pair or a <code>Sink</code> and <code>Stream</code> of
-                        packets. Worked examples cover TCP, TLS, WebSockets and pipes.
+                        packets, over the network or for
+                        <a href="/ipc.html">IPC between processes</a>. Worked examples cover TCP,
+                        TLS, WebSockets and pipes.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/transports/index.html">transports &rarr;</a></p>
                 </article>

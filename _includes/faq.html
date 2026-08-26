@@ -1,0 +1,10 @@
+<section class="section{% if include.alt %} alt{% endif %}">
+    <div class="wrap narrow">
+        <h2>Questions</h2>
+        {%- for item in page.faq %}
+
+        <h3>{{ item.q }}</h3>
+        <p>{{ item.a }}</p>
+        {%- endfor %}
+    </div>
+</section>

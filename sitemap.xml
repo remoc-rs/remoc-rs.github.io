@@ -4,8 +4,16 @@ permalink: /sitemap.xml
 ---
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url><loc>{{ site.url }}/</loc></url>
+    <url><loc>{{ site.url }}/multiplexing.html</loc></url>
+    <url><loc>{{ site.url }}/remote-channels.html</loc></url>
+    <url><loc>{{ site.url }}/ipc.html</loc></url>
+    <url><loc>{{ site.url }}/server-push.html</loc></url>
     <url><loc>{{ site.url }}/postbag/</loc></url>
+    <url><loc>{{ site.url }}/postbag/schema-evolution.html</loc></url>
+    <url><loc>{{ site.url }}/postbag/file-formats.html</loc></url>
     <url><loc>{{ site.url }}/aggligator/</loc></url>
+    <url><loc>{{ site.url }}/aggligator/network-switching.html</loc></url>
+    <url><loc>{{ site.url }}/aggligator/bonding.html</loc></url>
     <url><loc>{{ site.url }}/aggligator/tunnel.html</loc></url>
     <url><loc>{{ site.url }}/benchmarks.html</loc></url>
     <url><loc>{{ site.url }}/comparison.html</loc></url>

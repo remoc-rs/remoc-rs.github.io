@@ -1,0 +1,142 @@
+---
+layout: base
+project: aggligator
+title: "Combine multiple internet connections in one application: link bonding in user space"
+description: >-
+  How to combine the bandwidth of multiple network links, such as two internet
+  connections, DSL and LTE, or Ethernet and USB, in your own application with
+  Aggligator, without bonding routers or Multipath TCP.
+social_description: >-
+  Link bonding in user space: combine DSL and LTE, two ISPs, or network and USB into
+  one connection with their combined bandwidth.
+canonical: /aggligator/bonding.html
+favicon: /aggligator/logo.png
+footer_alt: true
+faq:
+  - q: "Do both ends need to run Aggligator?"
+    a: >-
+      Yes. The links are recombined into one ordered stream at the other endpoint, so
+      the server must run Aggligator or <code>agg-tunnel</code> as well. Bonding a connection to an
+      arbitrary website or service that you do not control is not possible, since that
+      would require an aggregation endpoint in the network. This is what commercial
+      bonding services provide.
+  - q: "Can links with very different speeds be combined?"
+    a: >-
+      Yes. Data is sent on whichever link is ready to accept more, so each link carries
+      as much as its current capacity allows. Links whose latency would delay overall
+      delivery are set aside and retested periodically, so a slow link does not hold
+      back the rest.
+  - q: "Is this the same as Multipath TCP?"
+    a: >-
+      It serves the same purpose. Multipath TCP is implemented in the kernel and
+      requires support from both operating systems and a network path that lets it
+      through. Aggligator is completely implemented in user space and works over
+      ordinary TCP, TLS, WebSocket, USB or Bluetooth links, so no cooperation from the
+      operating system or the network is needed.
+  - q: "Do the links have to be of the same kind?"
+    a: >-
+      No. One connection can combine links of different transports, for example TCP
+      over two internet uplinks together with a direct USB cable. Links can also be
+      added and removed while the connection is running.
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Combine multiple internet connections</h1>
+            <p class="lead">
+                Often a single network link is too slow on its own, while others, such as a
+                second internet uplink, LTE or a USB cable, sit idle.
+                <a href="/aggligator/">Aggligator</a> combines the links between two endpoints
+                into one connection that has their combined bandwidth, completely in user space.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Why bonding usually needs special infrastructure</h2>
+                <p>
+                    A TCP connection follows a single path through the network, so a transfer is
+                    limited to the bandwidth of one link even when several are available.
+                    Combining links, known as link aggregation or channel bonding, is
+                    traditionally done below the application. Bonding routers
+                    and SD-WAN appliances tunnel all traffic to an aggregation server in the
+                    network, <a href="https://en.wikipedia.org/wiki/Multipath_TCP">Multipath
+                    TCP</a> requires kernel support on both endpoints and a network path that
+                    lets it through, and interface bonding on Linux requires all links to
+                    terminate at the same switch. All of these approaches bond the whole
+                    machine's traffic and involve infrastructure that you may not control.
+                </p>
+                <p>
+                    However, when both endpoints run your own software, no such infrastructure
+                    is needed and the aggregation can be done by the applications themselves.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Bonding between two applications</h2>
+                <p>
+                    Aggligator establishes a link over every usable path between the two
+                    endpoints and distributes the connection's data across them. Data is handed
+                    to whichever link is ready to accept more, so faster links carry more data
+                    and the distribution adapts as link conditions change. Links whose latency
+                    would delay overall delivery are set aside and retested periodically. At the
+                    receiving end the data is reordered and delivered as one ordered byte
+                    stream.
+                </p>
+                <p>
+                    Since unacknowledged data of a failed link is resent over the remaining
+                    links, bonding also provides failover. When one uplink is lost, the
+                    bandwidth is reduced but the connection continues. Additionally, latency,
+                    throughput and backlog of each link are available to your application and
+                    can be displayed with the interactive
+                    <a href="https://docs.rs/aggligator-monitor">terminal monitor</a>.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>Links of different kinds in one connection</h2>
+                <p class="section-lead">
+                    A <code>Connector</code> combines transport types. This client reaches the
+                    server over all network interfaces and a USB cable at the same time.
+                </p>
+
+                <figure class="code-single">
+                    <figcaption>Combining TCP and USB links</figcaption>
+                    <pre><code><span class="k">let</span> <span class="k">mut</span> connector = <span class="t">Connector</span>::new();
+connector.add(<span class="t">TcpConnector</span>::new([<span class="s">"server"</span>], <span class="n">5900</span>).<span class="k">await</span>?);
+connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() == <span class="n">0x1209</span>)?);
+
+<span class="k">let</span> stream = connector.channel().unwrap().<span class="k">await</span>?.into_stream();</code></pre>
+                </figure>
+
+                <p class="section-foot">
+                    Use <a href="/aggligator/tunnel.html"><code>agg-tunnel</code> to forward TCP
+                    ports of existing applications over the bonded connection &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        {% include faq.html alt=true %}
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Where to go next</h2>
+                <p>
+                    The <a href="/aggligator/">Aggligator overview</a> explains
+                    <a href="/aggligator/#design">how unequal links are balanced</a> and lists
+                    the available <a href="/aggligator/#transports">transports</a>. If you are
+                    interested in resiliency rather than bandwidth, see
+                    <a href="/aggligator/network-switching.html">keeping connections alive while
+                    switching networks</a>.
+                </p>
+            </div>
+        </section>
+    </main>
