@@ -1,0 +1,235 @@
+---
+layout: base
+project: aggligator
+title: "agg-tunnel: forward TCP ports over Aggligator"
+description: >-
+  Use agg-tunnel to forward TCP ports over an aggregated connection, with prebuilt
+  downloads, a quick start and a reference for common options.
+canonical: /aggligator/agg-tunnel.html
+favicon: /aggligator/logo.png
+nav_url: /aggligator/agg-tunnel.html
+footer_alt: true
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>agg-tunnel</h1>
+            <p class="lead">
+                <code>agg-tunnel</code> forwards TCP ports through an Aggligator connection.
+                Applications connect to an ordinary local TCP port; the forwarded traffic uses
+                the available links between the tunnel endpoints.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Quick start</h2>
+                <p>
+                    This example forwards SSH on port 22 from <code>server.example</code> to port
+                    2222 on the client. The tunnel itself listens on port 5000.
+                </p>
+
+                <h3>On the server</h3>
+                <pre class="cmd"><code>agg-tunnel server --tcp 5000 --port 22</code></pre>
+
+                <h3>On the client</h3>
+                <pre class="cmd"><code>agg-tunnel client --tcp server.example:5000 --port 22:2222</code></pre>
+
+                <h3>Connect through the tunnel</h3>
+                <pre class="cmd"><code>ssh -p 2222 localhost</code></pre>
+
+                <aside class="notice spaced">
+                    <p>
+                        Aggligator authenticates links joining an existing connection, but
+                        <code>agg-tunnel</code> does not encrypt the forwarded payload. SSH is already
+                        encrypted; other protocols need their own encryption when the links are not
+                        trusted.
+                    </p>
+                </aside>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap">
+                <h2>Install it</h2>
+                <p class="section-lead">
+                    Release archives contain <code>agg-tunnel</code> and <code>agg-speed</code>.
+                    The Linux binaries are statically linked.
+                </p>
+
+                <div class="downloads">
+                    <a class="button icon-link"
+                        href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-x86_64-linux.tar.gz"><span
+                            class="icon download" aria-hidden="true"></span>Linux x86-64</a>
+                    <a class="button icon-link"
+                        href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-aarch64-linux.tar.gz"><span
+                            class="icon download" aria-hidden="true"></span>Linux ARM64</a>
+                    <a class="button icon-link"
+                        href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-macos.tar.gz"><span
+                            class="icon download" aria-hidden="true"></span>macOS Apple silicon</a>
+                    <a class="button icon-link"
+                        href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-windows.zip"><span
+                            class="icon download" aria-hidden="true"></span>Windows x86-64</a>
+                </div>
+
+                <div class="install standalone">
+                    <span class="prompt" aria-hidden="true">$</span>
+                    <code>cargo install aggligator-util</code>
+                    <button class="copy-button" type="button" data-copy="cargo install aggligator-util"
+                        aria-label="Copy the command">
+                        <span class="icon copy" aria-hidden="true"></span>
+                        <span class="icon check" aria-hidden="true"></span>
+                    </button>
+                </div>
+
+                <p class="section-foot">
+                    <code>agg-speed</code> measures aggregate and per-link throughput.
+                    <a href="https://github.com/remoc-rs/aggligator/blob/master/docs/agg-speed.md">Command
+                        reference &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>Port mappings</h2>
+                <p class="section-lead">
+                    The server lists permitted targets. The client selects one of those server ports
+                    and chooses where to expose it locally. Both options can be repeated.
+                </p>
+
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Side</th>
+                                <th>Option</th>
+                                <th>Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>server</td>
+                                <td><code>--port 22</code></td>
+                                <td>allow forwarding to local port 22</td>
+                            </tr>
+                            <tr>
+                                <td>server</td>
+                                <td><code>--port db.internal:5432</code></td>
+                                <td>allow forwarding to port 5432 on another host</td>
+                            </tr>
+                            <tr>
+                                <td>client</td>
+                                <td><code>--port 22:2222</code></td>
+                                <td>expose server port 22 as local port 2222</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Adding links</h3>
+                <p>
+                    The TCP transport tries the usable combinations of local interfaces and resolved
+                    server addresses. Repeat <code>--tcp</code> for additional targets. Depending on
+                    the build and platform, clients can also add links through SOCKS5 proxies, USB or
+                    Bluetooth.
+                </p>
+            </div>
+        </section>
+
+        <section id="monitor" class="section alt">
+            <div class="wrap">
+                <h2>Link monitor</h2>
+                <p class="section-lead">
+                    When attached to a terminal, <code>agg-tunnel</code> displays the connection,
+                    active port forwards and statistics for each link. Use
+                    <code>--no-monitor</code> for plain log output.
+                </p>
+
+                {% include agg-tunnel-monitor.html %}
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>Common options</h2>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Option</th>
+                                <th>Applies to</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>--tcp</code></td>
+                                <td>client, server</td>
+                                <td>connect to a server target or listen on a TCP port</td>
+                            </tr>
+                            <tr>
+                                <td><code>--port</code></td>
+                                <td>client, server</td>
+                                <td>add a local mapping or permit a target</td>
+                            </tr>
+                            <tr>
+                                <td><code>--global</code></td>
+                                <td>client</td>
+                                <td>listen on all local interfaces instead of loopback only</td>
+                            </tr>
+                            <tr>
+                                <td><code>--tcp-link-filter</code></td>
+                                <td>client</td>
+                                <td>control which local-interface and remote-address pairs become links</td>
+                            </tr>
+                            <tr>
+                                <td><code>--socks</code></td>
+                                <td>client</td>
+                                <td>add one link through each SOCKS5 proxy</td>
+                            </tr>
+                            <tr>
+                                <td><code>--usb</code></td>
+                                <td>client</td>
+                                <td>add a USB link when supported by the build</td>
+                            </tr>
+                            <tr>
+                                <td><code>--no-monitor</code></td>
+                                <td>client, server</td>
+                                <td>write plain status messages instead of the interactive monitor</td>
+                            </tr>
+                            <tr>
+                                <td><code>--cfg</code></td>
+                                <td>global</td>
+                                <td>load an Aggligator configuration file</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="section-foot">
+                    Run <code>agg-tunnel client --help</code> or
+                    <code>agg-tunnel server --help</code> for options available in the installed build.
+                    <a href="https://github.com/remoc-rs/aggligator/blob/master/docs/agg-tunnel.md">Generated
+                        command reference &rarr;</a>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.documentElement.classList.add("js");
+        for (const button of document.querySelectorAll("button[data-copy]")) {
+            button.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(button.dataset.copy);
+                    button.classList.add("copied");
+                    setTimeout(() => button.classList.remove("copied"), 1500);
+                } catch {}
+            });
+        }
+    </script>

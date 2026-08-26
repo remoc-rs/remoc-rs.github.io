@@ -11,6 +11,7 @@ social_description: >-
 canonical: /aggligator/
 favicon: /aggligator/logo.png
 nav_url: /aggligator/
+footer_alt: true
 ---
 
     <header class="hero">
@@ -22,14 +23,11 @@ nav_url: /aggligator/
             <h1>Aggligator</h1>
             <p class="tagline">Your friendly link aggregator.</p>
             <p class="lead">
-                A TCP connection takes one path and lives and dies with it. Aggligator takes every
-                link you have between two endpoints &mdash; Ethernet, Wi-Fi, USB, Bluetooth &mdash;
-                and combines them into <b>one</b> connection with the bandwidth of all of them.
-                Links may fail, be unplugged or added while it runs, and the connection carries on.
-                It does what <a href="https://en.wikipedia.org/wiki/Multipath_TCP">Multipath TCP</a>
-                and <a href="https://en.wikipedia.org/wiki/Stream_Control_Transmission_Protocol">SCTP</a>
-                do, but over the protocols you already have and entirely in user space, so it asks
-                nothing of the operating system.
+                Aggligator combines multiple network links between two endpoints into one connection.
+                Data is distributed across the links that are currently usable. If one fails,
+                unacknowledged data is sent again over the others; links can be added and removed while
+                the connection runs. Links may use TCP, TLS, WebSockets, USB, Bluetooth, SOCKS5 or a
+                custom ordered transport.
             </p>
 
             <div class="cta">
@@ -62,13 +60,66 @@ nav_url: /aggligator/
                 <figure class="diagram">
                     {% include aggligator-diagram.svg %}
                     <figcaption>
-                        Your program sees one byte stream at each end. Underneath, its data is spread
-                        over every link that is up, each carrying what it can. A link that fails takes
-                        nothing with it: what was in flight on it is sent again over the others, and it
-                        is reconnected as soon as it comes back. Adding a link is just as undramatic,
-                        the connection simply gets faster.
+                        The application sees one byte stream at each end. Aggligator sends its data over
+                        the available links according to the capacity each one currently has. If a link
+                        fails, its unacknowledged data is reassigned; when the link becomes available
+                        again, it can rejoin the connection.
                     </figcaption>
                 </figure>
+            </div>
+        </section>
+
+        <section id="usage" class="section">
+            <div class="wrap">
+                <h2>Use it like a socket</h2>
+                <p class="section-lead">
+                    The TCP transport discovers routes between the two hosts and uses each as a link.
+                    Both ends receive a stream implementing <code>AsyncRead</code> and
+                    <code>AsyncWrite</code>.
+                </p>
+
+                <div class="code-pair">
+                    <figure>
+                        <figcaption>Client</figcaption>
+                        <pre><code><span class="k">use</span> aggligator_transport_tcp::simple::tcp_connect;
+<span class="k">use</span> tokio::io::<span class="t">AsyncWriteExt</span>;
+
+<span class="c">// Connect to "server" over all network interfaces.</span>
+<span class="k">let</span> <span class="k">mut</span> stream = tcp_connect([<span class="s">"server"</span>], <span class="n">5900</span>).<span class="k">await</span>?;
+
+stream.write_all(<span class="s">b"hello"</span>).<span class="k">await</span>?;</code></pre>
+                    </figure>
+                    <figure>
+                        <figcaption>Server</figcaption>
+                        <pre><code><span class="k">use</span> aggligator_transport_tcp::simple::tcp_server;
+
+tcp_server(
+    <span class="s">"[::]:5900"</span>.<span class="f">parse</span>()?,
+    |<span class="k">mut</span> stream| <span class="k">async move</span> {
+        <span class="c">// One task per connection, including all its links.</span>
+    },
+).<span class="k">await</span>?;</code></pre>
+                    </figure>
+                </div>
+
+                <p class="section-lead spaced">
+                    A <code>Connector</code> combines different transport types in the same connection.
+                    This client can reach a device over the network and over USB at once.
+                </p>
+
+                <figure class="code-single">
+                    <figcaption>Combining TCP and USB links</figcaption>
+                    <pre><code><span class="k">let</span> <span class="k">mut</span> connector = <span class="t">Connector</span>::new();
+connector.add(<span class="t">TcpConnector</span>::new([<span class="s">"server"</span>], <span class="n">5900</span>).<span class="k">await</span>?);
+connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() == <span class="n">0x1209</span>)?);
+
+<span class="k">let</span> stream = connector.channel().unwrap().<span class="k">await</span>?.into_stream();</code></pre>
+                </figure>
+
+                <p class="section-foot">
+                    <a href="https://docs.rs/aggligator/latest/aggligator/transport/index.html">Connecting
+                        and accepting with custom transports &rarr;</a>
+                </p>
             </div>
         </section>
 
@@ -77,82 +128,56 @@ nav_url: /aggligator/
                 <h2>Features</h2>
                 <div class="grid">
                     <article>
-                        <h3>Bandwidth adds up</h3>
+                        <h3>Capacity follows the links</h3>
                         <p>
-                            Data is distributed over all links continuously, by how fast each one is
-                            actually going, not by a fixed share decided in advance. Two gigabit
-                            cables and a Wi-Fi card make one connection of all three.
+                            Faster links become ready for more data sooner and therefore carry more.
+                            The distribution changes as link conditions change.
                         </p>
                     </article>
                     <article>
-                        <h3>Links may fail</h3>
+                        <h3>Links can change</h3>
                         <p>
-                            Unplug a cable and the traffic moves to the remaining links. Nothing is
-                            lost, the connection does not stall and your code sees no error. The link
-                            is re-established by itself once it works again.
+                            Links may fail, return, be added or be removed while the connection runs.
+                            If another link remains available, unacknowledged data is sent over it.
                         </p>
                     </article>
                     <article>
-                        <h3>Links may come and go</h3>
+                        <h3>Runs in user space</h3>
                         <p>
-                            Links are added and removed while the connection runs. Plug in a USB
-                            cable and it starts carrying data; walk out of Wi-Fi range and the rest
-                            takes over.
-                        </p>
-                    </article>
-                    <article>
-                        <h3>It looks like a socket</h3>
-                        <p>
-                            What you get is a <code>Stream</code> implementing <code>AsyncRead</code>
-                            and <code>AsyncWrite</code>, so code that speaks to a
-                            <code>TcpStream</code> speaks to this as well.
-                        </p>
-                        <p><a href="https://docs.rs/aggligator/latest/aggligator/alc/index.html">alc module &rarr;</a>
-                        </p>
-                    </article>
-                    <article>
-                        <h3>Nothing from the kernel</h3>
-                        <p>
-                            Multipath TCP and SCTP need support from the operating system and from
-                            everything on the path. Aggligator runs in user space over ordinary
-                            connections, so it works where those do not.
+                            Unlike Multipath TCP or SCTP, Aggligator does not require multipath support
+                            from the operating system or network. It runs over ordinary connections.
                         </p>
                     </article>
                     <article>
                         <h3>Bring your own links</h3>
                         <p>
-                            Anything that delivers bytes or packets in order can be a link: a stream of
-                            <code>AsyncRead</code> and <code>AsyncWrite</code>, or a <code>Sink</code>
-                            and <code>Stream</code> of packets. Transports for the usual ones are ready
-                            made.
+                            An ordered <code>AsyncRead</code>/<code>AsyncWrite</code> stream or a
+                            <code>Sink</code>/<code>Stream</code> of packets can be used as a link.
                         </p>
                         <p><a href="#transports">Transports &rarr;</a></p>
                     </article>
                     <article>
-                        <h3>No link smuggled in</h3>
+                        <h3>Authenticated link attachment</h3>
                         <p>
-                            The identifier of a connection is encrypted with a secret from a
-                            Diffie-Hellman exchange, so nobody can attach a link to your connection by
-                            guessing its id. Your data is not encrypted, though: wrap the links in TLS
-                            if they are not trusted.
+                            A secret established with Diffie-Hellman protects the connection identifier
+                            used when adding links. Payload data is not encrypted; use TLS for untrusted
+                            links.
                         </p>
                         <p><a href="https://crates.io/crates/aggligator-wrapper-tls">TLS wrapper &rarr;</a></p>
                     </article>
                     <article>
-                        <h3>See what each link does</h3>
+                        <h3>Per-link statistics</h3>
                         <p>
-                            Every link reports its speed, round-trip time and how much is unacknowledged
-                            on it, live. The monitor draws that in a terminal, and the numbers are
-                            available to your own program too.
+                            Each link reports latency, throughput and unacknowledged data. Applications
+                            can consume the values directly or display them with the terminal monitor.
                         </p>
                         <p><a href="https://docs.rs/aggligator-monitor">aggligator-monitor &rarr;</a></p>
                     </article>
                     <article>
-                        <h3>100&nbsp;% safe Rust</h3>
+                        <h3>Safe Rust on native and WebAssembly</h3>
                         <p>
-                            Not a line of <code>unsafe</code>, built on <a href="https://tokio.rs/">Tokio</a>.
-                            It runs on every major platform and compiles to WebAssembly, so a browser tab
-                            can aggregate links too.
+                            Aggligator contains no <code>unsafe</code> code, runs on Tokio and supports
+                            native platforms and WebAssembly.
                         </p>
                     </article>
                 </div>
@@ -161,84 +186,40 @@ nav_url: /aggligator/
 
         <section id="design" class="section">
             <div class="wrap">
-                <h2>How the links are driven</h2>
+                <h2>How traffic is distributed</h2>
                 <p class="section-lead">
-                    Splitting one stream over several links is easy to get wrong, and it goes wrong
-                    in one particular way: a slow link holds up everything that was sent over the
-                    fast ones. Three mechanisms keep that from happening, and none of them needs to
-                    measure how much bandwidth a link has.
+                    Aggligator adapts to link capacity and latency while the connection runs. It does
+                    not assign a fixed share or depend on a bandwidth estimate.
                 </p>
 
-                <h3>The split is discovered, not calculated</h3>
-                <p>
-                    Nothing decides what share each link should carry. The next packet simply goes to
-                    a link that has room for it. A fast link finishes sooner, has room again sooner
-                    and ends up carrying more; a slow one carries less, without anyone working out
-                    how much less. No estimate of a link's throughput takes part in the decision, so
-                    there is no estimate to be wrong when a link changes speed &mdash; which, on
-                    Wi-Fi and mobile networks, is constantly.
-                </p>
-
-                <h3>Waiting data is measured, and acted on</h3>
-                <p>
-                    Data that arrives out of order has to wait for the gap in front of it, and that
-                    waiting data is what a bad link really costs you. The sender counts it directly:
-                    every packet the far end has received but cannot pass on yet. When that backlog
-                    passes a third of the buffer, the link holding the oldest missing packet has its
-                    allowance trimmed; past three quarters, the allowance is halved. Allowances grow
-                    only while data is waiting and every link is already full, so a link is granted
-                    more only when it has proven it is the bottleneck.
-                </p>
-                <p>
-                    If a link fails to acknowledge what it was sent, everything still in flight on it
-                    is put back in order and sent again over a different link &mdash; never over the
-                    one that just failed it.
-                </p>
-
-                <h3>A link too slow to help is set aside</h3>
-                <p>
-                    Bandwidth cannot buy back delay: past a point, a slow link costs more in waiting
-                    than it contributes in throughput. Each link's round-trip time is therefore
-                    measured against the fastest link of the connection.
-                </p>
-
-                <div class="table-scroll">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Round-trip time</th>
-                                <th>What happens to the link</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>up to 4&times; the fastest</td>
-                                <td>free to take on more</td>
-                            </tr>
-                            <tr>
-                                <td>above 5&times;</td>
-                                <td>allowance trimmed until it stops hurting</td>
-                            </tr>
-                            <tr>
-                                <td>above 10&times;</td>
-                                <td>set aside, retested, brought back when it improves</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="grid">
+                    <article>
+                        <h3>Ready links receive data</h3>
+                        <p>
+                            The next packet goes to a link with available send capacity. Faster links
+                            become ready sooner and carry a larger share without a calculated split.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>Reordering limits a link</h3>
+                        <p>
+                            Data waiting behind a missing packet is measured directly. When a link
+                            causes that backlog to grow, its send allowance is reduced.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>Slow links are retested</h3>
+                        <p>
+                            A link whose latency makes it counterproductive can be set aside. It is
+                            tested periodically and used again when its conditions improve.
+                        </p>
+                    </article>
                 </div>
-
-                <p class="note">
-                    The factors follow from <code>link_max_ping_spread</code>, which defaults
-                    to&nbsp;5, and are relative to the fastest link of the moment, so a connection
-                    on which everything is slow keeps all of its links. Bonding a fast line with a
-                    much slower one on purpose &mdash; fibre and a mobile connection, say &mdash;
-                    means raising that factor, or setting an absolute <code>max_ping</code> instead.
-                </p>
 
                 <p class="section-foot">
                     <a class="button"
-                        href="https://docs.rs/aggligator/latest/aggligator/cfg/struct.Cfg.html">Every
-                        knob and its default &rarr;</a>
+                        href="https://docs.rs/aggligator/latest/aggligator/cfg/struct.Cfg.html">Configuration
+                        and defaults &rarr;</a>
                 </p>
             </div>
         </section>
@@ -247,18 +228,17 @@ nav_url: /aggligator/
             <div class="wrap">
                 <h2>Links of every kind</h2>
                 <p class="section-lead">
-                    Aggligator itself never touches the network; it aggregates the links you give it.
-                    These crates provide them, and a connection may mix as many of them as it likes.
+                    Transport crates create links for Aggligator. A connection can combine different
+                    transport types.
                 </p>
 
                 <div class="table-scroll">
                     <table>
                         <caption>
-                            Everything on <a href="https://crates.io/keywords/aggligator-transport">the
-                                <code>aggligator-transport</code> keyword</a> on crates.io. Something
-                            missing? A transport is one trait, see the
-                            <a href="https://docs.rs/aggligator/latest/aggligator/transport/index.html">transport
-                                module</a>.
+                            Additional crates are listed under the
+                            <a href="https://crates.io/keywords/aggligator-transport"><code>aggligator-transport</code>
+                                keyword</a>. Custom transports implement the
+                            <a href="https://docs.rs/aggligator/latest/aggligator/transport/index.html">transport API</a>.
                         </caption>
                         <thead>
                             <tr>
@@ -318,169 +298,19 @@ nav_url: /aggligator/
             </div>
         </section>
 
-        <section id="usage" class="section">
+        <section id="tunnel" class="section">
             <div class="wrap">
-                <h2>Usage</h2>
+                <h2>Forward TCP ports with <code>agg-tunnel</code></h2>
                 <p class="section-lead">
-                    The client connects to a host and gets one stream. How many links that stream is
-                    made of is decided by how many ways there are to reach the host: every local
-                    interface is tried against every address the name resolves to, and links appear
-                    and disappear from then on without anybody asking.
+                    <code>agg-tunnel</code> forwards TCP ports through an aggregated connection. It
+                    can be installed with Cargo or downloaded as a prebuilt binary.
                 </p>
-
-                <div class="code-pair">
-                    <figure>
-                        <figcaption>Client</figcaption>
-                        <pre><code><span class="k">use</span> aggligator_transport_tcp::simple::tcp_connect;
-<span class="k">use</span> tokio::io::<span class="t">AsyncWriteExt</span>;
-
-<span class="c">// Every route to `server` becomes a link.</span>
-<span class="k">let</span> <span class="k">mut</span> stream = tcp_connect([<span class="s">"server"</span>], <span class="n">5900</span>).<span class="k">await</span>?;
-
-<span class="c">// From here on it is just a stream.</span>
-stream.write_all(<span class="s">b"hello"</span>).<span class="k">await</span>?;</code></pre>
-                    </figure>
-                    <figure>
-                        <figcaption>Server</figcaption>
-                        <pre><code><span class="k">use</span> aggligator_transport_tcp::simple::tcp_server;
-
-tcp_server(
-    <span class="t">SocketAddr</span>::new(<span class="t">Ipv6Addr</span>::UNSPECIFIED.into(), <span class="n">5900</span>),
-    |<span class="k">mut</span> stream| <span class="k">async move</span> {
-        <span class="c">// One task per connection, links and all.</span>
-    },
-).<span class="k">await</span>?;</code></pre>
-                    </figure>
-                </div>
-
-                <p class="section-lead spaced">
-                    Links do not have to be of one kind. A <code>Connector</code> takes as many
-                    transports as you have and puts all of their links into the same connection, so a
-                    device can be reached over the network and over its cable at once.
-                </p>
-
-                <figure class="code-single">
-                    <figcaption>Over the network and over the cable</figcaption>
-                    <pre><code><span class="k">let</span> <span class="k">mut</span> connector = <span class="t">Connector</span>::new();
-connector.add(<span class="t">TcpConnector</span>::new([<span class="s">"server"</span>], <span class="n">5900</span>).<span class="k">await</span>?);
-connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() == <span class="n">0x1209</span>)?);
-
-<span class="k">let</span> stream = connector.channel().unwrap().<span class="k">await</span>?.into_stream();</code></pre>
-                </figure>
-
                 <p class="section-foot">
-                    <a class="button"
-                        href="https://github.com/remoc-rs/aggligator/tree/master/aggligator-util/src/bin">How
-                        the tools below do it &rarr;</a>
+                    <a class="button" href="/aggligator/agg-tunnel.html">Usage and downloads &rarr;</a>
                 </p>
             </div>
         </section>
 
-        <section id="tools" class="section alt">
-            <div class="wrap">
-                <h2>Tools you can just run</h2>
-                <p class="section-lead">
-                    Aggligator is a crate to build with, but two programs come out of it ready to use.
-                </p>
-
-                <div class="grid spaced">
-                    <article>
-                        <h3><code>agg-tunnel</code></h3>
-                        <p>
-                            Forwards TCP ports through an aggregated connection. Anything that speaks
-                            TCP &mdash; SSH, a database, a web server &mdash; gets the combined
-                            bandwidth and the resilience without knowing that any of this is going on.
-                        </p>
-                        <p><a href="https://github.com/remoc-rs/aggligator/blob/master/docs/agg-tunnel.md">All
-                                options &rarr;</a></p>
-                    </article>
-                    <article>
-                        <h3><code>agg-speed</code></h3>
-                        <p>
-                            Measures what a connection between two machines actually does, link by
-                            link, and shows it while it runs. The quickest way to find out what your
-                            cables and radios add up to.
-                        </p>
-                        <p><a href="https://github.com/remoc-rs/aggligator/blob/master/docs/agg-speed.md">All
-                                options &rarr;</a></p>
-                    </article>
-                </div>
-
-                <div class="downloads spaced">
-                    <a class="button icon-link"
-                        href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-x86_64-linux.tar.gz"><span
-                            class="icon download" aria-hidden="true"></span>Linux x86-64</a>
-                    <a class="button icon-link"
-                        href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-aarch64-linux.tar.gz"><span
-                            class="icon download" aria-hidden="true"></span>Linux ARM64</a>
-                    <a class="button icon-link"
-                        href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-macos.tar.gz"><span
-                            class="icon download" aria-hidden="true"></span>macOS Apple silicon</a>
-                    <a class="button icon-link"
-                        href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-windows.zip"><span
-                            class="icon download" aria-hidden="true"></span>Windows x86-64</a>
-                </div>
-
-                <div class="install standalone">
-                    <span class="prompt" aria-hidden="true">$</span>
-                    <code>cargo install aggligator-util</code>
-                    <button class="copy-button" type="button" data-copy="cargo install aggligator-util"
-                        aria-label="Copy the command">
-                        <span class="icon copy" aria-hidden="true"></span>
-                        <span class="icon check" aria-hidden="true"></span>
-                    </button>
-                </div>
-
-                <p class="section-lead spaced">
-                    Each archive holds both programs, statically linked on Linux and with nothing to
-                    install alongside them. Or build them yourself with the command above.
-                </p>
-
-                <figure class="shot">
-                    <img src="monitor.png" width="801" height="938"
-                        alt="Terminal screenshot of the link monitor: a speed test running at about 100 megabytes per second in both directions over eight links between two machines, each line showing one link with its interface, address, latency and throughput.">
-                    <figcaption>
-                        <code>agg-speed</code> between two machines with four and two network
-                        interfaces: eight links, about 100&nbsp;MB/s each way, which is what a
-                        full-duplex gigabit link gives. Pull a cable out and the traffic redistributes
-                        over the rest, plug it back in and the link returns; the number at the top
-                        does not move much either way.
-                    </figcaption>
-                </figure>
-            </div>
-        </section>
-
-        <section id="more" class="section">
-            <div class="wrap">
-                <h2>Read on</h2>
-                <div class="grid">
-                    <article>
-                        <h3>How to use it</h3>
-                        <p>
-                            The whole API on docs.rs: how connections are established and accepted,
-                            what each link reports and what can be configured.
-                        </p>
-                        <p><a href="https://docs.rs/aggligator">Documentation &rarr;</a></p>
-                    </article>
-                    <article>
-                        <h3>What to run it over</h3>
-                        <p>
-                            TCP, WebSockets, USB, Bluetooth and SOCKS5 proxies, each in a crate of its
-                            own, all of them mixable within one connection.
-                        </p>
-                        <p><a href="https://crates.io/keywords/aggligator-transport">Transports &rarr;</a></p>
-                    </article>
-                    <article>
-                        <h3>What to run over it</h3>
-                        <p>
-                            An aggregated connection is one byte stream, which is exactly what Remoc
-                            asks for: channels and RPC between machines, over every link you have.
-                        </p>
-                        <p><a href="/">Remoc &rarr;</a></p>
-                    </article>
-                </div>
-            </div>
-        </section>
     </main>
 
     <script>

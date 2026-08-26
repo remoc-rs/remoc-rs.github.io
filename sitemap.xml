@@ -6,6 +6,7 @@ permalink: /sitemap.xml
     <url><loc>{{ site.url }}/</loc></url>
     <url><loc>{{ site.url }}/postbag/</loc></url>
     <url><loc>{{ site.url }}/aggligator/</loc></url>
+    <url><loc>{{ site.url }}/aggligator/agg-tunnel.html</loc></url>
     <url><loc>{{ site.url }}/benchmarks.html</loc></url>
     <url><loc>{{ site.url }}/comparison.html</loc></url>
     <url><loc>{{ site.url }}/examples/channels.html</loc></url>

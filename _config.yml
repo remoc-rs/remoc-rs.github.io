@@ -47,11 +47,9 @@ projects:
     branch: master
     crate: aggligator
     links:
-      - { title: Features, url: "/aggligator/#features" }
       - { title: Design, url: "/aggligator/#design" }
       - { title: Transports, url: "/aggligator/#transports" }
-      - { title: Usage, url: "/aggligator/#usage" }
-      - { title: Tools, url: "/aggligator/#tools" }
+      - { title: agg-tunnel, url: /aggligator/agg-tunnel.html }
       - { title: Docs, url: "https://docs.rs/aggligator" }
       - { title: GitHub, url: "https://github.com/remoc-rs/aggligator", icon: github }
 
