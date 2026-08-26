@@ -52,7 +52,7 @@ footer_alt: true
         </div>
     </header>
 
-    <main id="content">
+    <main id="content" class="home-content">
         <section id="overview" class="section">
             <div class="wrap">
                 <h2>One connection, <b>many</b> channels</h2>
@@ -286,7 +286,7 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     <p><a href="https://docs.rs/remoc/latest/remoc/robj/index.html">robj module &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Bring your own transport
+                    <h3>Transport independence
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-transport"/></svg>
                     </h3>
                     <p>
@@ -299,7 +299,7 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     <p><a href="https://docs.rs/remoc/latest/remoc/transports/index.html">transports &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Back pressure everywhere
+                    <h3>Independent back pressure
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-pressure"/></svg>
                     </h3>
                     <p>
@@ -309,7 +309,7 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     </p>
                 </article>
                 <article>
-                    <h3>The speed of a plain socket
+                    <h3>Transport performance
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-speed"/></svg>
                     </h3>
                     <p>
@@ -319,7 +319,7 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     <p><a href="benchmarks.html">Benchmarks &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>100&nbsp;% safe Rust
+                    <h3>Safe Rust and WebAssembly
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-safe"/></svg>
                     </h3>
                     <p>
@@ -337,7 +337,7 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
 
         <section id="connection-resilience" class="section">
             <div class="wrap">
-                <h2>Keep connections alive across link failures</h2>
+                <h2>Connection resilience with Aggligator</h2>
                 <p class="section-lead">
                     Remoc sessions are <strong>stateful</strong>: channels and remote objects remain
                     connected for as long as the session does. The Aggligator crate provides a

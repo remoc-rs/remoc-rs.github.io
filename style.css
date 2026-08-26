@@ -1064,6 +1064,10 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     max-width: 46rem;
 }
 
+.home-content .diagram figcaption {
+    font-size: 1rem;
+}
+
 /* A single listing, captioned like the pairs above it. */
 
 .code-single {
