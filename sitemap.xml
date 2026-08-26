@@ -8,6 +8,7 @@ permalink: /sitemap.xml
     <url><loc>{{ site.url }}/remote-channels.html</loc></url>
     <url><loc>{{ site.url }}/ipc.html</loc></url>
     <url><loc>{{ site.url }}/server-push.html</loc></url>
+    <url><loc>{{ site.url }}/erlang-messaging.html</loc></url>
     <url><loc>{{ site.url }}/postbag/</loc></url>
     <url><loc>{{ site.url }}/postbag/schema-evolution.html</loc></url>
     <url><loc>{{ site.url }}/postbag/file-formats.html</loc></url>

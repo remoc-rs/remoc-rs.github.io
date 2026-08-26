@@ -24,6 +24,9 @@ built on Tokio.
 - [Server push and callbacks](https://remoc.rs/server-push.html): calls that
   return or accept channels, and clients that serve traits of their own, so the
   server can push events and call back through NAT.
+- [Erlang-style message passing](https://remoc.rs/erlang-messaging.html):
+  distributed Erlang's model of sending messages and addresses between machines,
+  with typed messages and bounded channels; what OTP has that Remoc does not.
 - [Multiplexing typed channels](https://remoc.rs/multiplexing.html): many
   independent, typed channels over one TCP, TLS or WebSocket connection, with
   per-channel flow control.
