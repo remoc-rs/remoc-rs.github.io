@@ -1,6 +1,6 @@
 {%- assign project = site.projects | where: "id", page.project | first %}
 {%- unless project %}{% assign project = site.projects | first %}{% endunless %}
-<footer>
+<footer{% if page.footer_alt %} class="alt"{% endif %}>
     <div class="footer-inner">
         <div class="footer-brand">
             <img src="{{ project.logo }}" alt="" width="27" height="28">

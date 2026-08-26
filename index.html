@@ -10,6 +10,7 @@ social_description: >-
   observable collections. All of it over one connection.
 canonical: /
 nav: home
+footer_alt: true
 ---
 
     <header class="hero">
@@ -84,13 +85,53 @@ nav: home
                         Any channel can carry another. Here an RPC call hands over the sender of a
                         new mpsc channel: no port to open, nothing to register, no name to look up
                         and no acknowledgement to await.
-                        <a href="#usage">See the example</a>.
                     </figcaption>
                 </figure>
+
+                <div class="code-triple">
+                <figure>
+                    <figcaption>Shared request</figcaption>
+                    <pre><code><span class="k">use</span> remoc::prelude::*;
+
+<span class="a">#[derive(Serialize, Deserialize)]</span>
+<span class="k">struct</span> <span class="t">CountReq</span> {
+    up_to: <span class="t">u32</span>,
+    <span class="c">// A sender, on its way to the peer.</span>
+    seq_tx: rch::mpsc::<span class="t">Sender</span>&lt;<span class="t">u32</span>&gt;,
+}</code></pre>
+                </figure>
+                <figure>
+                    <figcaption>Server</figcaption>
+                    <pre><code><span class="k">while let</span> <span class="t">Some</span>(req) = rx.recv().<span class="k">await</span>? {
+    <span class="k">for</span> i <span class="k">in</span> <span class="n">0</span>..req.up_to {
+        req.seq_tx.send(i).<span class="k">await</span>?;
+    }
+}</code></pre>
+                </figure>
+                <figure>
+                    <figcaption>Client</figcaption>
+                    <pre><code><span class="k">let</span> (seq_tx, <span class="k">mut</span> seq_rx) = rch::mpsc::channel(<span class="n">1</span>);
+tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_tx }).<span class="k">await</span>?;
+
+<span class="c">// The channel is live now, nothing to set up.</span>
+<span class="k">while let</span> <span class="t">Some</span>(i) = seq_rx.recv().<span class="k">await</span>? {
+    <span class="m">println!</span>(<span class="s">"{i}"</span>);
+}</code></pre>
+                </figure>
+                </div>
+
+                <p class="section-foot">
+                    The listings are excerpts showing using an existing channel for sending the count request.
+                    The example pages include all source files.
+                </p>
+                <p class="section-foot">
+                    <a class="button" href="/examples/channels.html">Channels example &rarr;</a>
+                    <a class="button" href="/examples/rtc.html">Trait calling example &rarr;</a>
+                </p>
             </div>
         </section>
 
-        <section id="pipelining" class="section alt">
+        <section id="pipelining" class="section">
             <div class="wrap">
                 <h2>Multiple remote calls, <b>one</b> round trip</h2>
                 <p class="section-lead">
@@ -109,36 +150,52 @@ nav: home
                     </figcaption>
                 </figure>
 
-                <div class="code-pair">
+                <div class="code-triple pipelining-code">
                 <figure>
-                    <figcaption>The trait</figcaption>
+                    <figcaption>The remote trait</figcaption>
                     <pre><code><span class="a">#[rtc::remote]</span>
 <span class="k">trait</span> <span class="t">Directory</span> {
-    <span class="c">// One attribute; the method itself is unchanged</span>
-    <span class="c">// and existing callers keep working.</span>
+    <span class="c">// Existing callers remain unchanged.</span>
     <span class="a">#[pipelinable]</span>
-    <span class="k">async fn</span> <span class="f">open_counter</span>(&amp;<span class="k">self</span>, name: <span class="t">String</span>)
-        -&gt; <span class="t">Result</span>&lt;<span class="t">CounterClient</span>, <span class="t">OpenError</span>&gt;;
+    <span class="k">async fn</span> <span class="f">open_counter</span>(&amp;<span class="k">self</span>, name: <span class="t">String</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">CounterClient</span>, <span class="t">OpenError</span>&gt;;
 }</code></pre>
                 </figure>
                 <figure>
-                    <figcaption>The caller</figcaption>
-                    <pre><code><span class="c">// The client, before the object it names exists.</span>
+                    <figcaption>Sequential caller</figcaption>
+                    <pre><code><span class="c">// Request counter client, one round trip.</span>
+<span class="k">let mut</span> counter = dir.<span class="f">open_counter</span>(name).<span class="k">await</span>?;
+
+<span class="c">// Two calls, two round trips.</span>
+counter.<span class="f">increase</span>(<span class="n">20</span>).<span class="k">await</span>?;
+counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="k">await</span>?;
+
+<span class="c">// Final call, one round trip.</span>
+<span class="k">let</span> value = counter.<span class="f">value</span>().<span class="k">await</span>?;
+
+<span class="c">// Total: four round trips.</span>
+</code></pre>
+                </figure>
+                <figure>
+                    <figcaption>Pipelined caller</figcaption>
+                    <pre><code><span class="c">// Create the counter client up front, no round trip.</span>
 <span class="k">let</span> (<span class="k">mut</span> counter, counter_rx) = <span class="t">CounterClient</span>::<span class="f">new</span>();
 
-<span class="c">// Every call is sent before any result is awaited.</span>
+<span class="c">// Four calls, one round trip.</span>
 <span class="k">let</span> value = rtc::<span class="m">calls!</span>(
     dir.<span class="f">open_counter_pipelined</span>(name, counter_rx);
     counter.<span class="f">increase_call</span>(<span class="n">20</span>);
     counter.<span class="f">increase_call</span>(<span class="n">45</span>);
     counter.<span class="f">value_call</span>()
-);</code></pre>
+);
+<span class="c">// Total: one round trip.</span>
+</code></pre>
                 </figure>
                 </div>
 
                 <p class="section-foot">
                     A pipelined call may hand out a further object in turn, so a chain of them is
-                    still one round trip.
+                    still one round trip.<br>
+                    <br>
                     <a href="https://docs.rs/remoc/latest/remoc/rtc/pipelining/index.html">How
                         pipelining works &rarr;</a>
                 </p>
@@ -268,70 +325,7 @@ nav: home
             </div>
         </section>
 
-        <section id="usage" class="section">
-            <div class="wrap">
-                <h2>Usage</h2>
-                <p class="section-lead">
-                    The client asks the server to count for it. It creates a channel, includes the
-                    sender in the request and reads the numbers from the receiver. The request and
-                    returned sequence both use the single TCP connection opened at the start.
-                </p>
-
-                <div class="code-pair">
-                <figure>
-                    <figcaption>Shared</figcaption>
-                    <pre><code><span class="k">use</span> remoc::prelude::*;
-
-<span class="a">#[derive(Serialize, Deserialize)]</span>
-<span class="k">struct</span> <span class="t">CountReq</span> {
-    up_to: <span class="t">u32</span>,
-    <span class="c">// A sender, on its way to the peer.</span>
-    seq_tx: rch::mpsc::<span class="t">Sender</span>&lt;<span class="t">u32</span>&gt;,
-}</code></pre>
-                </figure>
-                <figure>
-                    <figcaption>Client</figcaption>
-                    <pre><code><span class="k">let</span> (seq_tx, <span class="k">mut</span> seq_rx) = rch::mpsc::channel(<span class="n">1</span>);
-tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_tx }).<span class="k">await</span>?;
-
-<span class="c">// The channel is live now, nothing to set up.</span>
-<span class="k">while let</span> <span class="t">Some</span>(i) = seq_rx.recv().<span class="k">await</span>? {
-    <span class="m">println!</span>(<span class="s">"{i}"</span>);
-}</code></pre>
-                </figure>
-                <figure>
-                    <figcaption>Server</figcaption>
-                    <pre><code><span class="k">while let</span> <span class="t">Some</span>(req) = rx.recv().<span class="k">await</span>? {
-    <span class="k">for</span> i <span class="k">in</span> <span class="n">0</span>..req.up_to {
-        req.seq_tx.send(i).<span class="k">await</span>?;
-    }
-}</code></pre>
-                </figure>
-                <figure>
-                    <figcaption>Or call a trait remotely</figcaption>
-                    <pre><code><span class="a">#[rtc::remote]</span>
-<span class="k">trait</span> <span class="t">Counter</span> {
-    <span class="k">async fn</span> <span class="f">value</span>(&amp;<span class="k">self</span>)
-        -&gt; <span class="t">Result</span>&lt;<span class="t">u32</span>, rtc::<span class="t">CallError</span>&gt;;
-
-    <span class="k">async fn</span> <span class="f">watch</span>(&amp;<span class="k">mut self</span>)
-        -&gt; <span class="t">Result</span>&lt;rch::watch::<span class="t">Receiver</span>&lt;<span class="t">u32</span>&gt;, rtc::<span class="t">CallError</span>&gt;;
-}</code></pre>
-                </figure>
-                </div>
-
-                <p class="section-foot">
-                    The fragments above are excerpts. The complete programs &mdash; every file,
-                    client and server &mdash; are on their own pages:
-                </p>
-                <p class="section-foot">
-                    <a class="button" href="/examples/channels.html">Channels example &rarr;</a>
-                    <a class="button" href="/examples/rtc.html">Trait calling example &rarr;</a>
-                </p>
-            </div>
-        </section>
-
-        <section id="connection-resilience" class="section alt">
+        <section id="connection-resilience" class="section">
             <div class="wrap">
                 <h2>Keep connections alive across link failures</h2>
                 <p class="section-lead">

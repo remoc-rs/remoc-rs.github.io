@@ -690,26 +690,58 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 
 /* Code examples */
 
-.code-pair {
+.code-pair,
+.code-triple {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
     gap: 1.25rem;
+}
+
+.code-pair {
+    grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
+}
+
+.code-triple {
+    grid-template-columns:
+        calc((100% - 2.5rem) / 3 - 20px)
+        calc((100% - 2.5rem) / 3 - 20px)
+        calc((100% - 2.5rem) / 3 + 40px);
+}
+
+.pipelining-code {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pipelining-code > figure:first-child {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 64rem) {
+    .code-triple {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pipelining-code > figure:first-child {
+        grid-column: auto;
+    }
 }
 
 /* The blocks of a pair are stretched to a common height, so that two listings of
    unequal length still line up. */
-.code-pair figure {
+.code-pair figure,
+.code-triple figure {
     margin: 0;
     min-width: 0;
     display: flex;
     flex-direction: column;
 }
 
-.code-pair pre {
+.code-pair pre,
+.code-triple pre {
     flex: 1;
 }
 
-.code-pair figcaption {
+.code-pair figcaption,
+.code-triple figcaption {
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.06em;
@@ -722,7 +754,11 @@ nav[aria-label="Primary"] a[aria-current="page"] {
    so they need a break of their own to read as the next thing rather than as part
    of the caption above them. */
 
-#pipelining .code-pair {
+#pipelining .code-triple {
+    margin-top: 2.75rem;
+}
+
+#channels .code-triple {
     margin-top: 2.75rem;
 }
 
@@ -1165,6 +1201,10 @@ footer {
     padding: 3rem 1.25rem;
     font-size: 0.94rem;
     color: var(--fg-muted);
+}
+
+footer.alt {
+    background: var(--bg-alt);
 }
 
 .footer-inner {
