@@ -53,7 +53,7 @@
   <line x1="252.4" y1="439.0" x2="354.9" y2="347" stroke="var(--ty)" stroke-width="2"/>
   <path d="M 346.9,342.5 L 354.9,347 L 346.9,351.5 Z" fill="var(--ty)" transform="rotate(-41.9 354.9 347)"/>
   <text x="167.7" y="331" font-family="Inter, system-ui, sans-serif" font-size="13.5" fill="var(--accent)">all four requests</text>
-  <text x="368.9" y="352" font-family="Inter, system-ui, sans-serif" font-size="13.5" fill="var(--ty)">all four results</text>
+  <text x="368.9" y="368" font-family="Inter, system-ui, sans-serif" font-size="13.5" fill="var(--ty)">all four results</text>
   <text x="203.0" y="463" font-family="Inter, system-ui, sans-serif" font-size="12.5" fill="var(--fg-muted)">counter attached, queued calls run</text>
   <path d="M 96.0,480 L 96.0,490 M 96.0,485 L 354.9,485 M 354.9,480 L 354.9,490" stroke="var(--fg-muted)" stroke-width="1.5" fill="none"/>
   <text x="225.5" y="506" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg)">1 round trip</text>

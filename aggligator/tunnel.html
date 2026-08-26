@@ -1,14 +1,45 @@
 ---
 layout: base
 project: aggligator
-title: "agg-tunnel: forward TCP ports over Aggligator"
+title: "agg-tunnel: TCP port forwarding over multiple bonded network links"
 description: >-
-  Use agg-tunnel to forward TCP ports over an aggregated connection, with prebuilt
-  downloads, a quick start, port mappings and an explanation of its link monitor.
+  agg-tunnel is a standalone command-line tool for Linux, macOS and Windows that
+  forwards TCP ports over multiple network links at once, with their combined
+  bandwidth, failover between links and a connection that survives network changes.
 canonical: /aggligator/tunnel.html
 favicon: /aggligator/logo.png
 nav_url: /aggligator/tunnel.html
+schema: app
+app_name: agg-tunnel
 footer_alt: true
+faq:
+  - q: "How is this different from SSH port forwarding?"
+    a: >-
+      ssh -L forwards a port over one TCP connection, which is limited to one network
+      path and breaks when that path does. agg-tunnel forwards over all links between
+      the two machines at once, giving the tunnel their combined bandwidth and letting
+      it continue when individual links fail. It does not encrypt the payload itself,
+      so the two are also complementary: SSH through agg-tunnel gives an encrypted
+      session that survives network changes.
+  - q: "Do I need to change my applications?"
+    a: >-
+      No. The client application connects to a local port and the server application
+      receives an ordinary TCP connection. Both are unaware of the tunnel.
+  - q: "Can it combine two internet connections?"
+    a: >-
+      Yes. All usable paths between the two machines running agg-tunnel become links of
+      one bonded connection. Like all link aggregation, this works between the two
+      endpoints; it cannot speed up connections to services that do not run agg-tunnel.
+  - q: "Does the tunnel survive switching networks?"
+    a: >-
+      Yes. Links are re-established automatically while the logical connection stays
+      open, so the tunnel continues when a machine moves between Wi-Fi, mobile data and
+      Ethernet, even with an IP address change.
+  - q: "Is the traffic encrypted?"
+    a: >-
+      Links joining a connection are authenticated, but the forwarded payload is not
+      encrypted. Use a protocol that encrypts itself, such as SSH or TLS, when the
+      links are not trusted.
 ---
 
     <header class="page-header">
@@ -19,9 +50,10 @@ footer_alt: true
                 <h1>Tunnel existing applications</h1>
                 <p class="lead">
                     <a href="/aggligator/">Aggligator</a> combines the available network links between two
-                    machines into one connection. It distributes traffic across them and can keep the
-                    connection alive as links fail or reconnect. Run <code>agg-tunnel</code> on both machines
-                    to use this with existing TCP applications: the server permits targets, the client
+                    machines into one bonded connection. It distributes traffic across them and can keep the
+                    connection alive as links fail, reconnect or the device changes networks.
+                    <code>agg-tunnel</code> is a standalone command-line tool for Linux, macOS and Windows
+                    that brings this to existing TCP applications: the server permits targets, the client
                     exposes local ports, and neither application needs modification.
                 </p>
             </div>
@@ -106,7 +138,9 @@ footer_alt: true
                 <h2>Port mappings</h2>
                 <p class="section-lead">
                     The server lists permitted targets. The client selects one of those server ports
-                    and chooses where to expose it locally. Both options can be repeated.
+                    and chooses where to expose it locally. Both options can be repeated. This is
+                    classical port forwarding, as known from <code>ssh -L</code>, but carried over
+                    multiple links at once.
                 </p>
 
                 <div class="table-scroll">
@@ -194,6 +228,8 @@ footer_alt: true
 
             </div>
         </section>
+
+        {% include faq.html %}
     </main>
 
     <script>

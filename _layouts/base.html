@@ -35,6 +35,24 @@
     <meta name="twitter:description" content="{{ page.social_description | default: page.description }}">
     <meta name="twitter:image" content="{{ site.url }}{{ project.social_image }}">
     <meta name="twitter:image:alt" content="{{ project.social_image_alt }}">
+    {%- if page.schema == "app" %}
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "{{ page.app_name }}",
+        "description": {{ page.description | strip | jsonify }},
+        "url": "{{ site.url }}{{ page.canonical }}",
+        "operatingSystem": "Linux, macOS, Windows",
+        "applicationCategory": "DeveloperApplication",
+        "downloadUrl": "{{ project.repo }}/releases/latest",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "license": "https://www.apache.org/licenses/LICENSE-2.0",
+        "author": { "@type": "Person", "name": "Sebastian Urban", "url": "https://github.com/surban" }
+    }
+    </script>
+    {%- endif %}
     {%- if page.schema == "software" %}
 
     <script type="application/ld+json">

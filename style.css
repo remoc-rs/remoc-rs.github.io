@@ -98,27 +98,33 @@
     }
 }
 
-/* Each project keeps the same layout and takes its accent from its logo. */
+/* Each project keeps the same layout and takes its accent from its logo. The
+   alternating sections carry a hint of that accent, so the pages of a project
+   belong together without the layout changing. */
 
 .project-postbag {
     --accent: #a8481a;
     --accent-strong: #8c3a12;
+    --bg-alt: #faf8f6;
 }
 
 .project-aggligator {
     --accent: #3e721d;
     --accent-strong: #2d5413;
+    --bg-alt: #f8faf7;
 }
 
 @media (prefers-color-scheme: dark) {
     .project-postbag {
         --accent: #f0904f;
         --accent-strong: #ffb384;
+        --bg-alt: #1e1a17;
     }
 
     .project-aggligator {
         --accent: #86c95f;
         --accent-strong: #a9dd8a;
+        --bg-alt: #191e18;
     }
 }
 
