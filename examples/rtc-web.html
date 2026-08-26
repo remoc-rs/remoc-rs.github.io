@@ -1,0 +1,84 @@
+---
+layout: base
+project: remoc
+title: "Remoc in a web browser: a WebAssembly example"
+description: >-
+  A shared RTC counter with a Rust WebAssembly client connected through the
+  browser WebSocket API.
+social_description: >-
+  Typed Remoc calls and watch updates between an Axum server and a Rust
+  WebAssembly client.
+canonical: /examples/rtc-web.html
+example: rtc-web
+nav_url: /examples/channels.html
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Example: Remoc in a web browser</h1>
+            <p class="lead">
+                Two buttons call a shared counter through RTC. A watch receiver keeps every open
+                browser window up to date.
+            </p>
+
+            {% include example-tabs.html %}
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <p>
+                    The browser client is written in Rust and compiled to WebAssembly. It uses the
+                    browser's WebSocket API as a framed Remoc transport and exposes the generated
+                    RTC client to a small JavaScript interface with <code>wasm-bindgen</code>.
+                </p>
+                <p>
+                    The Axum server provides the page, WebAssembly module and WebSocket endpoint on
+                    one port. Its counter state is shared between connections, so an update from
+                    one browser reaches the watch receiver in every other browser.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Running it</h2>
+                <p>
+                    Clone the repository and install the WebAssembly build prerequisites:
+                </p>
+                <pre class="cmd"><code>git clone {{ site.repo }}
+cd remoc
+rustup target add wasm32-unknown-unknown
+cargo install wasm-pack</code></pre>
+                <p class="section-foot">
+                    Build the client, embed it in the server and start the server:
+                </p>
+                <pre class="cmd"><code>./examples/rtc-web/run.sh</code></pre>
+                <p class="section-foot">
+                    Open <a href="http://127.0.0.1:9872">http://127.0.0.1:9872</a> in two browser
+                    windows to see the shared updates.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>The program</h2>
+                <p class="section-lead">
+                    The build script runs <code>wasm-pack</code> before compiling the server.
+                    The remaining listings show the shared trait, server, HTML and Rust browser
+                    client.
+                </p>
+
+                {% include example-rtc-web.html %}
+
+                <p class="section-foot">
+                    <a class="button icon-link" href="{{ site.repo }}/tree/master/examples/rtc-web"><span
+                            class="icon github" aria-hidden="true"></span>Browse it on GitHub</a>
+                </p>
+            </div>
+        </section>
+    </main>

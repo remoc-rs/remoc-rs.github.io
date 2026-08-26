@@ -20,7 +20,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from pygments.lexers import RustLexer, TOMLLexer
+from pygments.lexers import BashLexer, HtmlLexer, RustLexer, TOMLLexer
 from pygments.token import Token
 
 # --------------------------------------------------------------------------- #
@@ -39,6 +39,7 @@ class Crate:
     name: str  # directory name, shown as the heading of the group
     role: str  # what this crate is, in one line
     files: list[File]
+    directory: str | None = None  # source directory when it differs from the heading
 
 
 @dataclass
@@ -130,13 +131,74 @@ EXAMPLES = [
             ),
         ],
     ),
+    Example(
+        id="rtc-web",
+        directory="examples/rtc-web",
+        crates=[
+            Crate(
+                "build",
+                "Builds the WebAssembly client before compiling the server that embeds it.",
+                [
+                    File(
+                        "Cargo.toml",
+                        "Uses a size-oriented release profile for the WebAssembly build.",
+                    ),
+                    File(
+                        "build.sh",
+                        "Runs the two target-specific builds in the required order.",
+                    ),
+                ],
+                directory=".",
+            ),
+            Crate(
+                "counter",
+                "Defines the remote trait shared by the browser client and server.",
+                [
+                    File("Cargo.toml", MANIFEST),
+                    File(
+                        "src/lib.rs",
+                        "Defines the increment, decrement and watch methods on the shared counter.",
+                    ),
+                ],
+            ),
+            Crate(
+                "counter-server-web",
+                "Keeps the shared counter and serves the page and Remoc WebSocket endpoint.",
+                [
+                    File("Cargo.toml", MANIFEST),
+                    File(
+                        "src/main.rs",
+                        "Adapts an Axum WebSocket for Remoc and embeds the generated browser assets.",
+                    ),
+                    File(
+                        "src/index.html",
+                        "Provides the counter controls and calls the Rust client from JavaScript.",
+                    ),
+                ],
+            ),
+            Crate(
+                "counter-client-web",
+                "Runs the generated counter client in the browser.",
+                [
+                    File("Cargo.toml", MANIFEST),
+                    File(
+                        "src/lib.rs",
+                        "Connects through the browser WebSocket API and exposes the counter to "
+                        "JavaScript with <code>wasm-bindgen</code>.",
+                    ),
+                ],
+            ),
+        ],
+    ),
 ]
 
 # The manifests in the repository depend on Remoc by path, which is an artefact of
 # living next to it. The listings show what a reader would actually write, so that
 # one dependency is rewritten to the published version. Everything else, including
 # the path dependencies between the example's own crates, is shown as it is.
-PATH_DEPENDENCY = re.compile(r'^remoc = \{ path = "[^"]*" \}$', re.M)
+PATH_DEPENDENCY = re.compile(
+    r'^remoc = \{ path = "[^"]*"(?P<options>, [^}]*)? \}$', re.M
+)
 
 # --------------------------------------------------------------------------- #
 # Rendering                                                                    #
@@ -166,7 +228,24 @@ TOML_CLASSES = {
     Token.Literal.String: "s",
 }
 
-LEXERS = {".rs": (RustLexer, CLASSES), ".toml": (TOMLLexer, TOML_CLASSES)}
+HTML_CLASSES = {
+    **CLASSES,
+    Token.Name.Tag: "k",
+    Token.Name.Attribute: "a",
+}
+
+SHELL_CLASSES = {
+    **CLASSES,
+    Token.Name.Builtin: "f",
+    Token.Name.Variable: "n",
+}
+
+LEXERS = {
+    ".html": (HtmlLexer, HTML_CLASSES),
+    ".rs": (RustLexer, CLASSES),
+    ".sh": (BashLexer, SHELL_CLASSES),
+    ".toml": (TOMLLexer, TOML_CLASSES),
+}
 
 
 def css_class(token, classes: dict) -> str | None:
@@ -205,7 +284,12 @@ def highlight(source: str, suffix: str) -> str:
 
 def published(source: str, version: str) -> str:
     """A manifest as the reader would write it, depending on a released Remoc."""
-    source, count = PATH_DEPENDENCY.subn(f'remoc = {{ version = "{version}" }}', source)
+    source, count = PATH_DEPENDENCY.subn(
+        lambda match: (
+            f'remoc = {{ version = "{version}"{match.group("options") or ""} }}'
+        ),
+        source,
+    )
     if count != 1:
         sys.exit("a manifest no longer has the expected `remoc` path dependency")
     return source
@@ -216,14 +300,15 @@ def render(example: Example, repo: Path, version: str) -> str:
     base = repo / example.directory
     out = []
     for crate in example.crates:
+        crate_directory = crate.directory or crate.name
         out.append('<section class="example-crate">')
         out.append(f"    <h3>{html.escape(crate.name)}</h3>")
         out.append(f'    <p class="example-crate-role">{crate.role}</p>')
 
         for entry in crate.files:
-            path = f"{crate.name}/{entry.path}"
-            source = (base / path).read_text()
-            if entry.path == "Cargo.toml":
+            path = entry.path if crate_directory == "." else f"{crate.name}/{entry.path}"
+            source = (base / crate_directory / entry.path).read_text()
+            if entry.path == "Cargo.toml" and PATH_DEPENDENCY.search(source):
                 source = published(source, version)
 
             anchor = path.replace("/", "-").replace(".", "-")

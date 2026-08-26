@@ -1,0 +1,523 @@
+<!-- generated from remoc 147456e by _tools/render_examples.py -->
+<section class="example-crate">
+    <h3>build</h3>
+    <p class="example-crate-role">Builds the WebAssembly client before compiling the server that embeds it.</p>
+    <article class="example-file" id="Cargo-toml">
+        <h4><code>Cargo.toml</code></h4>
+        <p>Uses a size-oriented release profile for the WebAssembly build.</p>
+        <pre><code><span class="t">[workspace]</span>
+resolver = <span class="s">"2"</span>
+members = [<span class="s">"counter"</span>, <span class="s">"counter-client-web"</span>, <span class="s">"counter-server-web"</span>]
+
+<span class="t">[profile.release]</span>
+opt-level = <span class="s">"z"</span>
+lto = <span class="t">true</span>
+codegen-units = 1
+panic = <span class="s">"abort"</span></code></pre>
+    </article>
+    <article class="example-file" id="build-sh">
+        <h4><code>build.sh</code></h4>
+        <p>Runs the two target-specific builds in the required order.</p>
+        <pre><code><span class="c">#!/usr/bin/env bash
+</span><span class="f">set</span> -euo pipefail
+
+<span class="n">example_dir</span>=<span class="s">"</span><span class="k">$(</span><span class="f">cd</span> -- <span class="s">"</span><span class="k">$(</span>dirname -- <span class="s">"${</span><span class="n">BASH_SOURCE</span>[0]<span class="s">}"</span><span class="k">)</span><span class="s">"</span> &amp;&amp; <span class="f">pwd</span><span class="k">)</span><span class="s">"</span>
+<span class="n">assets_dir</span>=<span class="s">"${</span><span class="n">example_dir</span><span class="s">}/target/web"</span>
+
+<span class="c"># Compile the Rust browser client and generate the JavaScript loader for it.
+</span>wasm-pack build <span class="s">\
+</span>    <span class="s">"${</span><span class="n">example_dir</span><span class="s">}/counter-client-web"</span> <span class="s">\
+</span>    --target web <span class="s">\
+</span>    --release <span class="s">\
+</span>    --no-pack <span class="s">\
+</span>    --no-typescript <span class="s">\
+</span>    --out-name counter_web <span class="s">\
+</span>    --out-dir <span class="s">"${</span><span class="n">assets_dir</span><span class="s">}"</span>
+
+<span class="c"># Compile the native server, which embeds the generated browser files.
+</span>cargo build <span class="s">\
+</span>    --manifest-path <span class="s">"${</span><span class="n">example_dir</span><span class="s">}/Cargo.toml"</span> <span class="s">\
+</span>    --package counter-server-web</code></pre>
+    </article>
+</section>
+<section class="example-crate">
+    <h3>counter</h3>
+    <p class="example-crate-role">Defines the remote trait shared by the browser client and server.</p>
+    <article class="example-file" id="counter-Cargo-toml">
+        <h4><code>counter/Cargo.toml</code></h4>
+        <p>Its dependencies.</p>
+        <pre><code><span class="t">[package]</span>
+name = <span class="s">"counter-web"</span>
+version = <span class="s">"0.1.0"</span>
+edition = <span class="s">"2024"</span>
+publish = <span class="t">false</span>
+
+<span class="t">[dependencies]</span>
+remoc = { version = <span class="s">"0.20"</span> }
+serde = { version = <span class="s">"1"</span>, features = [<span class="s">"derive"</span>] }</code></pre>
+    </article>
+    <article class="example-file" id="counter-src-lib-rs">
+        <h4><code>counter/src/lib.rs</code></h4>
+        <p>Defines the increment, decrement and watch methods on the shared counter.</p>
+        <pre><code><span class="c">//! Remote trait shared by the web counter client and server.
+</span><span class="a">#![warn(missing_docs)]</span>
+
+<span class="k">use</span> remoc::prelude::*;
+<span class="k">use</span> std::{error::Error, fmt};
+
+<span class="c">/// HTTP and WebSocket port used by the server.
+</span><span class="k">pub</span> <span class="k">const</span> HTTP_PORT: <span class="t">u16</span> = <span class="n">9872</span>;
+
+<span class="c">/// Changing the counter failed.
+</span><span class="a">#[derive(Debug, serde::Serialize, serde::Deserialize)]</span>
+<span class="k">pub</span> <span class="k">enum</span> <span class="t">ChangeError</span> {
+    <span class="c">/// The value cannot be increased any further.
+</span>    Maximum,
+    <span class="c">/// The value cannot be decreased any further.
+</span>    Minimum,
+    <span class="c">/// The RTC call failed.
+</span>    Call(rtc::CallError),
+}
+
+<span class="k">impl</span> <span class="t">From</span>&lt;rtc::CallError&gt; <span class="k">for</span> ChangeError {
+    <span class="k">fn</span> <span class="f">from</span>(error: <span class="t">rtc</span>::CallError) -&gt; <span class="t">Self</span> {
+        <span class="k">Self</span>::Call(error)
+    }
+}
+
+<span class="k">impl</span> fmt::Display <span class="k">for</span> ChangeError {
+    <span class="k">fn</span> <span class="f">fmt</span>(&amp;<span class="k">self</span>, formatter: <span class="k">&amp;</span><span class="t">mut</span> fmt::Formatter&lt;'<span class="t">_</span>&gt;) -&gt; <span class="t">fmt</span>::<span class="t">Result</span> {
+        <span class="k">match</span> <span class="k">self</span> {
+            <span class="k">Self</span>::Maximum =&gt; formatter.write_str(<span class="s">"the counter reached its maximum value"</span>),
+            <span class="k">Self</span>::Minimum =&gt; formatter.write_str(<span class="s">"the counter cannot be decreased below zero"</span>),
+            <span class="k">Self</span>::Call(error) =&gt; error.fmt(formatter),
+        }
+    }
+}
+
+<span class="k">impl</span> Error <span class="k">for</span> ChangeError {}
+
+<span class="c">/// A counter shared by all connected clients.
+// The macro generates the CounterClient and CounterServerSharedMut types.
+</span><span class="a">#[rtc::remote(server(SharedMut))]</span>
+<span class="k">pub</span> <span class="k">trait</span> Counter {
+    <span class="c">/// Increase the value by one.
+</span>    <span class="k">async</span> <span class="k">fn</span> <span class="f">increment</span>(&amp;<span class="k">mut</span> <span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;(), ChangeError&gt;;
+
+    <span class="c">/// Decrease the value by one.
+</span>    <span class="k">async</span> <span class="k">fn</span> <span class="f">decrement</span>(&amp;<span class="k">mut</span> <span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;(), ChangeError&gt;;
+
+    <span class="c">/// Subscribe to the current value and subsequent changes.
+</span>    <span class="k">async</span> <span class="k">fn</span> <span class="f">watch</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;rch::watch::Receiver&lt;<span class="t">u32</span>&gt;, rtc::CallError&gt;;
+}</code></pre>
+    </article>
+</section>
+<section class="example-crate">
+    <h3>counter-server-web</h3>
+    <p class="example-crate-role">Keeps the shared counter and serves the page and Remoc WebSocket endpoint.</p>
+    <article class="example-file" id="counter-server-web-Cargo-toml">
+        <h4><code>counter-server-web/Cargo.toml</code></h4>
+        <p>Its dependencies.</p>
+        <pre><code><span class="t">[package]</span>
+name = <span class="s">"counter-server-web"</span>
+version = <span class="s">"0.1.0"</span>
+edition = <span class="s">"2024"</span>
+publish = <span class="t">false</span>
+
+<span class="t">[dependencies]</span>
+counter-web = { path = <span class="s">"../counter"</span> }
+remoc = { version = <span class="s">"0.20"</span> }
+
+anyhow = <span class="s">"1"</span>
+axum = { version = <span class="s">"0.8"</span>, features = [<span class="s">"ws"</span>] }
+bytes = <span class="s">"1"</span>
+futures = <span class="s">"0.3"</span>
+tokio = { version = <span class="s">"1"</span>, features = [<span class="s">"macros"</span>, <span class="s">"net"</span>, <span class="s">"rt-multi-thread"</span>, <span class="s">"sync"</span>] }
+tracing = <span class="s">"0.1"</span>
+tracing-subscriber = <span class="s">"0.3"</span></code></pre>
+    </article>
+    <article class="example-file" id="counter-server-web-src-main-rs">
+        <h4><code>counter-server-web/src/main.rs</code></h4>
+        <p>Adapts an Axum WebSocket for Remoc and embeds the generated browser assets.</p>
+        <pre><code><span class="c">//! Axum server for the shared web counter.
+</span>
+<span class="k">use</span> anyhow::Context;
+<span class="k">use</span> axum::{
+    Router,
+    body::Bytes,
+    extract::{
+        State,
+        ws::{Message, WebSocket, WebSocketUpgrade},
+    },
+    http::{HeaderValue, header},
+    response::{Html, IntoResponse, Response},
+    routing::{any, get},
+};
+<span class="k">use</span> counter_web::{ChangeError, Counter, CounterServerSharedMut, HTTP_PORT};
+<span class="k">use</span> futures::{SinkExt, StreamExt, future};
+<span class="k">use</span> remoc::{codec, prelude::*};
+<span class="k">use</span> std::{net::Ipv4Addr, sync::Arc};
+<span class="k">use</span> tokio::sync::RwLock;
+
+<span class="c">// These files become part of the server executable at compile time.
+</span><span class="k">const</span> INDEX_HTML: <span class="k">&amp;</span><span class="t">str</span> = <span class="m">include_str!</span>(<span class="s">"index.html"</span>);
+<span class="k">const</span> CLIENT_JS: <span class="k">&amp;</span><span class="t">str</span> = <span class="m">include_str!</span>(<span class="m">concat!</span>(<span class="m">env!</span>(<span class="s">"CARGO_MANIFEST_DIR"</span>), <span class="s">"/../target/web/counter_web.js"</span>));
+<span class="k">const</span> CLIENT_WASM: <span class="k">&amp;</span>[<span class="t">u8</span>] =
+    <span class="m">include_bytes!</span>(<span class="m">concat!</span>(<span class="m">env!</span>(<span class="s">"CARGO_MANIFEST_DIR"</span>), <span class="s">"/../target/web/counter_web_bg.wasm"</span>));
+
+<span class="k">type</span> <span class="t">SharedCounter</span> = Arc&lt;RwLock&lt;CounterObj&gt;&gt;;
+
+<span class="c">/// The shared counter state.
+</span><span class="k">struct</span> <span class="t">CounterObj</span> {
+    value: <span class="t">rch</span>::watch::Sender&lt;<span class="t">u32</span>&gt;,
+}
+
+<span class="k">impl</span> <span class="t">Default</span> <span class="k">for</span> CounterObj {
+    <span class="k">fn</span> <span class="f">default</span>() -&gt; <span class="t">Self</span> {
+        <span class="k">let</span> (value, _) = rch::watch::channel(<span class="n">0</span>);
+        <span class="k">Self</span> { value }
+    }
+}
+
+<span class="k">impl</span> Counter <span class="k">for</span> CounterObj {
+    <span class="k">async</span> <span class="k">fn</span> <span class="f">increment</span>(&amp;<span class="k">mut</span> <span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;(), ChangeError&gt; {
+        <span class="k">let</span> current = *<span class="k">self</span>.value.borrow();
+        <span class="k">let</span> value = current.checked_add(<span class="n">1</span>).ok_or(ChangeError::Maximum)?;
+        <span class="k">self</span>.value.send_replace(value);
+        <span class="t">Ok</span>(())
+    }
+
+    <span class="k">async</span> <span class="k">fn</span> <span class="f">decrement</span>(&amp;<span class="k">mut</span> <span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;(), ChangeError&gt; {
+        <span class="k">let</span> current = *<span class="k">self</span>.value.borrow();
+        <span class="k">let</span> value = current.checked_sub(<span class="n">1</span>).ok_or(ChangeError::Minimum)?;
+        <span class="k">self</span>.value.send_replace(value);
+        <span class="t">Ok</span>(())
+    }
+
+    <span class="k">async</span> <span class="k">fn</span> <span class="f">watch</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;rch::watch::Receiver&lt;<span class="t">u32</span>&gt;, rtc::CallError&gt; {
+        <span class="t">Ok</span>(<span class="k">self</span>.value.subscribe())
+    }
+}
+
+<span class="a">#[tokio::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() -&gt; <span class="t">anyhow</span>::<span class="t">Result</span>&lt;()&gt; {
+    tracing_subscriber::fmt::init();
+
+    <span class="k">let</span> counter = Arc::new(RwLock::new(CounterObj::default()));
+    <span class="k">let</span> app = Router::new()
+        .route(<span class="s">"/"</span>, get(index))
+        .route(<span class="s">"/counter_web.js"</span>, get(client_js))
+        .route(<span class="s">"/counter_web_bg.wasm"</span>, get(client_wasm))
+        .route(<span class="s">"/remoc"</span>, any(websocket))
+        .with_state(counter);
+
+    <span class="k">let</span> address = (Ipv4Addr::LOCALHOST, HTTP_PORT);
+    <span class="k">let</span> listener = tokio::net::TcpListener::bind(address)
+        .<span class="k">await</span>
+        .with_context(|| <span class="m">format!</span>(<span class="s">"failed to listen on {}:{}"</span>, address.<span class="n">0</span>, address.<span class="n">1</span>))?;
+
+    <span class="m">println!</span>(<span class="s">"Open http://{}:{} in a web browser."</span>, address.<span class="n">0</span>, address.<span class="n">1</span>);
+    axum::serve(listener, app).<span class="k">await</span>.context(<span class="s">"web server failed"</span>)
+}
+
+<span class="k">async</span> <span class="k">fn</span> <span class="f">index</span>() -&gt; <span class="t">Html</span>&lt;&amp;'<span class="t">static</span> <span class="t">str</span>&gt; {
+    Html(INDEX_HTML)
+}
+
+<span class="k">async</span> <span class="k">fn</span> <span class="f">client_js</span>() -&gt; <span class="t">impl</span> IntoResponse {
+    ([(header::CONTENT_TYPE, HeaderValue::from_static(<span class="s">"text/javascript; charset=utf-8"</span>))], CLIENT_JS)
+}
+
+<span class="k">async</span> <span class="k">fn</span> <span class="f">client_wasm</span>() -&gt; <span class="t">impl</span> IntoResponse {
+    ([(header::CONTENT_TYPE, HeaderValue::from_static(<span class="s">"application/wasm"</span>))], Bytes::from_static(CLIENT_WASM))
+}
+
+<span class="k">async</span> <span class="k">fn</span> <span class="f">websocket</span>(State(counter): <span class="t">State</span>&lt;SharedCounter&gt;, upgrade: <span class="t">WebSocketUpgrade</span>) -&gt; <span class="t">Response</span> {
+    <span class="c">// Axum hands the upgraded WebSocket to this future.
+</span>    upgrade.on_upgrade(<span class="k">move</span> |socket| <span class="k">async</span> <span class="k">move</span> {
+        <span class="k">if</span> <span class="k">let</span> <span class="t">Err</span>(error) = serve_client(socket, counter).<span class="k">await</span> {
+            tracing::warn!(%error, <span class="s">"Remoc client connection failed"</span>);
+        }
+    })
+}
+
+<span class="k">async</span> <span class="k">fn</span> <span class="f">serve_client</span>(socket: <span class="t">WebSocket</span>, counter: <span class="t">SharedCounter</span>) -&gt; <span class="t">anyhow</span>::<span class="t">Result</span>&lt;()&gt; {
+    <span class="k">let</span> (websocket_tx, websocket_rx) = socket.split();
+
+    <span class="c">// Adapt Axum's binary WebSocket messages to the packet sink and stream Remoc expects.
+</span>    <span class="k">let</span> transport_tx =
+        websocket_tx.with(|packet: <span class="t">Bytes</span>| future::ready(<span class="t">Ok</span>::&lt;_, axum::Error&gt;(Message::Binary(packet))));
+    <span class="k">let</span> transport_rx = websocket_rx.filter_map(|message| {
+        future::ready(<span class="k">match</span> message {
+            <span class="t">Ok</span>(Message::Binary(packet)) =&gt; <span class="t">Some</span>(<span class="t">Ok</span>(packet)),
+            <span class="t">Ok</span>(_) =&gt; <span class="t">None</span>,
+            <span class="t">Err</span>(error) =&gt; <span class="t">Some</span>(<span class="t">Err</span>(error)),
+        })
+    });
+
+    <span class="c">// The macro-generated server executes calls on the counter shared by all connections.
+</span>    <span class="k">let</span> (server, client) = CounterServerSharedMut::&lt;_, codec::<span class="t">Default</span>&gt;::new(counter);
+
+    <span class="c">// Send its client proxy to the browser, then serve calls arriving through that proxy.
+</span>    remoc::Connect::framed(remoc::Cfg::default(), transport_tx, transport_rx)
+        .provide(client)
+        .<span class="k">await</span>
+        .context(<span class="s">"failed to establish Remoc connection"</span>)?;
+    server.serve().<span class="k">await</span>.map_err(|error| anyhow::anyhow!(<span class="s">"failed to serve counter: {error}"</span>))
+}</code></pre>
+    </article>
+    <article class="example-file" id="counter-server-web-src-index-html">
+        <h4><code>counter-server-web/src/index.html</code></h4>
+        <p>Provides the counter controls and calls the Rust client from JavaScript.</p>
+        <pre><code><span class="a">&lt;!doctype html&gt;</span>
+&lt;<span class="k">html</span> <span class="a">lang</span>=<span class="s">"en"</span>&gt;
+&lt;<span class="k">head</span>&gt;
+  &lt;<span class="k">meta</span> <span class="a">charset</span>=<span class="s">"utf-8"</span>&gt;
+  &lt;<span class="k">meta</span> <span class="a">name</span>=<span class="s">"viewport"</span> <span class="a">content</span>=<span class="s">"width=device-width, initial-scale=1"</span>&gt;
+  &lt;<span class="k">title</span>&gt;Remoc shared counter&lt;/<span class="k">title</span>&gt;
+  &lt;<span class="k">style</span>&gt;
+    <span class="k">body</span> {
+      <span class="k">max-width</span>: <span class="n">24</span><span class="t">rem</span>;
+      <span class="k">margin</span>: <span class="n">4</span><span class="t">rem</span> <span class="k">auto</span>;
+      <span class="k">padding</span>: <span class="n">0</span> <span class="n">1</span><span class="t">rem</span>;
+      <span class="k">font-family</span>: system-ui, <span class="k">sans-serif</span>;
+      <span class="k">text-align</span>: <span class="k">center</span>;
+    }
+
+    <span class="k">output</span> {
+      <span class="k">display</span>: <span class="k">block</span>;
+      <span class="k">margin</span>: <span class="n">2</span><span class="t">rem</span>;
+      <span class="k">font</span>: <span class="n">4</span><span class="t">rem</span>/<span class="n">1</span> ui-monospace, <span class="k">monospace</span>;
+    }
+
+    <span class="k">button</span> {
+      <span class="k">margin</span>: <span class="n">0</span> <span class="n">0.25</span><span class="t">rem</span>;
+      <span class="k">padding</span>: <span class="n">0.6</span><span class="t">rem</span> <span class="n">1</span><span class="t">rem</span>;
+      <span class="k">font</span>: <span class="k">inherit</span>;
+      <span class="k">cursor</span>: <span class="k">pointer</span>;
+    }
+
+    <span class="k">button</span>:disabled {
+      <span class="k">opacity</span>: <span class="n">0.45</span>;
+    }
+
+    #status {
+      <span class="k">min-height</span>: <span class="n">1.5</span><span class="t">em</span>;
+    }
+
+    #status.<span class="t">error</span> {
+      <span class="k">color</span>: <span class="n">#b00020</span>;
+    }
+  &lt;/<span class="k">style</span>&gt;
+&lt;/<span class="k">head</span>&gt;
+&lt;<span class="k">body</span>&gt;
+  &lt;<span class="k">main</span>&gt;
+    &lt;<span class="k">h1</span>&gt;Shared Remoc counter&lt;/<span class="k">h1</span>&gt;
+    &lt;<span class="k">output</span> <span class="a">id</span>=<span class="s">"value"</span> <span class="a">aria-live</span>=<span class="s">"polite"</span>&gt;--&lt;/<span class="k">output</span>&gt;
+    &lt;<span class="k">div</span>&gt;
+      &lt;<span class="k">button</span> <span class="a">id</span>=<span class="s">"decrement"</span> <span class="a">type</span>=<span class="s">"button"</span> <span class="a">disabled</span>&gt;Decrease&lt;/<span class="k">button</span>&gt;
+      &lt;<span class="k">button</span> <span class="a">id</span>=<span class="s">"increment"</span> <span class="a">type</span>=<span class="s">"button"</span> <span class="a">disabled</span>&gt;Increase&lt;/<span class="k">button</span>&gt;
+    &lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">p</span> <span class="a">id</span>=<span class="s">"status"</span>&gt;Connecting...&lt;/<span class="k">p</span>&gt;
+  &lt;/<span class="k">main</span>&gt;
+
+  &lt;<span class="k">script</span> <span class="a">type</span>=<span class="s">"module"</span>&gt;
+    <span class="k">import</span> init, { WebCounter } <span class="k">from</span> <span class="s">"./counter_web.js"</span>;
+
+    <span class="k">const</span> value = <span class="t">document</span>.querySelector(<span class="s">"#value"</span>);
+    <span class="k">const</span> status = <span class="t">document</span>.querySelector(<span class="s">"#status"</span>);
+    <span class="k">const</span> decrement = <span class="t">document</span>.querySelector(<span class="s">"#decrement"</span>);
+    <span class="k">const</span> increment = <span class="t">document</span>.querySelector(<span class="s">"#increment"</span>);
+    <span class="k">const</span> buttons = [decrement, increment];
+    <span class="k">let</span> counter;
+    <span class="k">let</span> connected = <span class="k">false</span>;
+
+    <span class="k">function</span> setButtonsEnabled(enabled) {
+      <span class="k">for</span> (<span class="k">const</span> button <span class="k">of</span> buttons) {
+        button.disabled = !enabled;
+      }
+    }
+
+    <span class="k">function</span> showError(error) {
+      connected = <span class="k">false</span>;
+      setButtonsEnabled(<span class="k">false</span>);
+      status.textContent = <span class="t">String</span>(error);
+      status.classList.add(<span class="s">"error"</span>);
+    }
+
+    <span class="k">async</span> <span class="k">function</span> change(operation) {
+      setButtonsEnabled(<span class="k">false</span>);
+      status.textContent = <span class="s">"Updating..."</span>;
+      status.classList.remove(<span class="s">"error"</span>);
+
+      <span class="k">try</span> {
+        <span class="k">await</span> operation();
+        status.textContent = <span class="s">"Connected"</span>;
+      } <span class="k">catch</span> (error) {
+        status.textContent = <span class="t">String</span>(error);
+        status.classList.add(<span class="s">"error"</span>);
+      } <span class="k">finally</span> {
+        setButtonsEnabled(connected);
+      }
+    }
+
+    decrement.addEventListener(<span class="s">"click"</span>, () =&gt; change(() =&gt; counter.decrement()));
+    increment.addEventListener(<span class="s">"click"</span>, () =&gt; change(() =&gt; counter.increment()));
+
+    <span class="k">try</span> {
+      <span class="c">// Load the WebAssembly module before using the Rust WebCounter type.</span>
+      <span class="k">await</span> init();
+      <span class="k">const</span> websocketProtocol = location.protocol === <span class="s">"https:"</span> ? <span class="s">"wss:"</span> : <span class="s">"ws:"</span>;
+
+      <span class="c">// Rust calls these functions when a watched value arrives or the channel closes.</span>
+      counter = <span class="k">await</span> WebCounter.connect(
+        <span class="s">`${</span>websocketProtocol<span class="s">}//${</span>location.host<span class="s">}/remoc`</span>,
+        newValue =&gt; {
+          value.value = newValue;
+        },
+        error =&gt; {
+          showError(<span class="s">`Disconnected: ${</span>error<span class="s">}`</span>);
+        },
+      );
+      connected = <span class="k">true</span>;
+      status.textContent = <span class="s">"Connected"</span>;
+      setButtonsEnabled(<span class="k">true</span>);
+    } <span class="k">catch</span> (error) {
+      showError(<span class="s">`Connection failed: ${</span>error<span class="s">}`</span>);
+    }
+  &lt;/<span class="k">script</span>&gt;
+&lt;/<span class="k">body</span>&gt;
+&lt;/<span class="k">html</span>&gt;</code></pre>
+    </article>
+</section>
+<section class="example-crate">
+    <h3>counter-client-web</h3>
+    <p class="example-crate-role">Runs the generated counter client in the browser.</p>
+    <article class="example-file" id="counter-client-web-Cargo-toml">
+        <h4><code>counter-client-web/Cargo.toml</code></h4>
+        <p>Its dependencies.</p>
+        <pre><code><span class="t">[package]</span>
+name = <span class="s">"counter-client-web"</span>
+version = <span class="s">"0.1.0"</span>
+edition = <span class="s">"2024"</span>
+publish = <span class="t">false</span>
+
+<span class="t">[lib]</span>
+crate-type = [<span class="s">"cdylib"</span>]
+
+<span class="t">[dependencies]</span>
+counter-web = { path = <span class="s">"../counter"</span> }
+remoc = { version = <span class="s">"0.20"</span>, features = [<span class="s">"js"</span>] }
+
+bytes = <span class="s">"1"</span>
+futures = <span class="s">"0.3"</span>
+js-sys = <span class="s">"0.3"</span>
+wasm-bindgen = <span class="s">"0.2"</span>
+wasm-bindgen-futures = <span class="s">"0.4"</span>
+web-sys = { version = <span class="s">"0.3"</span>, features = [<span class="s">"console"</span>] }
+websocket-web = <span class="s">"0.1"</span></code></pre>
+    </article>
+    <article class="example-file" id="counter-client-web-src-lib-rs">
+        <h4><code>counter-client-web/src/lib.rs</code></h4>
+        <p>Connects through the browser WebSocket API and exposes the counter to JavaScript with <code>wasm-bindgen</code>.</p>
+        <pre><code><span class="c">//! Browser client for the shared RTC counter.
+</span>
+<span class="k">use</span> bytes::Bytes;
+<span class="k">use</span> counter_web::{Counter, CounterClient};
+<span class="k">use</span> futures::{SinkExt, StreamExt, future, lock::Mutex};
+<span class="k">use</span> js_sys::Function;
+<span class="k">use</span> remoc::prelude::*;
+<span class="k">use</span> std::{fmt, io, rc::Rc};
+<span class="k">use</span> wasm_bindgen::prelude::*;
+<span class="k">use</span> wasm_bindgen_futures::spawn_local;
+<span class="k">use</span> websocket_web::{Msg, WebSocket};
+
+<span class="c">/// A browser-facing handle to the remote counter.
+// wasm-bindgen makes this type and its public methods available to JavaScript.
+</span><span class="a">#[wasm_bindgen]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="t">WebCounter</span> {
+    client: <span class="t">Rc</span>&lt;Mutex&lt;CounterClient&gt;&gt;,
+}
+
+<span class="a">#[wasm_bindgen]</span>
+<span class="k">impl</span> WebCounter {
+    <span class="c">/// Connects to the counter and starts forwarding watched values to JavaScript.
+</span>    <span class="a">#[wasm_bindgen(js_name = connect)]</span>
+    <span class="k">pub</span> <span class="k">async</span> <span class="k">fn</span> <span class="f">connect</span>(
+        url: <span class="t">String</span>, on_value: <span class="t">Function</span>, on_disconnect: <span class="t">Function</span>,
+    ) -&gt; <span class="t">Result</span>&lt;WebCounter, JsValue&gt; {
+        <span class="k">let</span> websocket = WebSocket::connect(&amp;url).<span class="k">await</span>.map_err(js_error)?;
+        <span class="k">let</span> (websocket_tx, websocket_rx) = websocket.into_split();
+
+        <span class="c">// Adapt binary WebSocket messages to the packet sink and stream Remoc expects.
+</span>        <span class="k">let</span> transport_tx =
+            websocket_tx.with(|packet: <span class="t">Bytes</span>| future::ready(<span class="t">Ok</span>::&lt;_, io::Error&gt;(Msg::Binary(packet.into()))));
+        <span class="k">let</span> transport_rx = websocket_rx.filter_map(|message| {
+            future::ready(<span class="k">match</span> message {
+                <span class="t">Ok</span>(Msg::Binary(packet)) =&gt; <span class="t">Some</span>(<span class="t">Ok</span>(Bytes::from(packet))),
+                <span class="t">Ok</span>(Msg::Text(_)) =&gt; <span class="t">None</span>,
+                <span class="t">Err</span>(error) =&gt; <span class="t">Some</span>(<span class="t">Err</span>(error)),
+            })
+        });
+
+        <span class="c">// Start Remoc on the WebSocket and receive the CounterClient sent by the server.
+</span>        <span class="k">let</span> client: <span class="t">CounterClient</span> = remoc::Connect::framed(remoc::Cfg::default(), transport_tx, transport_rx)
+            .consume()
+            .<span class="k">await</span>
+            .map_err(js_error)?;
+
+        <span class="c">// Send the current value to JavaScript before waiting for later changes.
+</span>        <span class="k">let</span> <span class="k">mut</span> watch = client.watch().<span class="k">await</span>.map_err(js_error)?;
+        <span class="k">let</span> initial_value = *watch.borrow_and_update().map_err(js_error)?;
+        call_with_value(&amp;on_value, initial_value)?;
+
+        <span class="c">// Browser futures run on the current JavaScript event-loop thread.
+</span>        spawn_local(<span class="k">async</span> <span class="k">move</span> {
+            <span class="k">if</span> <span class="k">let</span> <span class="t">Err</span>(error) = forward_values(watch, on_value).<span class="k">await</span> {
+                report_disconnect(&amp;on_disconnect, error);
+            }
+        });
+
+        <span class="t">Ok</span>(<span class="k">Self</span> { client: <span class="t">Rc</span>::new(Mutex::new(client)) })
+    }
+
+    <span class="c">/// Increases the shared counter by one.
+</span>    <span class="k">pub</span> <span class="k">async</span> <span class="k">fn</span> <span class="f">increment</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;(), JsValue&gt; {
+        <span class="k">self</span>.client.lock().<span class="k">await</span>.increment().<span class="k">await</span>.map_err(js_error)
+    }
+
+    <span class="c">/// Decreases the shared counter by one.
+</span>    <span class="k">pub</span> <span class="k">async</span> <span class="k">fn</span> <span class="f">decrement</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;(), JsValue&gt; {
+        <span class="k">self</span>.client.lock().<span class="k">await</span>.decrement().<span class="k">await</span>.map_err(js_error)
+    }
+}
+
+<span class="c">/// Forwards watched counter values to JavaScript until the channel closes.
+</span><span class="k">async</span> <span class="k">fn</span> <span class="f">forward_values</span>(
+    <span class="k">mut</span> watch: <span class="t">rch</span>::watch::Receiver&lt;<span class="t">u32</span>&gt;, on_value: <span class="t">Function</span>,
+) -&gt; <span class="t">Result</span>&lt;(), rch::watch::ChangedError&gt; {
+    <span class="k">loop</span> {
+        watch.changed().<span class="k">await</span>?;
+        <span class="k">let</span> value = *watch.borrow_and_update()?;
+        <span class="k">if</span> <span class="k">let</span> <span class="t">Err</span>(error) = call_with_value(&amp;on_value, value) {
+            web_sys::console::error_2(&amp;<span class="s">"The value callback failed:"</span>.into(), &amp;error);
+        }
+    }
+}
+
+<span class="k">fn</span> <span class="f">call_with_value</span>(callback: <span class="k">&amp;</span><span class="t">Function</span>, value: <span class="t">u32</span>) -&gt; <span class="t">Result</span>&lt;(), JsValue&gt; {
+    callback.call1(&amp;JsValue::NULL, &amp;JsValue::from(value))?;
+    <span class="t">Ok</span>(())
+}
+
+<span class="k">fn</span> <span class="f">report_disconnect</span>(error_callback: <span class="k">&amp;</span><span class="t">Function</span>, error: <span class="t">impl</span> fmt::Display) {
+    <span class="k">if</span> <span class="k">let</span> <span class="t">Err</span>(callback_error) = error_callback.call1(&amp;JsValue::NULL, &amp;JsValue::from_str(&amp;error.to_string())) {
+        web_sys::console::error_2(&amp;<span class="s">"The disconnection callback failed:"</span>.into(), &amp;callback_error);
+    }
+}
+
+<span class="k">fn</span> <span class="f">js_error</span>(error: <span class="t">impl</span> fmt::Display) -&gt; <span class="t">JsValue</span> {
+    js_sys::Error::new(&amp;error.to_string()).into()
+}</code></pre>
+    </article>
+</section>

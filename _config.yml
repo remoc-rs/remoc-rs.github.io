@@ -58,6 +58,7 @@ projects:
 examples:
   - { id: channels, name: Remote channels, url: /examples/channels.html }
   - { id: rtc, name: Remote trait calls, url: /examples/rtc.html }
+  - { id: rtc-web, name: Web browser, url: /examples/rtc-web.html }
 
 # GitHub Pages builds this with Jekyll; the layout and includes exist only to keep
 # the shared chrome in one place. Nothing here is a blog, so no plugins are needed.
