@@ -718,6 +718,14 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     margin-bottom: 0.45rem;
 }
 
+/* Here the listings follow a diagram and its caption rather than a lead paragraph,
+   so they need a break of their own to read as the next thing rather than as part
+   of the caption above them. */
+
+#pipelining .code-pair {
+    margin-top: 2.75rem;
+}
+
 /* One encoding of the data format: a heading, what it buys, and the diagram.
    The section holds one of these per configuration. */
 
@@ -993,11 +1001,127 @@ thead th {
     font-weight: 600;
 }
 
+.comparison-table th,
+.comparison-table td {
+    overflow-wrap: anywhere;
+    white-space: normal;
+    vertical-align: top;
+}
+
+.comparison-table tr > :first-child {
+    padding-left: 0.9rem;
+}
+
+.comparison-table .comparison-remoc > * {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
 td.num,
 th.num {
     text-align: right;
     font-variant-numeric: tabular-nums;
     padding-right: 1.4rem;
+}
+
+/* Example listings, generated from the repository by _tools/render_examples.py.
+   Each file carries its own path as a heading, because the point of the page is
+   that these are several files making up one program rather than one long
+   listing. */
+
+/* One crate per group, ruled off from the next, because the thing a reader has to
+   understand first is that this is three programs' worth of files and which file
+   belongs to which. */
+
+.example-crate {
+    border-top: 2px solid var(--accent);
+    padding-top: 1rem;
+    margin-top: 3rem;
+}
+
+.example-crate:first-of-type {
+    margin-top: 1rem;
+}
+
+.example-crate h3 {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 1.15rem;
+    margin-bottom: 0.3em;
+}
+
+.example-crate-role {
+    max-width: 46rem;
+    margin-bottom: 2rem;
+}
+
+.example-file {
+    margin-bottom: 2.5rem;
+}
+
+.example-file h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.3em;
+}
+
+/* The path is the identity of the block, so it is set as a path rather than as
+   prose: monospace, at full contrast, and without the inline-code background
+   that would make it look like a mention of a file rather than the file. */
+.example-file h4 code {
+    background: none;
+    padding: 0;
+    font-size: 1em;
+    color: var(--fg-muted);
+}
+
+.example-file > p {
+    color: var(--fg-muted);
+    font-size: 0.94rem;
+    max-width: 46rem;
+    margin-bottom: 0.7rem;
+}
+
+/* Deliberately no height limit: the page exists so that a whole file can be read
+   in one go, and an inner scrollbar per listing would take that back. A long page
+   is the right shape for a listing of six files. */
+
+/* Shell commands, where the font's ligatures would be a lie: `--manifest-path`
+   must not be drawn as an em dash followed by a word. */
+pre.cmd {
+    font-variant-ligatures: none;
+}
+
+/* Switches between the example pages. They are separate pages, so these are plain
+   links; only the styling makes them a set of tabs. */
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 2rem;
+}
+
+.tabs a {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    font-size: 0.94rem;
+    font-weight: 600;
+    color: var(--fg-muted);
+    background: var(--bg);
+    text-decoration: none;
+}
+
+.tabs a:hover {
+    color: var(--fg);
+    border-color: var(--accent);
+}
+
+/* The current tab is filled rather than merely tinted, so which page you are on
+   survives being read without colour. */
+.tabs a.current {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
 }
 
 /* Syntax colours */

@@ -18,9 +18,9 @@ projects:
     branch: master
     crate: remoc
     links:
-      - { title: Features, url: "/#features" }
-      - { title: Usage, url: "/#usage" }
+      - { title: Examples, url: /examples/channels.html }
       - { title: Benchmarks, url: /benchmarks.html }
+      - { title: Comparison, url: /comparison.html }
       - { title: Docs, url: "https://docs.rs/remoc" }
       - { title: GitHub, url: "https://github.com/remoc-rs/remoc", icon: github }
   - id: postbag
@@ -56,6 +56,12 @@ projects:
       - { title: Tools, url: "/aggligator/#tools" }
       - { title: Docs, url: "https://docs.rs/aggligator" }
       - { title: GitHub, url: "https://github.com/remoc-rs/aggligator", icon: github }
+
+# The example programs. The pages under /examples/ switch between them with a tab bar,
+# and each names the one it is with `example:` in its front matter.
+examples:
+  - { id: channels, name: Remote channels, url: /examples/channels.html }
+  - { id: rtc, name: Remote trait calls, url: /examples/rtc.html }
 
 # GitHub Pages builds this with Jekyll; the layout and includes exist only to keep
 # the shared chrome in one place. Nothing here is a blog, so no plugins are needed.

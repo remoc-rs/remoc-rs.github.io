@@ -1,0 +1,82 @@
+---
+layout: base
+project: remoc
+title: "A counter over remote trait calls: a Remoc example"
+description: >-
+  A client and server built on a trait tagged with #[rtc::remote], including watch
+  notifications and a streamed sequence.
+social_description: >-
+  A remote trait whose methods return values and channels for subsequent updates.
+canonical: /examples/rtc.html
+example: rtc
+nav_url: /examples/channels.html
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Example: a counter over trait calls</h1>
+            <p class="lead">
+                The server maintains a counter that clients can query, increase and watch.
+            </p>
+
+            {% include example-tabs.html %}
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <p>
+                    The <code>#[rtc::remote]</code> attribute generates a client that implements
+                    the trait and server types that dispatch calls to the trait implementation.
+                    Calling a method on the client runs it on the server and returns its result.
+                </p>
+                <p>
+                    The <code>watch()</code> method returns a
+                    <a href="https://docs.rs/remoc/latest/remoc/rch/watch/index.html">watch
+                        receiver</a> and <code>count_to_value()</code> an
+                    <a href="https://docs.rs/remoc/latest/remoc/rch/mpsc/index.html">mpsc
+                        receiver</a>. Both receivers continue to deliver values after the method
+                    call returns.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Running it</h2>
+                <p>
+                    Clone the repository:
+                </p>
+                <pre class="cmd"><code>git clone {{ site.repo }}
+cd remoc</code></pre>
+                <p class="section-foot">
+                    Start the server:
+                </p>
+                <pre class="cmd"><code>cargo run --manifest-path examples/rtc/Cargo.toml -p counter-server</code></pre>
+                <p class="section-foot">
+                    Then, in another terminal, start the client:
+                </p>
+                <pre class="cmd"><code>cargo run --manifest-path examples/rtc/Cargo.toml -p counter-client</code></pre>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>The program</h2>
+                <p class="section-lead">
+                    The shared crate defines the remote trait, and the other two crates provide the
+                    server and client binaries.
+                </p>
+
+                {% include example-rtc.html %}
+
+                <p class="section-foot">
+                    <a class="button icon-link" href="{{ site.repo }}/tree/master/examples/rtc"><span
+                            class="icon github" aria-hidden="true"></span>Browse it on GitHub</a>
+                </p>
+            </div>
+        </section>
+    </main>

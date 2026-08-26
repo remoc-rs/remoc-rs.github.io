@@ -1,0 +1,60 @@
+<svg viewBox="0 0 960 524" role="img" aria-labelledby="pipelining-title pipelining-desc"
+     xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
+  <title id="pipelining-title">What pipelining saves</title>
+  <desc id="pipelining-desc">Two frames, each showing a client timeline above a server timeline with requests travelling down to the server and results back up. In the first, a call on the directory hands out a counter and three further calls are then made on that counter, each waiting for the previous result, so the exchange takes four round trips and fills the width of the picture. In the second, the same four calls leave together and their results come back together, so the exchange takes one round trip and occupies a quarter of the width.</desc>
+  <text x="0" y="26" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg)">Ordinarily: each call waits for the result of the one before it</text>
+  <line x1="96" y1="78" x2="952" y2="78" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="82" y="83" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg-muted)">Client</text>
+  <line x1="96" y1="174" x2="952" y2="174" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="82" y="179" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg-muted)">Server</text>
+  <line x1="100.5" y1="82.0" x2="203.0" y2="174" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 195.0,169.5 L 203.0,174 L 195.0,178.5 Z" fill="var(--accent)" transform="rotate(41.9 203.0 174)"/>
+  <line x1="207.5" y1="170.0" x2="310.0" y2="78" stroke="var(--ty)" stroke-width="2"/>
+  <path d="M 302.0,73.5 L 310.0,78 L 302.0,82.5 Z" fill="var(--ty)" transform="rotate(-41.9 310.0 78)"/>
+  <text x="96.0" y="62" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--fg)"><tspan font-size="11" fill="var(--fg-muted)">dir.</tspan>open_counter("mine")</text>
+  <text x="310.0" y="156.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--ty)">CounterClient</text>
+  <line x1="314.5" y1="82.0" x2="417.0" y2="174" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 409.0,169.5 L 417.0,174 L 409.0,178.5 Z" fill="var(--accent)" transform="rotate(41.9 417.0 174)"/>
+  <line x1="421.5" y1="170.0" x2="524.0" y2="78" stroke="var(--ty)" stroke-width="2"/>
+  <path d="M 516.0,73.5 L 524.0,78 L 516.0,82.5 Z" fill="var(--ty)" transform="rotate(-41.9 524.0 78)"/>
+  <text x="310.0" y="62" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--fg)"><tspan font-size="11" fill="var(--fg-muted)">counter.</tspan>increase(20)</text>
+  <line x1="528.5" y1="82.0" x2="631.0" y2="174" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 623.0,169.5 L 631.0,174 L 623.0,178.5 Z" fill="var(--accent)" transform="rotate(41.9 631.0 174)"/>
+  <line x1="635.5" y1="170.0" x2="738.0" y2="78" stroke="var(--ty)" stroke-width="2"/>
+  <path d="M 730.0,73.5 L 738.0,78 L 730.0,82.5 Z" fill="var(--ty)" transform="rotate(-41.9 738.0 78)"/>
+  <text x="524.0" y="62" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--fg)"><tspan font-size="11" fill="var(--fg-muted)">counter.</tspan>increase(45)</text>
+  <line x1="742.5" y1="82.0" x2="845.0" y2="174" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 837.0,169.5 L 845.0,174 L 837.0,178.5 Z" fill="var(--accent)" transform="rotate(41.9 845.0 174)"/>
+  <line x1="849.5" y1="170.0" x2="952.0" y2="78" stroke="var(--ty)" stroke-width="2"/>
+  <path d="M 944.0,73.5 L 952.0,78 L 944.0,82.5 Z" fill="var(--ty)" transform="rotate(-41.9 952.0 78)"/>
+  <text x="738.0" y="62" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="12.5" fill="var(--fg)"><tspan font-size="11" fill="var(--fg-muted)">counter.</tspan>value()</text>
+  <text x="203.0" y="194" font-family="Inter, system-ui, sans-serif" font-size="12.5" fill="var(--fg-muted)">counter created</text>
+  <path d="M 96.0,211 L 96.0,221 M 96.0,216 L 952.0,216 M 952.0,211 L 952.0,221" stroke="var(--fg-muted)" stroke-width="1.5" fill="none"/>
+  <text x="524.0" y="237" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg)">4 round trips</text>
+  <text x="0" y="295" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg)">Pipelined: every call is sent before any result is awaited</text>
+  <line x1="96" y1="347" x2="952" y2="347" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="82" y="352" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg-muted)">Client</text>
+  <line x1="96" y1="443" x2="952" y2="443" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="82" y="448" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg-muted)">Server</text>
+  <line x1="100.5" y1="351.0" x2="203.0" y2="443" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 195.0,438.5 L 203.0,443 L 195.0,447.5 Z" fill="var(--accent)" transform="rotate(41.9 203.0 443)"/>
+  <line x1="207.5" y1="439.0" x2="310.0" y2="347" stroke="var(--ty)" stroke-width="2"/>
+  <path d="M 302.0,342.5 L 310.0,347 L 302.0,351.5 Z" fill="var(--ty)" transform="rotate(-41.9 310.0 347)"/>
+  <line x1="115.4" y1="351.0" x2="218.0" y2="443" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 210.0,438.5 L 218.0,443 L 210.0,447.5 Z" fill="var(--accent)" transform="rotate(41.9 218.0 443)"/>
+  <line x1="222.4" y1="439.0" x2="325.0" y2="347" stroke="var(--ty)" stroke-width="2"/>
+  <path d="M 317.0,342.5 L 325.0,347 L 317.0,351.5 Z" fill="var(--ty)" transform="rotate(-41.9 325.0 347)"/>
+  <line x1="130.4" y1="351.0" x2="233.0" y2="443" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 225.0,438.5 L 233.0,443 L 225.0,447.5 Z" fill="var(--accent)" transform="rotate(41.9 233.0 443)"/>
+  <line x1="237.4" y1="439.0" x2="340.0" y2="347" stroke="var(--ty)" stroke-width="2"/>
+  <path d="M 332.0,342.5 L 340.0,347 L 332.0,351.5 Z" fill="var(--ty)" transform="rotate(-41.9 340.0 347)"/>
+  <line x1="145.4" y1="351.0" x2="247.9" y2="443" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 239.9,438.5 L 247.9,443 L 239.9,447.5 Z" fill="var(--accent)" transform="rotate(41.9 247.9 443)"/>
+  <line x1="252.4" y1="439.0" x2="354.9" y2="347" stroke="var(--ty)" stroke-width="2"/>
+  <path d="M 346.9,342.5 L 354.9,347 L 346.9,351.5 Z" fill="var(--ty)" transform="rotate(-41.9 354.9 347)"/>
+  <text x="167.7" y="331" font-family="Inter, system-ui, sans-serif" font-size="13.5" fill="var(--accent)">all four requests</text>
+  <text x="368.9" y="352" font-family="Inter, system-ui, sans-serif" font-size="13.5" fill="var(--ty)">all four results</text>
+  <text x="203.0" y="463" font-family="Inter, system-ui, sans-serif" font-size="12.5" fill="var(--fg-muted)">counter attached, queued calls run</text>
+  <path d="M 96.0,480 L 96.0,490 M 96.0,485 L 354.9,485 M 354.9,480 L 354.9,490" stroke="var(--fg-muted)" stroke-width="1.5" fill="none"/>
+  <text x="225.5" y="506" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg)">1 round trip</text>
+</svg>

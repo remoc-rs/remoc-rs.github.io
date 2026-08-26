@@ -1,0 +1,223 @@
+<!-- generated from remoc 62d1ab4 by _tools/render_examples.py -->
+<section class="example-crate">
+    <h3>counting</h3>
+    <p class="example-crate-role">Defines the request type shared by the client and server.</p>
+    <article class="example-file" id="counting-Cargo-toml">
+        <h4><code>counting/Cargo.toml</code></h4>
+        <p>Its dependencies.</p>
+        <pre><code><span class="t">[package]</span>
+name = <span class="s">"counting"</span>
+version = <span class="s">"0.1.0"</span>
+edition = <span class="s">"2024"</span>
+
+<span class="t">[dependencies]</span>
+remoc = { version = <span class="s">"0.20"</span> }
+serde = { version = <span class="s">"1.0"</span>, features = [<span class="s">"derive"</span>] }</code></pre>
+    </article>
+    <article class="example-file" id="counting-src-lib-rs">
+        <h4><code>counting/src/lib.rs</code></h4>
+        <p>Defines a request containing a channel sender.</p>
+        <pre><code><span class="c">//! This library crate defines the data exchanged by the counting example.
+//!
+//! The client and server depend on it. It is the whole contract between
+//! them: there is no schema file and nothing to generate.
+</span><span class="a">#![warn(missing_docs)]</span>
+
+<span class="k">use</span> remoc::prelude::*;
+
+<span class="c">/// TCP port the server is listening on.
+</span><span class="k">pub</span> <span class="k">const</span> TCP_PORT: <span class="t">u16</span> = <span class="n">9870</span>;
+
+<span class="c">/// A request to count up to a number.
+///
+/// Remoc types such as channel senders and receivers are serializable, so they
+/// can be placed in a struct like any other field. Sending this request creates
+/// the channel `seq_tx` belongs to inside the connection that carries the
+/// request, which is what saves the client from opening a second connection or
+/// agreeing on an identifier with the server.
+</span><span class="a">#[derive(Debug, serde::Serialize, serde::Deserialize)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="t">CountReq</span> {
+    <span class="c">/// Count up to, but excluding, this number.
+</span>    <span class="k">pub</span> up_to: <span class="t">u32</span>,
+    <span class="c">/// The sender the server should count into.
+</span>    <span class="c">///
+</span>    <span class="c">/// The client keeps the matching receiver.
+</span>    <span class="k">pub</span> seq_tx: <span class="t">rch</span>::mpsc::Sender&lt;<span class="t">u32</span>&gt;,
+}</code></pre>
+    </article>
+</section>
+<section class="example-crate">
+    <h3>counting-server</h3>
+    <p class="example-crate-role">Accepts TCP connections and counts into whatever channel arrives in the request.</p>
+    <article class="example-file" id="counting-server-Cargo-toml">
+        <h4><code>counting-server/Cargo.toml</code></h4>
+        <p>Its dependencies.</p>
+        <pre><code><span class="t">[package]</span>
+name = <span class="s">"counting-server"</span>
+version = <span class="s">"0.1.0"</span>
+edition = <span class="s">"2024"</span>
+
+<span class="t">[dependencies]</span>
+counting = { path = <span class="s">"../counting"</span> }
+remoc = { version = <span class="s">"0.20"</span> }
+tokio = { version = <span class="s">"1"</span>, features = [<span class="s">"rt-multi-thread"</span>, <span class="s">"net"</span>, <span class="s">"time"</span>] }</code></pre>
+    </article>
+    <article class="example-file" id="counting-server-src-main-rs">
+        <h4><code>counting-server/src/main.rs</code></h4>
+        <p>Receives requests and sends each sequence over the channel included in the request.</p>
+        <pre><code><span class="c">//! This crate implements the server of the counting example.
+//!
+//! It accepts TCP connections, establishes a Remoc connection over each one and
+//! then counts into whatever channel the client sends it.
+</span><span class="a">#![warn(missing_docs)]</span>
+
+<span class="k">use</span> remoc::prelude::*;
+<span class="k">use</span> std::{net::Ipv4Addr, time::Duration};
+<span class="k">use</span> tokio::{net::TcpListener, time::sleep};
+
+<span class="k">use</span> counting::{CountReq, TCP_PORT};
+
+<span class="a">#[tokio::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() {
+    <span class="c">// Listen to TCP connections using Tokio.
+</span>    <span class="c">// In reality you would probably use TLS or WebSockets over HTTPS.
+</span>    <span class="m">println!</span>(<span class="s">"Listening on port {TCP_PORT}. Press Ctrl+C to exit."</span>);
+    <span class="k">let</span> listener = TcpListener::bind((Ipv4Addr::LOCALHOST, TCP_PORT)).<span class="k">await</span>.unwrap();
+
+    <span class="k">loop</span> {
+        <span class="c">// Accept an incoming TCP connection.
+</span>        <span class="k">let</span> (socket, addr) = listener.accept().<span class="k">await</span>.unwrap();
+        <span class="k">let</span> (socket_rx, socket_tx) = socket.into_split();
+        <span class="m">println!</span>(<span class="s">"Accepted connection from {addr}"</span>);
+
+        <span class="c">// Spawn a task for each incoming connection.
+</span>        tokio::spawn(<span class="k">async</span> <span class="k">move</span> {
+            <span class="c">// Establish a Remoc connection with default configuration over the TCP
+</span>            <span class="c">// connection and obtain the receiving half of the base channel.
+</span>            <span class="c">//
+</span>            <span class="c">// The connection is always bidirectional, but this end only receives,
+</span>            <span class="c">// so the unneeded sender is dropped.
+</span>            <span class="k">let</span> (conn, _tx, rx): (_, rch::base::Sender&lt;()&gt;, _) =
+                remoc::Connect::io(remoc::Cfg::default(), socket_rx, socket_tx).<span class="k">await</span>.unwrap();
+
+            <span class="c">// The connection dispatcher must be spawned; it drives everything that
+</span>            <span class="c">// travels over this TCP connection.
+</span>            tokio::spawn(conn);
+
+            <span class="c">// Serve requests until the client disconnects. A client going away is
+</span>            <span class="c">// an ordinary end to the conversation, not a failure, so it is told
+</span>            <span class="c">// apart from the errors that are.
+</span>            <span class="k">match</span> serve(rx).<span class="k">await</span> {
+                <span class="t">Ok</span>(()) =&gt; <span class="m">println!</span>(<span class="s">"Client {addr} closed the connection"</span>),
+                <span class="t">Err</span>(err) <span class="k">if</span> err.is_disconnected() =&gt; <span class="m">println!</span>(<span class="s">"Client {addr} disconnected"</span>),
+                <span class="t">Err</span>(err) =&gt; <span class="m">println!</span>(<span class="s">"Connection from {addr} failed: {err}"</span>),
+            }
+        });
+    }
+}
+
+<span class="c">/// Counts for the client, once per request.
+</span><span class="k">async</span> <span class="k">fn</span> <span class="f">serve</span>(<span class="k">mut</span> rx: <span class="t">rch</span>::base::Receiver&lt;CountReq&gt;) -&gt; <span class="t">Result</span>&lt;(), rch::base::RecvError&gt; {
+    <span class="c">// Receive count requests over the base channel.
+</span>    <span class="k">while</span> <span class="k">let</span> <span class="t">Some</span>(CountReq { up_to, seq_tx }) = rx.recv().<span class="k">await</span>? {
+        <span class="m">println!</span>(<span class="s">"Counting up to {up_to}"</span>);
+
+        <span class="k">for</span> i <span class="k">in</span> <span class="n">0</span>..up_to {
+            <span class="c">// Send each counted number over the channel the client provided.
+</span>            <span class="c">//
+</span>            <span class="c">// This is an ordinary channel send; that the receiver is on another
+</span>            <span class="c">// machine makes no difference to the code, only to the error it can
+</span>            <span class="c">// return.
+</span>            <span class="k">if</span> seq_tx.send(i).<span class="k">await</span>.into_disconnected().unwrap() {
+                <span class="c">// The client dropped its receiver or went away, so there is
+</span>                <span class="c">// nobody left to count for.
+</span>                <span class="m">println!</span>(<span class="s">"Client stopped listening"</span>);
+                <span class="k">break</span>;
+            }
+
+            sleep(Duration::from_millis(<span class="n">300</span>)).<span class="k">await</span>;
+        }
+
+        <span class="c">// Dropping seq_tx closes that channel, which is how the client's
+</span>        <span class="c">// recv() learns that the sequence has ended.
+</span>    }
+
+    <span class="t">Ok</span>(())
+}</code></pre>
+    </article>
+</section>
+<section class="example-crate">
+    <h3>counting-client</h3>
+    <p class="example-crate-role">Asks the server to count and prints the sequence as it arrives.</p>
+    <article class="example-file" id="counting-client-Cargo-toml">
+        <h4><code>counting-client/Cargo.toml</code></h4>
+        <p>Its dependencies.</p>
+        <pre><code><span class="t">[package]</span>
+name = <span class="s">"counting-client"</span>
+version = <span class="s">"0.1.0"</span>
+edition = <span class="s">"2024"</span>
+
+<span class="t">[dependencies]</span>
+counting = { path = <span class="s">"../counting"</span> }
+remoc = { version = <span class="s">"0.20"</span> }
+tokio = { version = <span class="s">"1"</span>, features = [<span class="s">"rt-multi-thread"</span>, <span class="s">"net"</span>, <span class="s">"time"</span>] }</code></pre>
+    </article>
+    <article class="example-file" id="counting-client-src-main-rs">
+        <h4><code>counting-client/src/main.rs</code></h4>
+        <p>Creates a channel, sends its sender in the request and reads from its receiver.</p>
+        <pre><code><span class="c">//! This crate implements the client of the counting example.
+//!
+//! It asks the server to count, sending the channel to count into along with
+//! the request.
+</span><span class="a">#![warn(missing_docs)]</span>
+
+<span class="k">use</span> remoc::prelude::*;
+<span class="k">use</span> std::net::Ipv4Addr;
+<span class="k">use</span> tokio::net::TcpStream;
+
+<span class="k">use</span> counting::{CountReq, TCP_PORT};
+
+<span class="a">#[tokio::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() {
+    <span class="c">// Establish TCP connection to server.
+</span>    <span class="k">let</span> socket = TcpStream::connect((Ipv4Addr::LOCALHOST, TCP_PORT)).<span class="k">await</span>.unwrap();
+    <span class="k">let</span> (socket_rx, socket_tx) = socket.into_split();
+
+    <span class="c">// Establish a Remoc connection with default configuration over the TCP
+</span>    <span class="c">// connection and obtain the sending half of the base channel.
+</span>    <span class="c">//
+</span>    <span class="c">// The connection is always bidirectional, but this end only sends, so the
+</span>    <span class="c">// unneeded receiver is dropped.
+</span>    <span class="k">let</span> (conn, tx, _rx): (_, _, rch::base::Receiver&lt;()&gt;) =
+        remoc::Connect::io(remoc::Cfg::default(), socket_rx, socket_tx).<span class="k">await</span>.unwrap();
+
+    <span class="c">// The connection dispatcher must be spawned; it drives everything that
+</span>    <span class="c">// travels over this TCP connection.
+</span>    tokio::spawn(conn);
+
+    count(tx, <span class="n">10</span>).<span class="k">await</span>;
+}
+
+<span class="c">/// Asks the server to count up to `up_to` and prints each number as it arrives.
+</span><span class="k">async</span> <span class="k">fn</span> <span class="f">count</span>(<span class="k">mut</span> tx: <span class="t">rch</span>::base::Sender&lt;CountReq&gt;, up_to: <span class="t">u32</span>) {
+    <span class="c">// Create a new channel. Nothing has been sent yet, so the server does not
+</span>    <span class="c">// know about it and no connection has been made for it.
+</span>    <span class="k">let</span> (seq_tx, <span class="k">mut</span> seq_rx) = rch::mpsc::channel();
+
+    <span class="c">// Sending the sender half connects the channel to the server, inside the
+</span>    <span class="c">// TCP connection that already exists. There is no port to open, nothing to
+</span>    <span class="c">// register and no acknowledgement to wait for.
+</span>    <span class="m">println!</span>(<span class="s">"Asking the server to count up to {up_to}"</span>);
+    tx.send(CountReq { up_to, seq_tx }).<span class="k">await</span>.unwrap();
+
+    <span class="c">// Receive each number as the server counts it.
+</span>    <span class="k">while</span> <span class="k">let</span> <span class="t">Some</span>(i) = seq_rx.recv().<span class="k">await</span>.unwrap() {
+        <span class="m">println!</span>(<span class="s">"Server counts {i}"</span>);
+    }
+
+    <span class="c">// recv() returned None, so the server dropped its sender: the sequence is
+</span>    <span class="c">// over. A channel closing is how a remote endpoint says it is finished.
+</span>    <span class="m">println!</span>(<span class="s">"Server is done counting."</span>);
+}</code></pre>
+    </article>
+</section>

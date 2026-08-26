@@ -90,6 +90,61 @@ nav: home
             </div>
         </section>
 
+        <section id="pipelining" class="section alt">
+            <div class="wrap">
+                <h2>Multiple remote calls, <b>one</b> round trip</h2>
+                <p class="section-lead">
+                    A call that hands out another object normally costs a round trip before that
+                    object can be used. Mark the method <code>#[pipelinable]</code> and the caller
+                    creates the client itself, then calls it while the request that opens it is
+                    still on its way.
+                </p>
+                <figure class="diagram">
+                    {% include diagram-pipelining.svg %}
+                    <figcaption>
+                        The counter is requested by the caller and calls to be performed with it are
+                        sent along with the initial request. They are run the moment the server attaches the
+                        counter to it. Only the final request is waited for, so the counter creation and the three
+                        calls that depend on it share a single round trip.
+                    </figcaption>
+                </figure>
+
+                <div class="code-pair">
+                <figure>
+                    <figcaption>The trait</figcaption>
+                    <pre><code><span class="a">#[rtc::remote]</span>
+<span class="k">trait</span> <span class="t">Directory</span> {
+    <span class="c">// One attribute; the method itself is unchanged</span>
+    <span class="c">// and existing callers keep working.</span>
+    <span class="a">#[pipelinable]</span>
+    <span class="k">async fn</span> <span class="f">open_counter</span>(&amp;<span class="k">self</span>, name: <span class="t">String</span>)
+        -&gt; <span class="t">Result</span>&lt;<span class="t">CounterClient</span>, <span class="t">OpenError</span>&gt;;
+}</code></pre>
+                </figure>
+                <figure>
+                    <figcaption>The caller</figcaption>
+                    <pre><code><span class="c">// The client, before the object it names exists.</span>
+<span class="k">let</span> (<span class="k">mut</span> counter, counter_rx) = <span class="t">CounterClient</span>::<span class="f">new</span>();
+
+<span class="c">// Every call is sent before any result is awaited.</span>
+<span class="k">let</span> value = rtc::<span class="m">calls!</span>(
+    dir.<span class="f">open_counter_pipelined</span>(name, counter_rx);
+    counter.<span class="f">increase_call</span>(<span class="n">20</span>);
+    counter.<span class="f">increase_call</span>(<span class="n">45</span>);
+    counter.<span class="f">value_call</span>()
+);</code></pre>
+                </figure>
+                </div>
+
+                <p class="section-foot">
+                    A pipelined call may hand out a further object in turn, so a chain of them is
+                    still one round trip.
+                    <a href="https://docs.rs/remoc/latest/remoc/rtc/pipelining/index.html">How
+                        pipelining works &rarr;</a>
+                </p>
+            </div>
+        </section>
+
         <section id="schema-evolution" class="section">
             <div class="wrap">
                 <h2>Messages that <strong>evolve</strong> with your application</h2>
@@ -131,6 +186,7 @@ nav: home
                         Putting <code>#[rtc::remote]</code> on a trait generates client and server
                         implementations. Arguments and return values may contain channels, allowing a
                         method to return a stream of updates instead of a single value.
+                        Multiple calls can be pipelined, saving round trips.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc module &rarr;</a></p>
                 </article>
@@ -206,6 +262,9 @@ nav: home
                     </p>
                 </article>
                 </div>
+                <p class="section-foot">
+                    <a href="comparison.html">How Remoc compares with other RPC libraries &rarr;</a>
+                </p>
             </div>
         </section>
 
@@ -262,9 +321,12 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
                 </div>
 
                 <p class="section-foot">
-                    <a class="button"
-                        href="https://github.com/remoc-rs/remoc/tree/master/examples/rtc">Example
-                        (client and server) &rarr;</a>
+                    The fragments above are excerpts. The complete programs &mdash; every file,
+                    client and server &mdash; are on their own pages:
+                </p>
+                <p class="section-foot">
+                    <a class="button" href="/examples/channels.html">Channels example &rarr;</a>
+                    <a class="button" href="/examples/rtc.html">Trait calling example &rarr;</a>
                 </p>
             </div>
         </section>

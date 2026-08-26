@@ -1,0 +1,79 @@
+---
+layout: base
+project: remoc
+title: "Counting over remote channels: a Remoc example"
+description: >-
+  A client and server that exchange values over a channel sent inside a request.
+social_description: >-
+  A client creates a channel, sends its sender in a request and reads the numbers
+  produced by the server.
+canonical: /examples/channels.html
+example: channels
+nav_url: /examples/channels.html
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Example: counting over channels</h1>
+            <p class="lead">
+                The client asks the server to count, includes a channel sender in the request
+                and reads the resulting sequence from the receiver.
+            </p>
+
+            {% include example-tabs.html %}
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <p>
+                    The client creates the channel after establishing the TCP connection. Its
+                    sender is transferred to the server as part of the request, while the client
+                    retains the receiver. Remoc carries the channel over the existing connection.
+                </p>
+                <p>
+                    The example uses three crates. <code>counting</code> defines the request type,
+                    and the client and server binaries both depend on it.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Running it</h2>
+                <p>
+                    Clone the repository:
+                </p>
+                <pre class="cmd"><code>git clone {{ site.repo }}
+cd remoc</code></pre>
+                <p class="section-foot">
+                    Start the server:
+                </p>
+                <pre class="cmd"><code>cargo run --manifest-path examples/channels/Cargo.toml -p counting-server</code></pre>
+                <p class="section-foot">
+                    Then, in another terminal, start the client:
+                </p>
+                <pre class="cmd"><code>cargo run --manifest-path examples/channels/Cargo.toml -p counting-client</code></pre>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>The program</h2>
+                <p class="section-lead">
+                    The shared crate defines the request, and the other two crates provide the
+                    server and client binaries.
+                </p>
+
+                {% include example-channels.html %}
+
+                <p class="section-foot">
+                    <a class="button icon-link" href="{{ site.repo }}/tree/master/examples/channels"><span
+                            class="icon github" aria-hidden="true"></span>Browse it on GitHub</a>
+                </p>
+            </div>
+        </section>
+    </main>
