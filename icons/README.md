@@ -13,6 +13,9 @@ also why every file is a solid silhouette.
 | `copy.svg` | Font Awesome Free 6.7.2, `solid/copy` |
 | `download.svg` | Font Awesome Free 6.7.2, `solid/download` |
 | `check.svg` | Font Awesome Free 6.7.2, `solid/check` |
+| `linux.svg` | Font Awesome Free 6.7.2, `brands/linux` |
+| `apple.svg` | Font Awesome Free 6.7.2, `brands/apple` |
+| `windows.svg` | Font Awesome Free 6.7.2, `brands/windows` |
 
 The Font Awesome icons are licensed CC BY 4.0 and each file keeps the attribution
 comment that Font Awesome ships with it; see <https://fontawesome.com/license/free>.

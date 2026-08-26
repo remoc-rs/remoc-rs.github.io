@@ -378,6 +378,21 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     -webkit-mask-image: url(icons/download.svg);
     mask-image: url(icons/download.svg);
 }
+
+.icon.linux {
+    -webkit-mask-image: url(icons/linux.svg);
+    mask-image: url(icons/linux.svg);
+}
+
+.icon.apple {
+    -webkit-mask-image: url(icons/apple.svg);
+    mask-image: url(icons/apple.svg);
+}
+
+.icon.windows {
+    -webkit-mask-image: url(icons/windows.svg);
+    mask-image: url(icons/windows.svg);
+}
 /* Subpage header */
 
 /* The same glow as the hero. The radii are relative to the box, and this header is
@@ -412,6 +427,47 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 
 .notice p:last-child {
     margin-bottom: 0;
+}
+
+.tunnel-promo,
+.tunnel-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(2rem, 6vw, 5rem);
+}
+
+.tunnel-promo .section-lead {
+    margin-bottom: 2rem;
+}
+
+.tunnel-illustration {
+    display: block;
+    width: clamp(15rem, 28vw, 22rem);
+    height: auto;
+}
+
+.tunnel-intro .lead {
+    max-width: 44rem;
+    margin-bottom: 0;
+}
+
+.tunnel-intro .tunnel-illustration {
+    width: clamp(17rem, 30vw, 24rem);
+}
+
+@media (max-width: 48rem) {
+    .tunnel-promo,
+    .tunnel-intro {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.5rem;
+    }
+
+    .tunnel-illustration,
+    .tunnel-intro .tunnel-illustration {
+        width: min(22rem, 100%);
+        justify-self: center;
+    }
 }
 
 /* Hero */
@@ -570,8 +626,12 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 }
 
 /* Ready-made binaries: one button per platform, wrapping on a narrow screen rather
-   than shrinking. The install line below them is the same control as in the hero,
-   but outside that grid, so it is given a width of its own. */
+   than shrinking. */
+
+.download-options {
+    width: fit-content;
+    max-width: 100%;
+}
 
 .downloads {
     display: flex;
@@ -581,7 +641,7 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 }
 
 .install.standalone {
-    max-width: 34rem;
+    width: 100%;
 }
 
 /* Sections */
@@ -678,6 +738,66 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 
 .grid code {
     overflow-wrap: anywhere;
+}
+
+/* The traffic strategy is a set of related rules, not another feature grid.
+   Horizontal rows keep it visually distinct from the cards above. */
+
+.traffic-principles {
+    max-width: 60rem;
+    border-top: 1px solid var(--border);
+}
+
+.traffic-principles article {
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.2fr);
+    gap: 1.5rem;
+    align-items: start;
+    padding: 1.15rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.traffic-principles h3,
+.traffic-principles p {
+    margin: 0;
+}
+
+.traffic-principles h3 {
+    font-size: 1.08rem;
+}
+
+.traffic-principles p {
+    color: var(--fg-muted);
+    font-size: 0.96rem;
+}
+
+.traffic-title {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: center;
+}
+
+.traffic-icon {
+    width: 1.45rem;
+    height: 1.45rem;
+    color: var(--accent);
+}
+
+@media (max-width: 48rem) {
+    .traffic-principles article {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.35rem;
+    }
+
+    .traffic-title {
+        grid-template-columns: 2.5rem minmax(0, 1fr);
+        gap: 0.75rem;
+    }
+
+    .traffic-principles p {
+        margin-left: 3.25rem;
+    }
 }
 
 /* A card named after a program: the name is the heading, so it is set like one
@@ -818,10 +938,6 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 #design h3,
 #design .table-scroll {
     max-width: 46rem;
-}
-
-#design h3 {
-    margin-top: 2rem;
 }
 
 /* What a table says in prose, set like its caption but kept outside it, so that on
@@ -980,15 +1096,23 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 }
 
 .terminal-shot {
+    width: fit-content;
+    max-width: 100%;
     margin: 2rem 0 0;
 }
 
 .terminal-output {
+    width: calc(80ch + 2.2rem + 2px);
+    max-width: 100%;
     background: #171717;
     border-color: #353535;
     color: #dedede;
     font-size: clamp(0.72rem, 1.5vw, 0.9rem);
     line-height: 1.4;
+}
+
+.terminal-output code {
+    font-size: inherit;
 }
 
 .terminal-output .term-title {
@@ -1009,10 +1133,36 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     font-weight: 700;
 }
 
-.terminal-shot figcaption {
-    color: var(--fg-muted);
-    font-size: 0.92rem;
-    margin-top: 0.7rem;
+.terminal-output .term-rule {
+    color: #858585;
+}
+
+.monitor-explanation {
+    max-width: 46rem;
+    margin-top: 1.5rem;
+}
+
+.monitor-explanation p:last-child {
+    margin-bottom: 0;
+}
+
+.monitor-explanation .monitor-cyan,
+.monitor-explanation .monitor-id,
+.monitor-explanation .monitor-connected {
+    padding: 0.05em 0.3em;
+    background: #171717;
+}
+
+.monitor-explanation .monitor-cyan {
+    color: #42d6d3;
+}
+
+.monitor-explanation .monitor-id {
+    color: #ee78c4;
+}
+
+.monitor-explanation .monitor-connected {
+    color: #75d69c;
 }
 
 .table-scroll {
@@ -1071,6 +1221,18 @@ th.num {
     text-align: right;
     font-variant-numeric: tabular-nums;
     padding-right: 1.4rem;
+}
+
+.transport-name {
+    white-space: nowrap;
+}
+
+.transport-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.75rem;
+    vertical-align: -0.2em;
+    color: var(--accent);
 }
 
 /* Example listings, generated from the repository by _tools/render_examples.py.
@@ -1138,6 +1300,62 @@ th.num {
    must not be drawn as an em dash followed by a word. */
 pre.cmd {
     font-variant-ligatures: none;
+}
+
+#quick-start pre + h3 {
+    margin-top: 1.5rem;
+}
+
+#quick-start,
+#port-mappings,
+#monitor {
+    --port-tunnel: #1d5fbf;
+    --port-target: #a84b00;
+    --port-local: #2a7a34;
+}
+
+@media (prefers-color-scheme: dark) {
+    #quick-start,
+    #port-mappings,
+    #monitor {
+        --port-tunnel: #8ab4f8;
+        --port-target: #fdba74;
+        --port-local: #8fd18a;
+    }
+}
+
+#quick-start .port-tunnel,
+#port-mappings .port-tunnel,
+#monitor .port-tunnel {
+    --port-color: var(--port-tunnel);
+}
+
+#quick-start .port-target,
+#port-mappings .port-target,
+#monitor .port-target {
+    --port-color: var(--port-target);
+}
+
+#quick-start .port-local,
+#port-mappings .port-local,
+#monitor .port-local {
+    --port-color: var(--port-local);
+}
+
+#quick-start .port-tunnel,
+#quick-start .port-target,
+#quick-start .port-local,
+#port-mappings .port-tunnel,
+#port-mappings .port-target,
+#port-mappings .port-local,
+#monitor .port-tunnel,
+#monitor .port-target,
+#monitor .port-local {
+    padding: 0.05em 0.2em;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--port-color) 14%, transparent);
+    color: var(--port-color);
+    font-weight: 600;
 }
 
 /* Switches between the example pages. They are separate pages, so these are plain

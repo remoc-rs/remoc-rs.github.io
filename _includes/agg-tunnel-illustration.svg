@@ -1,0 +1,67 @@
+<svg class="tunnel-illustration" viewBox="0 0 440 240" aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg">
+    <g fill="var(--bg)" stroke="var(--fg-muted)" stroke-width="2">
+        <rect x="8" y="76" width="82" height="92" rx="9"/>
+        <rect x="350" y="76" width="82" height="92" rx="9"/>
+    </g>
+    <g fill="var(--fg-muted)">
+        <circle cx="22" cy="90" r="2.5"/>
+        <circle cx="31" cy="90" r="2.5"/>
+        <circle cx="364" cy="90" r="2.5"/>
+        <circle cx="373" cy="90" r="2.5"/>
+    </g>
+    <g fill="none" stroke="var(--fg-muted)" stroke-width="2" stroke-linecap="round">
+        <path d="M20 102h58M362 102h58"/>
+        <path d="M31 122h36v24H31zM373 122h36v24h-36z"/>
+    </g>
+    <g fill="var(--fg-muted)" font-family="'JetBrains Mono', ui-monospace, monospace"
+        font-size="9" text-anchor="middle">
+        <text x="49" y="158">TCP app</text>
+        <text x="391" y="158">TCP app</text>
+    </g>
+
+    <g fill="none" stroke-linecap="round" stroke-width="3">
+        <path d="M90 116C150 109 290 109 350 116" stroke="color-mix(in srgb, var(--accent) 95%, transparent)"/>
+        <path d="M90 136C155 137 285 137 350 136" stroke="color-mix(in srgb, var(--accent) 65%, transparent)"/>
+        <path d="M90 156C160 169 280 169 350 156" stroke="color-mix(in srgb, var(--accent) 35%, transparent)"/>
+    </g>
+
+    <g transform="translate(34 -2) scale(.75)">
+        <path d="M94 132
+            C84 111 88 82 103 57
+            L119 32
+            C124 24 135 29 131 38
+            C123 55 118 74 122 89
+            C126 105 138 110 160 110
+            L190 110
+            C213 110 224 102 242 84
+            C263 64 285 60 307 72
+            L326 82
+            C337 88 351 88 370 86
+            L405 84
+            C416 83 422 89 422 99
+            L422 112
+            C422 124 414 131 401 134
+            L373 140
+            C354 144 345 153 335 168
+            C320 190 299 199 272 199
+            L166 199
+            C129 199 103 176 94 146Z"
+            fill="var(--accent)"/>
+
+        <path d="M318 88C330 89 338 84 341 75C349 83 349 94 343 101C334 108 322 102 318 88Z"
+            fill="var(--code-fg)"/>
+        <g fill="var(--bg)">
+            <path d="M365 119h43l-7 11-8-11-9 13-8-13-7 10Z"/>
+        </g>
+        <g fill="none" stroke="color-mix(in srgb, var(--bg) 55%, var(--accent))"
+            stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m167 132-18 18 18 18M273 132l18 18-18 18"/>
+        </g>
+        <g fill="color-mix(in srgb, var(--bg) 55%, var(--accent))">
+            <circle cx="192" cy="150" r="7"/>
+            <circle cx="220" cy="150" r="7"/>
+            <circle cx="248" cy="150" r="7"/>
+        </g>
+    </g>
+</svg>

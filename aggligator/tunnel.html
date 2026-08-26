@@ -1,0 +1,210 @@
+---
+layout: base
+project: aggligator
+title: "agg-tunnel: forward TCP ports over Aggligator"
+description: >-
+  Use agg-tunnel to forward TCP ports over an aggregated connection, with prebuilt
+  downloads, a quick start, port mappings and an explanation of its link monitor.
+canonical: /aggligator/tunnel.html
+favicon: /aggligator/logo.png
+nav_url: /aggligator/tunnel.html
+footer_alt: true
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap tunnel-intro">
+            <div>
+                <h1>Tunnel existing applications</h1>
+                <p class="lead">
+                    <a href="/aggligator/">Aggligator</a> combines the available network links between two
+                    machines into one connection. It distributes traffic across them and can keep the
+                    connection alive as links fail or reconnect. Run <code>agg-tunnel</code> on both machines
+                    to use this with existing TCP applications: the server permits targets, the client
+                    exposes local ports, and neither application needs modification.
+                </p>
+            </div>
+            {% include agg-tunnel-illustration.svg %}
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Install <code>agg-tunnel</code></h2>
+                <p class="section-lead">
+                    Release archives contain <code>agg-tunnel</code> and a speed test utility called <code>agg-speed</code>.
+                    The Linux binaries are statically linked and should work on any recent Linux system.
+                </p>
+
+                <div class="download-options">
+                    <div class="downloads">
+                        <a class="button icon-link"
+                            href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-x86_64-linux.tar.gz"><span
+                                class="icon linux" aria-hidden="true"></span>Linux x86-64</a>
+                        <a class="button icon-link"
+                            href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-aarch64-linux.tar.gz"><span
+                                class="icon linux" aria-hidden="true"></span>Linux ARM64</a>
+                        <a class="button icon-link"
+                            href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-macos.tar.gz"><span
+                                class="icon apple" aria-hidden="true"></span>macOS</a>
+                        <a class="button icon-link"
+                            href="https://github.com/remoc-rs/aggligator/releases/latest/download/aggligator-windows.zip"><span
+                                class="icon windows" aria-hidden="true"></span>Windows x86-64</a>
+                    </div>
+
+                    <div class="install standalone">
+                        <span class="prompt" aria-hidden="true">$</span>
+                        <code>cargo install aggligator-util</code>
+                        <button class="copy-button" type="button" data-copy="cargo install aggligator-util"
+                            aria-label="Copy the command">
+                            <span class="icon copy" aria-hidden="true"></span>
+                            <span class="icon check" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="quick-start" class="section alt">
+            <div class="wrap narrow">
+                <h2>Quick start</h2>
+                <p>
+                    This example forwards SSH on port <code class="port-target">22</code> from
+                    <code>server.example</code> to port <code class="port-local">2222</code> on the
+                    client. The tunnel itself listens on port <code class="port-tunnel">5000</code>.
+                </p>
+
+                <h3>On the server</h3>
+                <pre class="cmd"><code>agg-tunnel server --tcp <span class="port-tunnel">5000</span> --port <span class="port-target">22</span></code></pre>
+
+                <h3>On the client</h3>
+                <pre class="cmd"><code>agg-tunnel client --tcp server.example:<span class="port-tunnel">5000</span> --port <span class="port-target">22</span>:<span class="port-local">2222</span></code></pre>
+
+                <h3>Connect through the tunnel</h3>
+                <pre class="cmd"><code>ssh -p <span class="port-local">2222</span> localhost</code></pre>
+
+                <aside class="notice spaced">
+                    <p>
+                        Aggligator authenticates links joining an existing connection, but
+                        <code>agg-tunnel</code> does not encrypt the forwarded payload. SSH is already
+                        encrypted; other protocols need their own encryption when the links are not
+                        trusted.
+                    </p>
+                </aside>
+
+                <p class="section-foot">
+                    Run <code>agg-tunnel client --help</code> or
+                    <code>agg-tunnel server --help</code> for options available in the installed build.
+                </p>
+            </div>
+        </section>
+
+        <section id="port-mappings" class="section">
+            <div class="wrap">
+                <h2>Port mappings</h2>
+                <p class="section-lead">
+                    The server lists permitted targets. The client selects one of those server ports
+                    and chooses where to expose it locally. Both options can be repeated.
+                </p>
+
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Side</th>
+                                <th>Option</th>
+                                <th>Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>server</b></td>
+                                <td><code>--port <span class="port-target">22</span></code></td>
+                                <td>allow forwarding to local port <code class="port-target">22</code></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><code>--port db.internal:<span class="port-target">5432</span></code></td>
+                                <td>allow forwarding to port <code class="port-target">5432</code> on another host</td>
+                            </tr>
+                            <tr>
+                                <td><b>client</b></td>
+                                <td><code>--port <span class="port-target">22</span>:<span
+                                            class="port-local">2222</span></code></td>
+                                <td>expose server port <code class="port-target">22</code> as local port
+                                    <code class="port-local">2222</code>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Adding links</h3>
+                <p>
+                    The TCP transport tries the usable combinations of local interfaces and resolved
+                    server addresses. Repeat <code>--tcp</code> for additional targets. Depending on
+                    the build and platform, clients can also add links through SOCKS5 proxies, USB or
+                    Bluetooth.
+                </p>
+            </div>
+        </section>
+
+        <section id="monitor" class="section alt">
+            <div class="wrap">
+                <h2>Link monitor</h2>
+                <p class="section-lead">
+                    When attached to a terminal, <code>agg-tunnel</code> displays the connection,
+                    active port forwards and statistics for each link. Use
+                    <code>--no-monitor</code> for plain log output.
+                </p>
+
+                {% include agg-tunnel-monitor.html %}
+
+                <div class="monitor-explanation">
+                    <p>
+                        In this example, both endpoints have Ethernet and Wi-Fi interfaces named
+                        <code class="monitor-cyan">eth0</code> and
+                        <code class="monitor-cyan">wlan0</code>. The server's Ethernet address is
+                        <code class="monitor-cyan">2001:db8:1::20</code> and its Wi-Fi address is
+                        <code class="monitor-cyan">2001:db8:2::20</code>. Aggligator has established
+                        all four combinations of the client's two interfaces and the server's two
+                        addresses; the server interface used by each link appears at the right.
+                    </p>
+                    <p>
+                        The <code class="monitor-cyan">Connection</code> row shows the logical
+                        connection's short ID <code class="monitor-id">4f2a91c7</code> and age, its
+                        combined transmit and receive rates, and the total bytes transferred. The
+                        following <code class="monitor-cyan">TX</code> and
+                        <code class="monitor-cyan">RX</code> rows show available buffer space and data
+                        that is unacknowledged or waiting to be consumed.
+                    </p>
+                    <p>
+                        The forwarding row identifies the local TCP application and the
+                        <code class="port-target">22</code>-to-<code class="port-local">2222</code>
+                        mapping it is using. Each numbered block is one Aggligator link, identified by
+                        its local interface, remote address and remote interface. It reports its
+                        <code class="monitor-connected">connected</code> state and age, round-trip time,
+                        unacknowledged data and current limit, current rates, and cumulative traffic.
+                        Pressing its number temporarily disables that link, which also provides a quick
+                        way to test failover.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.documentElement.classList.add("js");
+        for (const button of document.querySelectorAll("button[data-copy]")) {
+            button.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(button.dataset.copy);
+                    button.classList.add("copied");
+                    setTimeout(() => button.classList.remove("copied"), 1500);
+                } catch {}
+            });
+        }
+    </script>

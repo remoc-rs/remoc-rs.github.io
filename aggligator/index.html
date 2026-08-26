@@ -3,15 +3,14 @@ layout: base
 project: aggligator
 title: "Aggligator: many links, one connection for Rust"
 description: >-
-  Aggligator combines multiple network links between two endpoints into one connection with
-  the bandwidth of all of them. Links may fail, be added and removed while it runs.
+  Aggligator combines network links between two endpoints and keeps the logical connection alive
+  while links fail, reconnect or move between networks.
 social_description: >-
-  Many links, one connection: Aggligator adds up every TCP, TLS, WebSocket, USB or Bluetooth
-  link between two endpoints and keeps going when one of them fails.
+  Aggligator combines TCP, WebSocket, USB or Bluetooth links and keeps one logical connection
+  alive as devices move between networks.
 canonical: /aggligator/
 favicon: /aggligator/logo.png
 nav_url: /aggligator/
-footer_alt: true
 ---
 
     <header class="hero">
@@ -23,11 +22,10 @@ footer_alt: true
             <h1>Aggligator</h1>
             <p class="tagline">Your friendly link aggregator.</p>
             <p class="lead">
-                Aggligator combines multiple network links between two endpoints into one connection.
-                Data is distributed across the links that are currently usable. If one fails,
-                unacknowledged data is sent again over the others; links can be added and removed while
-                the connection runs. Links may use TCP, TLS, WebSockets, USB, Bluetooth, SOCKS5 or a
-                custom ordered transport.
+                Aggligator combines network links between two endpoints into one connection, distributing
+                data across those currently available. Failed links are re-established automatically, so
+                the logical connection can survive a device switching between Wi-Fi, mobile data and
+                Ethernet, even when its IP&nbsp;address changes.
             </p>
 
             <div class="cta">
@@ -61,17 +59,35 @@ footer_alt: true
                     {% include aggligator-diagram.svg %}
                     <figcaption>
                         The application sees one byte stream at each end. Aggligator sends its data over
-                        the available links according to the capacity each one currently has. If a link
-                        fails, its unacknowledged data is reassigned; when the link becomes available
-                        again, it can rejoin the connection.
+                        the available links according to the capacity each one currently has. Failed
+                        links can be re-established and rejoin the same connection. If none remain, the
+                        connection waits while transports try to establish a new link.
                     </figcaption>
                 </figure>
             </div>
         </section>
 
+        <section id="tunnel" class="section alt">
+            <div class="wrap tunnel-promo">
+                <div>
+                    <h2>Use Aggligator with existing TCP applications</h2>
+                    <p class="section-lead">
+                        The <code>agg-tunnel</code> utility carries ordinary TCP connections over
+                        Aggligator. Existing clients and servers can use aggregated links without changes
+                        to their code.
+                    </p>
+                    <p class="section-foot">
+                        <a class="button" href="/aggligator/tunnel.html">How to use <code>agg-tunnel</code>
+                            &rarr;</a>
+                    </p>
+                </div>
+                {% include agg-tunnel-illustration.svg %}
+            </div>
+        </section>
+
         <section id="usage" class="section">
             <div class="wrap">
-                <h2>Use it like a socket</h2>
+                <h2>Use it like a socket from Rust</h2>
                 <p class="section-lead">
                     The TCP transport discovers routes between the two hosts and uses each as a link.
                     Both ends receive a stream implementing <code>AsyncRead</code> and
@@ -91,14 +107,15 @@ stream.write_all(<span class="s">b"hello"</span>).<span class="k">await</span>?;
                     </figure>
                     <figure>
                         <figcaption>Server</figcaption>
-                        <pre><code><span class="k">use</span> aggligator_transport_tcp::simple::tcp_server;
+                        <pre><code><span class="k">use</span> aggligator_transport_tcp::simple::tcp_listen;
 
-tcp_server(
-    <span class="s">"[::]:5900"</span>.<span class="f">parse</span>()?,
-    |<span class="k">mut</span> stream| <span class="k">async move</span> {
-        <span class="c">// One task per connection, including all its links.</span>
-    },
-).<span class="k">await</span>?;</code></pre>
+<span class="c">// Listen on all network interfaces.</span>
+<span class="k">let</span> listener = tcp_listen(<span class="s">"[::]:5900"</span>.<span class="f">parse</span>()?).<span class="k">await</span>?;
+
+<span class="k">loop</span> {
+    <span class="c">// One connection, including all its links.</span>
+    <span class="k">let</span> <span class="k">mut</span> stream = listener.accept().<span class="k">await</span>?;
+}</code></pre>
                     </figure>
                 </div>
 
@@ -126,38 +143,41 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
         <section id="features" class="section alt">
             <div class="wrap">
                 <h2>Features</h2>
+                {% include feature-icons.svg %}
                 <div class="grid">
                     <article>
-                        <h3>Capacity follows the links</h3>
+                        <h3>Capacity follows the links
+                            <svg class="feature-icon" aria-hidden="true"><use href="#feature-speed"/></svg>
+                        </h3>
                         <p>
                             Faster links become ready for more data sooner and therefore carry more.
                             The distribution changes as link conditions change.
                         </p>
                     </article>
                     <article>
-                        <h3>Links can change</h3>
+                        <h3>Connection survives network changes
+                            <svg class="feature-icon" aria-hidden="true"><use href="#feature-channels"/></svg>
+                        </h3>
                         <p>
                             Links may fail, return, be added or be removed while the connection runs.
-                            If another link remains available, unacknowledged data is sent over it.
+                            When none remain, transport connectors keep reconnecting for a configurable
+                            time instead of immediately closing the logical connection.
                         </p>
                     </article>
                     <article>
-                        <h3>Runs in user space</h3>
+                        <h3>Bring your own links
+                            <svg class="feature-icon" aria-hidden="true"><use href="#feature-transport"/></svg>
+                        </h3>
                         <p>
-                            Unlike Multipath TCP or SCTP, Aggligator does not require multipath support
-                            from the operating system or network. It runs over ordinary connections.
-                        </p>
-                    </article>
-                    <article>
-                        <h3>Bring your own links</h3>
-                        <p>
-                            An ordered <code>AsyncRead</code>/<code>AsyncWrite</code> stream or a
-                            <code>Sink</code>/<code>Stream</code> of packets can be used as a link.
+                            Aggligator runs in user space over ordinary ordered byte streams or packet
+                            streams, without multipath support from the operating system or network.
                         </p>
                         <p><a href="#transports">Transports &rarr;</a></p>
                     </article>
                     <article>
-                        <h3>Authenticated link attachment</h3>
+                        <h3>Authenticated link attachment
+                            <svg class="feature-icon" aria-hidden="true"><use href="#feature-auth"/></svg>
+                        </h3>
                         <p>
                             A secret established with Diffie-Hellman protects the connection identifier
                             used when adding links. Payload data is not encrypted; use TLS for untrusted
@@ -166,7 +186,9 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                         <p><a href="https://crates.io/crates/aggligator-wrapper-tls">TLS wrapper &rarr;</a></p>
                     </article>
                     <article>
-                        <h3>Per-link statistics</h3>
+                        <h3>Per-link statistics
+                            <svg class="feature-icon" aria-hidden="true"><use href="#feature-stats"/></svg>
+                        </h3>
                         <p>
                             Each link reports latency, throughput and unacknowledged data. Applications
                             can consume the values directly or display them with the terminal monitor.
@@ -174,7 +196,9 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                         <p><a href="https://docs.rs/aggligator-monitor">aggligator-monitor &rarr;</a></p>
                     </article>
                     <article>
-                        <h3>Safe Rust on native and WebAssembly</h3>
+                        <h3>Safe Rust on native and WebAssembly
+                            <svg class="feature-icon" aria-hidden="true"><use href="#feature-safe"/></svg>
+                        </h3>
                         <p>
                             Aggligator contains no <code>unsafe</code> code, runs on Tokio and supports
                             native platforms and WebAssembly.
@@ -186,32 +210,45 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
 
         <section id="design" class="section">
             <div class="wrap">
-                <h2>How traffic is distributed</h2>
+                <h2>Adapts to unequal links</h2>
                 <p class="section-lead">
-                    Aggligator adapts to link capacity and latency while the connection runs. It does
-                    not assign a fixed share or depend on a bandwidth estimate.
+                    Simple packet striping can let one slow link hold back an otherwise fast
+                    connection. Aggligator instead adjusts how much data is in flight on each link
+                    while the connection runs.
                 </p>
 
-                <div class="grid">
+                <div class="traffic-principles">
                     <article>
-                        <h3>Ready links receive data</h3>
+                        <div class="traffic-title">
+                            <svg class="traffic-icon" aria-hidden="true"><use href="#traffic-ready"/></svg>
+                            <h3>Send on the next ready link</h3>
+                        </div>
                         <p>
-                            The next packet goes to a link with available send capacity. Faster links
-                            become ready sooner and carry a larger share without a calculated split.
+                            Aggligator does not calculate a fixed bandwidth share. A faster link
+                            finishes sending sooner, becomes ready again and naturally carries more
+                            packets.
                         </p>
                     </article>
                     <article>
-                        <h3>Reordering limits a link</h3>
+                        <div class="traffic-title">
+                            <svg class="traffic-icon" aria-hidden="true"><use href="#traffic-order"/></svg>
+                            <h3>Limit links that delay delivery</h3>
+                        </div>
                         <p>
-                            Data waiting behind a missing packet is measured directly. When a link
-                            causes that backlog to grow, its send allowance is reduced.
+                            Acknowledgements show how much received data is waiting behind an earlier
+                            packet. If that backlog grows, the sender reduces the unacknowledged-data
+                            allowance for the link used by the oldest outstanding packet.
                         </p>
                     </article>
                     <article>
-                        <h3>Slow links are retested</h3>
+                        <div class="traffic-title">
+                            <svg class="traffic-icon" aria-hidden="true"><use href="#traffic-retry"/></svg>
+                            <h3>Retest links set aside</h3>
+                        </div>
                         <p>
-                            A link whose latency makes it counterproductive can be set aside. It is
-                            tested periodically and used again when its conditions improve.
+                            When faster alternatives exist, a link with excessive round-trip time
+                            can be removed from normal scheduling. Test data and a ping periodically
+                            check whether it is ready to return.
                         </p>
                     </article>
                 </div>
@@ -248,66 +285,93 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                         </thead>
                         <tbody>
                             <tr>
-                                <td>TCP, with TLS if you want it</td>
+                                <td>
+                                    <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-tcp"/></svg>
+                                        <span>TCP</span>
+                                    </span>
+                                </td>
                                 <td><a href="https://crates.io/crates/aggligator-transport-tcp">aggligator-transport-tcp</a>
                                 </td>
                             </tr>
                             <tr>
-                                <td>WebSockets</td>
+                                <td>
+                                    <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-websocket"/></svg>
+                                        <span>WebSockets</span>
+                                    </span>
+                                </td>
                                 <td><a
                                         href="https://crates.io/crates/aggligator-transport-websocket">aggligator-transport-websocket</a>
                                 </td>
                             </tr>
                             <tr>
-                                <td>WebSockets, from a browser</td>
+                                <td>
+                                    <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-web"/></svg>
+                                        <span>WebSockets from a browser</span>
+                                    </span>
+                                </td>
                                 <td><a
                                         href="https://crates.io/crates/aggligator-transport-websocket-web">aggligator-transport-websocket-web</a>
                                 </td>
                             </tr>
                             <tr>
-                                <td>USB</td>
+                                <td>
+                                    <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-usb"/></svg>
+                                        <span>USB</span>
+                                    </span>
+                                </td>
                                 <td><a href="https://crates.io/crates/aggligator-transport-usb">aggligator-transport-usb</a>
                                 </td>
                             </tr>
                             <tr>
-                                <td>WebUSB, from a browser</td>
+                                <td>
+                                    <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-webusb"/></svg>
+                                        <span>WebUSB from a browser</span>
+                                    </span>
+                                </td>
                                 <td><a
                                         href="https://crates.io/crates/aggligator-transport-webusb">aggligator-transport-webusb</a>
                                 </td>
                             </tr>
                             <tr>
-                                <td>Bluetooth on Linux</td>
+                                <td>
+                                    <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-bluetooth"/></svg>
+                                        <span>Bluetooth on Linux</span>
+                                    </span>
+                                </td>
                                 <td><a
                                         href="https://crates.io/crates/aggligator-transport-bluer">aggligator-transport-bluer</a>
                                 </td>
                             </tr>
                             <tr>
-                                <td>SOCKS5 proxies</td>
+                                <td>
+                                    <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-proxy"/></svg>
+                                        <span>SOCKS5 proxies</span>
+                                    </span>
+                                </td>
                                 <td><a
                                         href="https://crates.io/crates/aggligator-transport-socks">aggligator-transport-socks</a>
                                 </td>
                             </tr>
                             <tr>
-                                <td>anything above, wrapped in TLS</td>
+                                <td>
+                                    <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-tls"/></svg>
+                                        <span>Anything above, wrapped in TLS</span>
+                                    </span>
+                                </td>
                                 <td><a href="https://crates.io/crates/aggligator-wrapper-tls">aggligator-wrapper-tls</a>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </section>
-
-        <section id="tunnel" class="section">
-            <div class="wrap">
-                <h2>Forward TCP ports with <code>agg-tunnel</code></h2>
-                <p class="section-lead">
-                    <code>agg-tunnel</code> forwards TCP ports through an aggregated connection. It
-                    can be installed with Cargo or downloaded as a prebuilt binary.
-                </p>
-                <p class="section-foot">
-                    <a class="button" href="/aggligator/agg-tunnel.html">Usage and downloads &rarr;</a>
-                </p>
             </div>
         </section>
 
