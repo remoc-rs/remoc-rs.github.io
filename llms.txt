@@ -4,17 +4,19 @@ permalink: /llms.txt
 ---
 # remoc.rs
 
-> Three Rust libraries for communication between programs: Remoc provides typed
-> channels, remote functions and trait RPC over a single connection; Aggligator
-> combines multiple network links into one resilient connection; Postbag is a
-> compact binary Serde codec with built-in schema evolution.
+> Three Rust libraries for communication between programs: Remoc provides Rust RPC
+> whose calls can pass typed channels and remote objects over a single connection;
+> Aggligator combines multiple network links into one resilient
+> connection; Postbag is a compact binary Serde codec with built-in schema
+> evolution.
 
 All three are Apache 2.0-licensed open source, written in 100% safe Rust and
 built on Tokio.
 
 ## Remoc
 
-- [Overview](https://remoc.rs/): remote multiplexed objects and channels for Rust.
+- [Overview](https://remoc.rs/): Rust RPC where calls can pass typed channels and
+  remote objects that remain usable after they return, all over one connection.
 - [Channels between processes and machines](https://remoc.rs/remote-channels.html):
   mpsc, oneshot, watch and broadcast channels with the API known from Tokio,
   working over a network connection, socket or pipe.

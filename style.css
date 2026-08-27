@@ -516,6 +516,10 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     margin: 0 auto 2rem;
 }
 
+.hero .lead a {
+    white-space: nowrap;
+}
+
 /* Two by two on anything but a narrow phone, where it falls into one column. */
 .cta {
     display: grid;

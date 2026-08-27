@@ -1,13 +1,13 @@
 ---
 layout: base
 project: remoc
-title: "Remoc: remote channels, objects and RPC for Rust"
+title: "Remoc: Rust RPC with remote channels and objects"
 description: >-
-  Remoc provides typed channels, remote functions, trait RPC and observable collections
-  between Rust programs over a single transport connection.
+  Remoc is an RPC library for Rust with trait-based RPC, typed remote channels and
+  objects, remote functions and observable collections over one connection.
 social_description: >-
-  Channels that work between machines, plus remote function calls, RPC on traits and
-  observable collections. All of it over one connection.
+  Rust RPC where calls can pass typed channels and remote objects that remain usable
+  after they return, all over one connection.
 canonical: /
 schema: software
 nav: home
@@ -19,14 +19,21 @@ nav: home
         <div class="hero-inner">
             <img class="hero-logo" src="logo.png" alt="Remoc logo: a pink squid" width="467" height="482">
             <h1>Remoc</h1>
-            <p class="tagline">Remote multiplexed objects and channels for Rust.</p>
+            <p class="tagline">Rust RPC with remote channels and objects over one connection.</p>
             <p class="lead">
-                <a href="https://docs.rs/tokio/latest/tokio/sync/index.html">Tokio channels</a> connect
-                tasks within an async Rust program. Remoc extends the same channel model across machines:
-                sending a <a href="https://docs.rs/remoc/latest/remoc/rch/index.html">channel endpoint</a>
-                to the remote side connects it over the existing transport. That transport may be TCP,
-                TLS, a WebSocket, a pipe or another byte or packet stream. Remoc also provides remote
-                functions, RPC on traits and observable collections.
+                Remoc turns Rust traits marked with
+                <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html"><code>#[rtc::remote]</code></a>
+                into remotely callable interfaces, generating their clients and servers. Unlike
+                conventional RPC, arguments and return values can contain
+                <a href="https://docs.rs/remoc/latest/remoc/rch/index.html">Tokio-style remote channels</a>
+                and remote&nbsp;objects that remain usable after the call.
+            </p>
+            <p class="lead">
+                A channel endpoint is
+                an ordinary value that can travel inside a message, creating a new communication path
+                wherever it arrives, without opening a port, looking up a name or registering anything.
+                RPC calls, channels and remote&nbsp;objects are multiplexed over one TCP, TLS, WebSocket,
+                pipe or other transport connection, each with independent flow control.
             </p>
 
             <div class="cta">
@@ -138,7 +145,7 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
 
         <section id="pipelining" class="section">
             <div class="wrap">
-                <h2>Multiple remote calls, <b>one</b> round trip</h2>
+                <h2>Multiple RPC calls, <b>one</b> round trip</h2>
                 <p class="section-lead">
                     A call that hands out another object normally costs a round trip before that
                     object can be used. Mark the method <code>#[pipelinable]</code> and the caller
