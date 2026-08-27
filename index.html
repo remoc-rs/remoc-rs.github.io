@@ -11,7 +11,6 @@ social_description: >-
 canonical: /
 schema: software
 nav: home
-footer_alt: true
 ---
 
     <header class="hero">
@@ -235,8 +234,7 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     </h3>
                     <p>
                         MPSC, oneshot, watch and broadcast, with the API you already know from
-                        <a href="https://tokio.rs/">Tokio</a>, working
-                        <a href="/remote-channels.html">between processes and machines</a>.
+                        <a href="https://tokio.rs/">Tokio</a>.
                         They all share one transport and messages are sent in chunks, so a big blob on one
                         channel does not stall the others.
                     </p>
@@ -248,9 +246,8 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     </h3>
                     <p>
                         Putting <code>#[rtc::remote]</code> on a trait generates client and server
-                        implementations. Arguments and return values may contain channels, allowing
-                        <a href="/server-push.html">server push and callbacks</a> instead of only
-                        request and response.
+                        implementations. Arguments and return values may contain channels, allowing a
+                        method to return a stream of updates instead of a single value.
                         Multiple calls can be pipelined, saving round trips.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc module &rarr;</a></p>
@@ -292,9 +289,7 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     <p>
                         Remoc is transport-independent. It operates over an <code>AsyncRead</code> and
                         <code>AsyncWrite</code> pair or a <code>Sink</code> and <code>Stream</code> of
-                        packets, over the network or for
-                        <a href="/ipc.html">IPC between processes</a>. Worked examples cover TCP,
-                        TLS, WebSockets and pipes.
+                        packets. Worked examples cover TCP, TLS, WebSockets and pipes.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/transports/index.html">transports &rarr;</a></p>
                 </article>
@@ -348,6 +343,52 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                 <p class="section-foot">
                     <a href="/aggligator/">How Aggligator keeps connections alive &rarr;</a>
                 </p>
+            </div>
+        </section>
+
+        <section id="topics" class="section alt">
+            <div class="wrap">
+                <h2>Common uses</h2>
+                <p class="section-lead">
+                    More on channels, RPC and IPC across process and machine boundaries.
+                </p>
+                <ul class="topics">
+                    <li>
+                        <a href="/remote-channels.html">Channels between processes and machines</a>
+                        <p>
+                            How channel endpoints work across process boundaries and what happens
+                            when the connection is lost.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/multiplexing.html">Many typed channels, one connection</a>
+                        <p>
+                            How any number of channels share a single TCP connection without one of
+                            them being able to stall the others.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/server-push.html">RPC with server push and callbacks</a>
+                        <p>
+                            Sending a channel to the other side so that a service can push events and
+                            progress instead of only answering requests.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/ipc.html">IPC between Rust processes</a>
+                        <p>
+                            A daemon and its client over a UNIX socket or a pipe, with Rust traits as
+                            the interface instead of a hand-rolled protocol.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/erlang-messaging.html">Erlang-style message passing in Rust</a>
+                        <p>
+                            A comparison of Remoc's channels and remote objects with Erlang
+                            processes and OTP.
+                        </p>
+                    </li>
+                </ul>
             </div>
         </section>
     </main>

@@ -12,6 +12,7 @@ canonical: /postbag/
 schema: software
 favicon: /postbag/logo.png
 nav_url: /postbag/
+footer_alt: true
 ---
 
     <header class="hero">
@@ -265,6 +266,33 @@ nav_url: /postbag/
                             Full format 1.0 specification</a></li>
                     <li><a href="https://github.com/remoc-rs/postbag/blob/main/POSTBAG-SLIM.md">Postbag
                             Slim format 1.0 specification</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="topics" class="section">
+            <div class="wrap narrow">
+                <h2>Common uses</h2>
+                <p class="section-lead">
+                    How Postbag handles changing Rust types and files that outlive the release that
+                    wrote them.
+                </p>
+                <ul class="topics">
+                    <li>
+                        <a href="/postbag/schema-evolution.html">Binary data that survives schema
+                            changes</a>
+                        <p>
+                            Why compact binary formats break after a type changes, and how Postbag
+                            keeps old and new programs compatible.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/postbag/file-formats.html">File formats that survive upgrades</a>
+                        <p>
+                            How to keep configuration files, save files and documents compatible
+                            across application versions.
+                        </p>
+                    </li>
                 </ul>
             </div>
         </section>

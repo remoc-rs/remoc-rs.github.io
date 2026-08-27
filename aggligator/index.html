@@ -12,6 +12,7 @@ canonical: /aggligator/
 schema: software
 favicon: /aggligator/logo.png
 nav_url: /aggligator/
+footer_alt: true
 ---
 
     <header class="hero">
@@ -375,6 +376,32 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </section>
+
+        <section id="topics" class="section">
+            <div class="wrap">
+                <h2>Common uses</h2>
+                <p class="section-lead">
+                    How to bond internet connections and keep them alive when the network changes.
+                </p>
+                <ul class="topics">
+                    <li>
+                        <a href="/aggligator/bonding.html">Combine multiple internet connections</a>
+                        <p>
+                            How Aggligator splits a connection across multiple uplinks, including
+                            which workloads benefit.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/aggligator/network-switching.html">Keep connections alive while
+                            switching networks</a>
+                        <p>
+                            How a logical connection survives a device moving between Wi-Fi and
+                            mobile data.
+                        </p>
+                    </li>
+                </ul>
             </div>
         </section>
 
