@@ -67,11 +67,11 @@ faq:
                     socket, a wire format, framing and dispatch code.
                 </p>
                 <p>
-                    The usual answers change the shape of your program. A hand-rolled protocol
-                    grows a message enum and match statements on both sides, and every new
-                    interaction touches all of them. An RPC framework such as gRPC restructures
-                    the code into request and response services, which is a different model than
-                    the tasks and channels you started with.
+                    Replacing the channels with a hand-rolled protocol changes the shape of the
+                    program: the protocol grows a message enum and match statements on both
+                    sides, and every new interaction touches all of them. An RPC framework such
+                    as gRPC restructures the code into request and response services, which is a
+                    different model than the tasks and channels you started with.
                 </p>
             </div>
         </section>
@@ -157,8 +157,8 @@ remote_tx.send(<span class="t">Request</span> { reply_tx: tx }).<span class="k">
                     processes</a> covers the local case of a daemon and its clients.
                     <a href="/erlang-messaging.html">Erlang-style message passing in Rust</a>
                     compares the model with distributed Erlang.
-                    Building upon the channels, the <a href="/">Remoc overview</a> shows remote
-                    trait calls and observable collections.
+                    The <a href="/">Remoc overview</a> also covers remote trait calls and
+                    observable collections.
                 </p>
             </div>
         </section>

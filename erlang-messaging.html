@@ -127,11 +127,11 @@ faq:
                     yours to design.
                 </p>
                 <p>
-                    The ingredients for that architecture are available, though. Run each
-                    service as its own OS process and let a parent process supervise it over
-                    Remoc. The kernel then provides preemptive scheduling and memory isolation
-                    even stronger than that of BEAM processes. A crash becomes a child exit
-                    that the parent observes and answers with a restart, and since
+                    A similar architecture can use a separate OS process for each service and a
+                    parent process that supervises them over Remoc. The kernel then provides
+                    preemptive scheduling and memory isolation even stronger than that of BEAM
+                    processes. A crash becomes a child exit that the parent observes and answers
+                    with a restart, and since
                     <a href="/postbag/">Postbag</a> keeps message types compatible across
                     versions, restarting a child with a newer binary takes the place of a hot
                     upgrade. This is the let-it-crash approach, with the operating system
@@ -139,13 +139,13 @@ faq:
                     you assemble it yourself.
                 </p>
                 <p>
-                    What Rust adds in exchange are compile-time checked messages, no garbage
-                    collector, single static binaries and the performance of native code, in a
-                    general-purpose language: the parts of a system that are not message
-                    passing, be it numerics, embedded targets or a user interface, need not
-                    leave it. For keeping the connection itself alive across link failures and
-                    network changes, <a href="/aggligator/">Aggligator</a> provides a resilient
-                    transport underneath Remoc.
+                    Rust provides compile-time checked messages, no garbage collector, single
+                    static binaries and native-code performance in a general-purpose language.
+                    Parts of a system that are not message passing, such as numerics, embedded
+                    targets or a user interface, can remain in the same language. To keep the
+                    connection itself alive across link failures and network changes,
+                    <a href="/aggligator/">Aggligator</a> provides a resilient transport
+                    underneath Remoc.
                 </p>
             </div>
         </section>
@@ -160,8 +160,8 @@ faq:
                     shows the model in working code, and the
                     <a href="/examples/channels.html">channels example</a> is complete and
                     runnable. For request/response-shaped services,
-                    <a href="/comparison.html">Remoc vs. other RPC libraries</a> places the
-                    model next to tarpc, gRPC and Cap'n Proto.
+                    <a href="/comparison.html">Remoc vs. other RPC libraries</a> compares Remoc
+                    with tarpc, gRPC and Cap'n Proto.
                 </p>
             </div>
         </section>

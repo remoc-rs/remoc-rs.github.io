@@ -6,8 +6,8 @@ description: >-
   Postbag is a binary Serde codec for Rust. Add, remove and reorder fields and enum variants,
   and programs built from either version of a type still read each other's data.
 social_description: >-
-  A binary Serde codec for Rust whose data survives its own schema changing: add, remove and
-  reorder fields, and old and new endpoints keep understanding each other.
+  A binary Serde codec for Rust that supports schema changes: add, remove and reorder fields,
+  and old and new endpoints keep understanding each other.
 canonical: /postbag/
 schema: software
 favicon: /postbag/logo.png
@@ -113,8 +113,8 @@ footer_alt: true
             <div class="wrap narrow">
                 <h2>Backwards and forwards compatibility</h2>
                 <p class="section-lead">
-                    Serializer and deserializer can work with different versions of your type,
-                    provided that the following rules are respected.
+                    Serializer and deserializer can use different versions of a type when the
+                    changes follow these rules.
                 </p>
 
                 <div class="table-scroll">

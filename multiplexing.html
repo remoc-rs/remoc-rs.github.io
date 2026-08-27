@@ -36,10 +36,9 @@ faq:
       schema-based system such as gRPC is the better fit.
   - q: "How many channels can one connection carry?"
     a: >-
-      As many as you like. Channels are cheap values rather than sockets; opening one
-      just sends its endpoint inside a message, without a port, handshake or
-      registration. It is perfectly normal to create one channel per request or per
-      subscriber.
+      Channels are cheap values rather than sockets. Opening one sends its endpoint
+      inside a message, without a port, handshake or registration. A channel per request
+      or subscriber does not require additional network connections.
 ---
 
     <header class="page-header">
@@ -97,7 +96,7 @@ faq:
                     may be sent over it. Every channel has its own flow control, meaning that a
                     receiver which stops reading only stalls its own sender and does not affect
                     unrelated traffic. Large messages are transmitted in chunks to avoid one
-                    channel blocking another. Building upon its channels, Remoc also provides
+                    channel blocking another. Remoc also provides
                     <a href="https://docs.rs/remoc/latest/remoc/rfn/index.html">remote
                     functions</a>, <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">RPC
                     on traits</a> and
@@ -109,7 +108,7 @@ faq:
 
         <section class="section">
             <div class="wrap narrow">
-                <h2>What it looks like</h2>
+                <h2>Opening a channel from a request</h2>
                 <p>
                     A request type can carry the sender of a new channel and the server replies
                     into it. Setting up a new communication path over the existing connection
@@ -141,8 +140,8 @@ faq:
                 <h2>Related pages</h2>
                 <p>
                     <a href="/remote-channels.html">Channels between processes and machines</a>
-                    shows how little code the channels need, and the <a href="/">Remoc
-                    overview</a> walks through remote trait calls and pipelining.
+                    shows a complete channel exchange, and the <a href="/">Remoc overview</a>
+                    covers remote trait calls and pipelining.
                     <a href="/comparison.html">Remoc vs. other RPC libraries</a> compares it
                     with tarpc, gRPC and Cap'n Proto, and the
                     <a href="/benchmarks.html">benchmarks</a> compare a Remoc channel with

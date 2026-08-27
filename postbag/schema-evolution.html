@@ -51,7 +51,7 @@ faq:
                 Serialized data often outlives the version of the program that wrote it, be it
                 as files on disk, messages between services deployed at different times or
                 records in a queue. <a href="/postbag/">Postbag</a> is a binary Serde codec that
-                is built to keep both directions of this version gap working.
+                allows either version to read data written by the other.
             </p>
         </div>
     </header>
@@ -68,12 +68,11 @@ faq:
                     the same release and previously written data becomes unreadable.
                 </p>
                 <p>
-                    The usual alternatives are JSON, which tolerates change but is large, slow
-                    and flattens Rust's data model, and Protocol Buffers, which evolve well but
-                    bring a separate <code>.proto</code> schema, generated types and their own
-                    data model. Postbag sits in between. It is a compact binary format for plain
-                    Serde types that supports schema evolution without a schema language and
-                    without explicit versioning.
+                    JSON tolerates change but is large, slow and flattens Rust's data model.
+                    Protocol Buffers evolve well but bring a separate <code>.proto</code> schema,
+                    generated types and their own data model. Postbag is a compact binary format
+                    for plain Serde types that supports schema evolution without a schema
+                    language or explicit versioning.
                 </p>
             </div>
         </section>
@@ -111,7 +110,7 @@ faq:
 
         <section class="section">
             <div class="wrap narrow">
-                <h2>When a change is not covered</h2>
+                <h2>Recovering an incompatible field</h2>
                 <p>
                     Some changes are incompatible under any rule set, for example completely
                     changing the type of a field. For these cases a field can be wrapped with

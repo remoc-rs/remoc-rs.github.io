@@ -4,8 +4,8 @@ project: aggligator
 title: "Keep a TCP connection alive when switching from Wi-Fi to mobile data"
 description: >-
   Why connections drop when a device changes networks, and how Aggligator keeps one
-  logical connection alive for seamless roaming across Wi-Fi, mobile data and Ethernet,
-  even when the IP address changes.
+  logical connection alive as it moves across Wi-Fi, mobile data and Ethernet, even when
+  the IP address changes.
 social_description: >-
   A connection that survives the device switching from Wi-Fi to mobile data, without
   Multipath TCP or operating system support.
@@ -69,9 +69,8 @@ faq:
                     progress, is lost.
                 </p>
                 <p>
-                    There are several ways to deal with this. You can implement reconnect logic
-                    in your application, but it must detect the failure, resume the session and
-                    handle data that was in flight when the connection broke.
+                    Application-level reconnect logic must detect the failure, resume the
+                    session and handle data that was in flight when the connection broke.
                     <a href="https://en.wikipedia.org/wiki/Multipath_TCP">Multipath TCP</a>
                     solves the problem in the kernel, but requires support from both operating
                     systems and must be let through by the middleboxes on the path. QUIC supports
@@ -83,7 +82,7 @@ faq:
 
         <section class="section alt">
             <div class="wrap narrow">
-                <h2>How Aggligator handles it</h2>
+                <h2>Links can leave and rejoin</h2>
                 <p>
                     Aggligator separates the logical connection from the network links that carry
                     it. Each link is an ordinary transport connection, for example TCP, TLS, a
@@ -100,11 +99,11 @@ faq:
                     while the transport connectors keep trying to establish a new link. A link
                     that comes back, possibly from a new IP address or a different network,
                     authenticates itself to the existing connection and traffic resumes where it
-                    stopped. For the application this roaming between networks is seamless; it
-                    just keeps reading and writing its one stream.
+                    stopped. The application continues reading and writing the same stream
+                    throughout.
                 </p>
                 <p>
-                    All of this happens in user space, without any support from the operating
+                    Aggligator runs entirely in user space, without support from the operating
                     system or the network in between.
                 </p>
             </div>
@@ -112,7 +111,7 @@ faq:
 
         <section class="section">
             <div class="wrap">
-                <h2>From Rust, it is a socket</h2>
+                <h2>One stream for the application</h2>
                 <p class="section-lead">
                     The TCP transport discovers the usable routes between the two hosts and
                     maintains a link over each of them. Your application reads and writes one

@@ -69,11 +69,11 @@ faq:
                     default, which breaks in exactly the same way.
                 </p>
                 <p>
-                    The usual escapes are keeping every struct frozen and adding
-                    <code>ConfigV2</code>, <code>ConfigV3</code> and migration code for each
-                    step, or moving to JSON and accepting larger files and a flattened data
-                    model. Both grow with every release, and neither helps when a user opens a
-                    file from a version newer than the installed one.
+                    You can keep every struct frozen and add <code>ConfigV2</code>,
+                    <code>ConfigV3</code> and migration code for each step, or move to JSON and
+                    accept larger files and a flattened data model. Both approaches grow with
+                    every release, and neither helps when a user opens a file from a version
+                    newer than the installed one.
                 </p>
             </div>
         </section>
@@ -91,22 +91,22 @@ faq:
                     and no frozen struct copies are needed; you just change your types.
                 </p>
                 <p>
-                    Furthermore, a field can be marked recoverable. If it changed incompatibly,
-                    reading the file does not fail; the rest of the document is loaded and that
-                    field takes its default. For a settings file this means one setting resets
-                    instead of the user losing the whole configuration.
+                    A field can also be marked recoverable. If it changed incompatibly, reading
+                    the file does not fail; the rest of the document is loaded and that field
+                    takes its default. For a settings file this means one setting resets instead
+                    of the user losing the whole configuration.
                 </p>
             </div>
         </section>
 
         <section class="section">
             <div class="wrap">
-                <h2>Evolution and recovery in practice</h2>
+                <h2>Adding and recovering fields</h2>
                 <p class="section-lead">
                     Version 2 of this config added <code>font_size</code>; files load in both
                     directions, with version 1 skipping the unknown field. The key bindings are
-                    additionally marked recoverable, which is unique to Postbag: even a change
-                    to them that no rule covers does not lose the file.
+                    also marked recoverable, so an incompatible change to them does not lose the
+                    file.
                 </p>
 
                 <div class="code-pair">
@@ -159,9 +159,8 @@ faq:
                     <a href="/postbag/schema-evolution.html">Binary data that survives schema
                     changes</a> explains how the encoding achieves this, and the
                     <a href="/postbag/">Postbag overview</a> has the quick start and the
-                    complete compatibility rules. The same properties apply when the bytes
-                    travel between programs instead of into a file, as
-                    <a href="/">Remoc</a> uses them.
+                    complete compatibility rules. <a href="/">Remoc</a> uses the same format for
+                    messages between programs.
                 </p>
             </div>
         </section>

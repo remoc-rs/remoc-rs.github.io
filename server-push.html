@@ -61,20 +61,20 @@ faq:
             <div class="wrap narrow">
                 <h2>The limits of request and response</h2>
                 <p>
-                    In a request/response framework the server cannot start a conversation. The
-                    usual workarounds all have costs. Polling wastes requests and adds latency.
-                    Server-streaming methods, as gRPC offers them, cover subscriptions, but the
-                    stream is tied to the method that opened it and cannot be passed around, and
-                    they still do not let the server invoke anything on the client. A second
-                    connection in the reverse direction requires the client to be reachable,
-                    which fails as soon as it sits behind NAT or a firewall.
+                    In a request/response framework the server cannot start a conversation.
+                    Polling wastes requests and adds latency. Server-streaming methods, as gRPC
+                    offers them, cover subscriptions, but the stream is tied to the method that
+                    opened it and cannot be passed around, and they still do not let the server
+                    invoke anything on the client. A second connection in the reverse direction
+                    requires the client to be reachable, which fails as soon as it sits behind
+                    NAT or a firewall.
                 </p>
             </div>
         </section>
 
         <section class="section alt">
             <div class="wrap narrow">
-                <h2>Channels make push natural</h2>
+                <h2>Returning a channel from a call</h2>
                 <p>
                     In Remoc, channel endpoints are values that calls can return and accept. A
                     method returns an <code>rch::mpsc::Receiver</code> and the client has a
@@ -84,19 +84,18 @@ faq:
                     call that created it has returned.
                 </p>
                 <p>
-                    For real callbacks, the roles can simply be reversed. The client implements
-                    a trait carrying <code>#[rtc::remote]</code> itself and sends its client
-                    object to the server, which then invokes methods on it like on any remote
-                    object. Communication is therefore fully bidirectional over the single
-                    connection that the client opened, so a device behind NAT can expose an
-                    interface to its server.
+                    For callbacks, the client implements a trait carrying
+                    <code>#[rtc::remote]</code> and sends its client object to the server, which
+                    then invokes methods on it like on any remote object. Communication is
+                    therefore fully bidirectional over the single connection that the client
+                    opened, so a device behind NAT can expose an interface to its server.
                 </p>
             </div>
         </section>
 
         <section class="section">
             <div class="wrap">
-                <h2>A pushing method is just a signature</h2>
+                <h2>Returning a watch receiver</h2>
                 <p class="section-lead">
                     This trait is from the <a href="/examples/rtc.html">counter example</a>. The
                     <code>watch</code> method returns a watch channel receiver, giving the
@@ -132,11 +131,11 @@ faq:
             <div class="wrap narrow">
                 <h2>Related pages</h2>
                 <p>
-                    <a href="/comparison.html">Remoc vs. other RPC libraries</a> positions this
-                    model against tarpc, gRPC and Cap'n Proto.
+                    <a href="/comparison.html">Remoc vs. other RPC libraries</a> compares this
+                    model with tarpc, gRPC and Cap'n Proto.
                     <a href="/remote-channels.html">Channels between processes and machines</a>
-                    explains the channels that make the pushing work, and for a daemon notifying
-                    local clients see <a href="/ipc.html">IPC between Rust processes</a>.
+                    explains the channels used for server push. For the local case of a daemon
+                    notifying clients, see <a href="/ipc.html">IPC between Rust processes</a>.
                 </p>
             </div>
         </section>

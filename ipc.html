@@ -62,7 +62,7 @@ faq:
     <main id="content">
         <section class="section">
             <div class="wrap narrow">
-                <h2>More than a byte pipe</h2>
+                <h2>Defining an IPC interface</h2>
                 <p>
                     The operating system gives you a byte stream for inter-process
                     communication, but what the processes actually need are commands with typed
@@ -71,13 +71,13 @@ faq:
                     breaking installed clients.
                 </p>
                 <p>
-                    The usual approaches each carry a burden. A hand-rolled protocol over a UNIX
-                    socket means framing, a message enum and dispatch code that grow with every
-                    command. JSON over stdin and stdout is quick to start with, but untyped and
-                    without a versioning story. D-Bus integrates well with system services, but
-                    brings a bus daemon and its own type system. gRPC over a UNIX socket works,
-                    but maintaining a <code>.proto</code> schema and generated code is a lot of
-                    machinery for two programs that you compile yourself.
+                    A hand-rolled protocol over a UNIX socket means framing, a message enum and
+                    dispatch code that grow with every command. JSON over stdin and stdout is
+                    quick to start with, but untyped and without a versioning story. D-Bus
+                    integrates well with system services, but brings a bus daemon and its own
+                    type system. gRPC over a UNIX socket works, but maintaining a
+                    <code>.proto</code> schema and generated code is a lot of machinery for two
+                    programs that you compile yourself.
                 </p>
             </div>
         </section>
@@ -89,10 +89,10 @@ faq:
                     With Remoc, the daemon's interface is a Rust trait carrying
                     <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html"><code>#[rtc::remote]</code></a>,
                     which generates the client and server implementations. Arguments and results
-                    are ordinary Serde types. Where the daemon needs to push, a method returns a
-                    channel, for example a stream of log lines, progress values or state
-                    changes; the <a href="/remote-channels.html">channels</a> work in both
-                    directions over the same socket.
+                    are ordinary Serde types. For server-initiated messages, a method returns a
+                    channel, for example a stream of log lines, progress values or state changes;
+                    the <a href="/remote-channels.html">channels</a> work in both directions over
+                    the same socket.
                 </p>
                 <p>
                     Since Remoc serializes with the <a href="/postbag/">Postbag</a> codec, the
