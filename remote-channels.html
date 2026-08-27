@@ -58,7 +58,7 @@ faq:
     <main id="content">
         <section class="section">
             <div class="wrap narrow">
-                <h2>When channels meet a process boundary</h2>
+                <h2>Channels at a process boundary</h2>
                 <p>
                     Programs get split for good reasons. Work moves to another machine, a
                     privileged part is separated from a user interface, or a component becomes a
@@ -78,7 +78,7 @@ faq:
 
         <section class="section alt">
             <div class="wrap narrow">
-                <h2>The same model, over a connection</h2>
+                <h2>Channels over one connection</h2>
                 <p>
                     Remoc provides <a href="https://docs.rs/remoc/latest/remoc/rch/index.html">MPSC,
                     oneshot, watch and broadcast channels</a> with the API you already know from
@@ -97,7 +97,7 @@ faq:
 
         <section class="section">
             <div class="wrap">
-                <h2>What changes in your code</h2>
+                <h2>Replacing a Tokio channel</h2>
                 <p class="section-lead">
                     The channel type comes from <code>remoc::rch</code> instead of
                     <code>tokio::sync</code> and the message derives Serde. Sending and
