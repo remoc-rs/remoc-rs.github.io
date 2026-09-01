@@ -1487,6 +1487,64 @@ pre.cmd {
 
 /* Footer */
 
+/* The three projects, offered again at the end of the page. The one you are reading
+   about is shown too, so the set stays complete, but it is not a link. */
+
+.footer-projects {
+    max-width: var(--measure);
+    margin: 0 auto 2rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1.5rem 2rem;
+}
+
+.footer-project {
+    display: flex;
+    align-items: start;
+    gap: 0.7rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.footer-project img {
+    flex: none;
+    margin-top: 0.1rem;
+}
+
+.footer-project .name {
+    display: block;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+}
+
+.footer-project p {
+    margin: 0.1rem 0 0;
+    font-size: 0.88rem;
+    color: var(--fg-muted);
+}
+
+/* As in the switcher at the top of the page: the project you are reading about keeps its
+   colour, and the others stay quiet until you point at them. */
+
+.footer-project:not(.current) .name {
+    color: var(--fg-muted);
+}
+
+.footer-project:not(.current) img {
+    opacity: 0.55;
+}
+
+.footer-project:not(.current):hover .name {
+    color: var(--fg);
+}
+
+.footer-project:not(.current):hover img {
+    opacity: 1;
+}
+
 footer {
     padding: 3rem 1.25rem;
     font-size: 0.94rem;

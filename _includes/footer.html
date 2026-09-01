@@ -1,6 +1,32 @@
 {%- assign project = site.projects | where: "id", page.project | first %}
 {%- unless project %}{% assign project = site.projects | first %}{% endunless %}
 <footer{% if page.footer_alt %} class="alt"{% endif %}>
+    {%- comment -%}
+    Once the reader has scrolled, the header switcher is gone, so the three projects are
+    offered again here with the same one-line summaries the switcher uses as its tooltips.
+    {%- endcomment -%}
+    <div class="footer-projects">
+        {%- for other in site.projects %}
+        {%- if other.id == page.project %}
+        <div class="footer-project current" aria-current="page">
+            <img src="{{ other.logo }}" alt="" width="27" height="28">
+            <div>
+                <span class="name">{{ other.name }}</span>
+                <p>{{ other.summary }}</p>
+            </div>
+        </div>
+        {%- else %}
+        <a class="footer-project" href="{{ other.url }}">
+            <img src="{{ other.logo }}" alt="" width="27" height="28">
+            <div>
+                <span class="name">{{ other.name }}</span>
+                <p>{{ other.summary }}</p>
+            </div>
+        </a>
+        {%- endif %}
+        {%- endfor %}
+    </div>
+
     <div class="footer-inner">
         <div class="footer-brand">
             <img src="{{ project.logo }}" alt="" width="27" height="28">
