@@ -69,6 +69,10 @@
     --radius: 10px;
 
     --scroll-thumb: #c4bec6;
+
+    --cell-good: #e9f4ec;
+    --cell-fair: #fdf2e0;
+    --cell-poor: #fbeae7;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -99,6 +103,10 @@
         --no: #ff9b91;
 
         --scroll-thumb: #45414e;
+
+        --cell-good: #16251a;
+        --cell-fair: #292013;
+        --cell-poor: #2a1815;
     }
 }
 
@@ -1721,4 +1729,229 @@ footer.alt {
     * {
         transition: none !important;
     }
+}
+
+
+/* The verdict table rates every property against one goal, seamless RPC between Rust
+   programs, which the lead above the table states. The tint only repeats what the mark or
+   the words already say, so it stays readable without colour. */
+
+.comparison-table.verdicts {
+    min-width: 68rem;
+}
+
+.verdict-header-sticky {
+    position: fixed;
+    top: 0;
+    z-index: 20;
+    visibility: hidden;
+    overflow: hidden;
+    background: var(--bg-alt);
+    box-shadow: 0 2px 6px color-mix(in srgb, var(--fg) 12%, transparent);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.verdict-header-sticky.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.verdict-header-sticky-scroll {
+    overflow: hidden;
+}
+
+.verdict-header-sticky .comparison-table {
+    margin: 0;
+}
+
+.verdict-header-sticky .comparison-table thead th {
+    background: var(--bg-alt);
+}
+
+.verdict-key {
+    display: inline-block;
+    padding: 0 0.3em;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    font-weight: 600;
+}
+
+.verdict-key.good {
+    background: var(--cell-good);
+}
+
+.verdict-key.fair {
+    background: var(--cell-fair);
+}
+
+.verdict-key.poor {
+    background: var(--cell-poor);
+}
+
+.row-help {
+    position: absolute;
+    top: 50%;
+    right: 0.6rem;
+    display: inline-grid;
+    width: 1.2rem;
+    height: 1.2rem;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    transform: translateY(-50%);
+    vertical-align: 0.1em;
+    border: 1px solid var(--fg-muted);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
+}
+
+.row-help:hover,
+.row-help:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+    outline: none;
+}
+
+.row-help:focus-visible {
+    box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
+.row-help-popover {
+    position: fixed;
+    inset: 0;
+    width: max-content;
+    height: max-content;
+    max-width: min(24rem, calc(100vw - 2rem));
+    margin: auto;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg);
+    box-shadow: var(--shadow);
+    color: var(--fg);
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.row-help-popover::backdrop {
+    background: transparent;
+}
+
+.comparison-table.verdicts td {
+    text-align: center;
+    vertical-align: middle;
+    min-width: 11rem;
+}
+
+.comparison-table.verdicts th[scope="row"] {
+    text-align: left;
+    vertical-align: middle;
+    font-weight: 500;
+    min-width: 16rem;
+    padding-right: 2.4rem;
+}
+
+/* The column heads sit over centred cells, so they are centred too. The first one
+   heads the row labels and stays with them on the left. */
+
+.comparison-table.verdicts thead th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.comparison-table.verdicts thead th:first-child {
+    text-align: left;
+}
+
+/* Keep the property beside the verdicts while a narrow viewport scrolls through the
+   libraries. Group headings span the table and therefore remain part of the scroll. */
+.comparison-table.verdicts thead th:first-child,
+.comparison-table.verdicts tr:not(.group) > th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bg-alt);
+    box-shadow: 1px 0 var(--border);
+}
+
+.comparison-table.verdicts thead th:first-child {
+    z-index: 2;
+}
+
+/* Without a divider two neighbouring cells of the same tint read as one wide block
+   instead of two verdicts. */
+
+.comparison-table.verdicts td,
+.comparison-table.verdicts thead th + th {
+    border-left: 1px solid var(--border);
+}
+
+.comparison-table.verdicts td.good {
+    background: var(--cell-good);
+}
+
+.comparison-table.verdicts td.fair {
+    background: var(--cell-fair);
+}
+
+.comparison-table.verdicts td.poor {
+    background: var(--cell-poor);
+}
+
+.comparison-table.verdicts tr.group th {
+    text-align: left;
+    padding-top: 1.6rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.comparison-table.verdicts tr:first-child.group th {
+    padding-top: 0.4rem;
+}
+
+.comparison-table.verdicts .own {
+    color: var(--accent);
+}
+
+.comparison-table.verdicts .qual {
+    display: block;
+    font-size: 0.85em;
+    color: var(--fg-muted);
+    margin-top: 0.15rem;
+}
+
+@media (max-width: 48rem) {
+    .comparison-table.verdicts {
+        min-width: 51rem;
+    }
+
+    .comparison-table.verdicts th[scope="row"] {
+        min-width: 11rem;
+        max-width: 11rem;
+    }
+
+    .comparison-table.verdicts td {
+        min-width: 10rem;
+    }
+}
+
+/* Read out by screen readers in place of the glyph, which is decorative. */
+.sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
 }

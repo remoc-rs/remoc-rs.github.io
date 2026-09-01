@@ -16,7 +16,8 @@ nav_url: /comparison.html
             <h1>Remoc vs. other RPC libraries</h1>
             <p class="lead">
                 Remoc is a Rust-to-Rust communication library in which calls can pass channels and
-                remote objects. Those values remain usable after the call returns.
+                remote objects. Those values remain usable after the call returns, but stay tied to
+                their connection.
             </p>
         </div>
     </header>
@@ -24,7 +25,7 @@ nav_url: /comparison.html
     <main id="content">
         <section class="section">
             <div class="wrap">
-                <h2>Transferable channels and objects</h2>
+                <h2>What makes Remoc different</h2>
                 <p>
                     Most RPC libraries model a call as arguments followed by one result or a stream
                     attached to that method. Remoc also lets arguments and results contain communication
@@ -69,50 +70,360 @@ nav_url: /comparison.html
         <section class="section alt">
             <div class="wrap">
                 <h2>Feature comparison</h2>
+                <p class="section-lead">
+                    Remoc is designed for seamless RPC between Rust programs, so the table compares
+                    each library against that goal. <span class="verdict-key good">Green</span> means
+                    built in, <span class="verdict-key fair">amber</span> means constraints or extra
+                    setup, and <span class="verdict-key poor">red</span> means no documented built-in
+                    support.
+                </p>
 
                 <div class="table-scroll">
-                    <table class="comparison-table">
+                    <table class="comparison-table verdicts">
                         <thead>
                             <tr>
-                                <th>Library</th>
-                                <th>Contract</th>
-                                <th>Peers</th>
-                                <th>Interaction model</th>
-                                <th>Useful when</th>
+                                <th></th>
+                                <th class="own">Remoc</th>
+                                <th><a href="https://docs.rs/tarpc">tarpc</a></th>
+                                <th><a href="https://github.com/hyperium/tonic">gRPC (tonic)</a></th>
+                                <th><a href="https://capnproto.org/rpc.html">Cap'n Proto</a></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="comparison-remoc">
-                                <th scope="row">Remoc</th>
-                                <td>Rust traits and types via Serde</td>
-                                <td>Rust</td>
-                                <td>calls, transferable channels (streams) and remote objects</td>
-                                <td>Rust programs want stateful communication over one connection</td>
+                            <tr class="group">
+                                <th colspan="5" scope="colgroup">Interface and contract</th>
                             </tr>
                             <tr>
-                                <th scope="row"><a href="https://docs.rs/tarpc">tarpc</a></th>
-                                <td>Rust traits</td>
-                                <td>Rust</td>
-                                <td>request/response with request context</td>
-                                <td>conventional RPC needs propagated trace context</td>
+                                <th scope="row">
+                                    Contract
+                                    {% include row-help.html id="contract"
+                                        text="The source from which both peers derive the service methods and message shapes." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">Rust traits and types</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">Rust traits</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual"><code>.proto</code> schema</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual"><code>.capnp</code> schema</span></td>
                             </tr>
                             <tr>
-                                <th scope="row"><a href="https://github.com/hyperium/tonic">gRPC (tonic)</a></th>
-                                <td><code>.proto</code> schema</td>
-                                <td>many languages</td>
-                                <td>request/response and schema-defined streams</td>
-                                <td>services cross language boundaries or use HTTP infrastructure</td>
+                                <th scope="row">
+                                    Interface is authored as a Rust trait
+                                    {% include row-help.html id="rust-trait"
+                                        text="Whether you write the RPC API directly as a Rust trait rather than in a separate schema language." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">generated from the schema</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">generated from the schema</span></td>
                             </tr>
                             <tr>
-                                <th scope="row"><a href="https://capnproto.org/rpc.html">Cap'n Proto</a></th>
-                                <td><code>.capnp</code> schema</td>
-                                <td>many languages</td>
-                                <td>calls and transferable capabilities</td>
-                                <td>capability-based RPC must work across languages</td>
+                                <th scope="row">
+                                    Messages use your existing Rust types
+                                    {% include row-help.html id="rust-types"
+                                        text="Whether arguments and results can use normal Serde Rust types instead of generated message structs." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">generated prost messages</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">generated reader and builder types</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    No code-generation build script
+                                    {% include row-help.html id="no-codegen"
+                                        text="Whether the usual setup avoids generating Rust source from schema files during the build." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual"><code>protoc</code> and <code>prost-build</code></span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual"><code>capnp</code> compiler</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Non-Rust clients
+                                    {% include row-help.html id="other-languages"
+                                        text="Whether supported implementations allow a peer to be written in another programming language." %}
+                                </th>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                            </tr>
+                            <tr class="group">
+                                <th colspan="5" scope="colgroup">Transferable channels, objects and functions</th>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Hands over a live reference the peer keeps using
+                                    {% include row-help.html id="live-reference"
+                                        text="Whether a call can pass a handle to a remote service or object that the recipient invokes after the original call finishes." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">remote trait client</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">capability reference</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Dependent calls in one round trip
+                                    {% include row-help.html id="dependent-calls"
+                                        text="Whether a method can be called on a remote value returned by another call before the first result arrives, also known as promise pipelining." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">promise pipelining</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">promise pipelining</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Live references need no schema declaration
+                                    {% include row-help.html id="reference-schema"
+                                        text="Whether channel and object handles can be transferred without declaring their interfaces in an external schema." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span> <span class="qual">declared in the schema</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Typed channels as message content
+                                    {% include row-help.html id="typed-channels"
+                                        text="Whether arguments and results can contain typed channel endpoints that continue carrying values after the call." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">capability interfaces can model streams</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Callbacks as values
+                                    {% include row-help.html id="callbacks"
+                                        text="Whether a call can pass behavior that the recipient invokes later, allowing it to call back the sender." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">remote functions and closures</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not transferable in calls</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">bidirectional streams, not callable values</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">schema-declared capabilities</span></td>
+                            </tr>
+                            <tr class="group">
+                                <th colspan="5" scope="colgroup">Shape of the conversation</th>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Either peer can serve over one connection
+                                    {% include row-help.html id="either-peer"
+                                        text="Whether the connection initiator and acceptor can both expose callable APIs over that same connection." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">send back a trait client</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">bidirectional streams, not reverse calls</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">callback capabilities</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Server pushes without the client polling
+                                    {% include row-help.html id="server-push"
+                                        text="Whether a server can send updates over an established communication path without waiting for another client request." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">transferred channel or callback</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">server streaming</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">callback capability</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Streaming model
+                                    {% include row-help.html id="streaming"
+                                        text="How the library represents a sequence of values: transferable channels, method-declared streams or application-defined interfaces." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">transferable mpsc, watch and broadcast channels</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not built in</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">method-declared client, server or bidirectional streams</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">capability interfaces; <code>-&gt; stream</code> adds flow control</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Remotely observable collections
+                                    {% include row-help.html id="observable-collections"
+                                        text="Whether built-in collection types can notify a remote peer when their entries change." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
+                            </tr>
+                            <tr class="group">
+                                <th colspan="5" scope="colgroup">Connection and transport</th>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Transport flexibility
+                                    {% include row-help.html id="transport"
+                                        text="Whether the RPC layer can run over application-chosen transports instead of requiring a specific network protocol." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">any byte or packet stream</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">any byte stream</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">requires HTTP/2 framing</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">any byte stream</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Concurrent calls share one connection
+                                    {% include row-help.html id="multiplexing"
+                                        text="Whether many calls can be in flight at once over one underlying connection." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">frame-multiplexed channels and calls</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">request IDs over one shared queue</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">one HTTP/2 stream per call</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">question IDs over one connection</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    A blocked receiver stalls only its own traffic
+                                    {% include row-help.html id="flow-control"
+                                        text="Whether backpressure from a receiver that stops reading is confined to its own traffic instead of delaying unrelated calls." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">credit window per channel</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">one shared transport queue</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">per-stream window; connection window also shared</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">only for <code>-&gt; stream</code> methods; ordinary calls have none</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Runs in a web browser
+                                    {% include row-help.html id="browser"
+                                        text="Whether the library provides a supported way to make its RPC calls from within a web browser." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">WebAssembly, full API</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not documented</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">grpc-web: unary and server streaming only</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not documented</span></td>
+                            </tr>
+                            <tr class="group">
+                                <th colspan="5" scope="colgroup">Compatibility across versions</th>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Add a field
+                                    {% include row-help.html id="add-field"
+                                        text="Whether old and new programs can still exchange messages after a field is added." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">anywhere; missing fields take a default</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">depends on the codec</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">use a new field number</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">use the next ordinal</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Remove a field
+                                    {% include row-help.html id="remove-field"
+                                        text="Whether old and new programs can still exchange messages after a field is removed." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">anywhere; old readers need a default</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">depends on the codec</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">reserve its field number</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not documented as safe</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Rename a field
+                                    {% include row-help.html id="rename-field"
+                                        text="Whether a field's source-code name can change without changing its identity on the wire." %}
+                                </th>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">with a stable numbered identifier</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">depends on the codec</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">keep its field number</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">keep its ordinal</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Reorder fields in source
+                                    {% include row-help.html id="reorder-fields"
+                                        text="Whether field declarations can move to a different order without changing the wire format." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">Postbag Full matches field identifiers</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">depends on the codec</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">keep field numbers</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">keep ordinals</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Add an enum variant
+                                    {% include row-help.html id="add-enum-variant"
+                                        text="Whether an enum can gain a variant while older programs continue to read messages safely." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">older readers need a fallback variant</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">depends on the codec</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">use a new numeric value</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">use the next ordinal; older readers handle unknown values</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Recover an incompatible field
+                                    {% include row-help.html id="recover-field"
+                                        text="Whether a known field whose encoded content no longer matches its type can take a default without discarding the rest of the message." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="/postbag/#recoverable">opt in per field</a>; surrounding data is preserved</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not provided by bundled codecs</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">a bad known field aborts message decoding</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">pointer fields are read separately; the caller handles each error</span></td>
+                            </tr>
+                            <tr class="group">
+                                <th colspan="5" scope="colgroup">Reach and operations</th>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Deadlines and cancellation
+                                    {% include row-help.html id="cancellation"
+                                        text="Whether a caller can bound work by time and tell the server to stop calls that are no longer needed." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">a tokio timeout cancels the whole call tree</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">deadline on every request</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><code>grpc-timeout</code> header</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">cancellation only</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    HTTP-aware proxies and service meshes
+                                    {% include row-help.html id="http-infrastructure"
+                                        text="Whether standard HTTP infrastructure can inspect individual RPC methods for routing, metrics and rate limits." %}
+                                </th>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">connection is opaque</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not HTTP-based</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">per-method routing, metrics and limits</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not HTTP-based</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Built-in trace-context propagation
+                                    {% include row-help.html id="trace-context"
+                                        text="Whether distributed tracing identity travels with calls so spans can be connected across peers." %}
+                                </th>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">pass it explicitly</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">trace id in the request context</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">via metadata and an interceptor</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">pass it explicitly</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    Use it when
+                                    {% include row-help.html id="use-case"
+                                        text="The scenario that most directly matches each library's design strengths." %}
+                                </th>
+                                <td>Rust-to-Rust RPC with evolvable types, from simple calls to channels and remote objects</td>
+                                <td>request/response Rust RPC with a built-in request context</td>
+                                <td>services cross languages or ride HTTP infrastructure</td>
+                                <td>capability RPC and pipelining must work across languages</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+                <p class="section-foot">
+                    The table compares documented, built-in capabilities as of September 2026.
+                    Remoc's version-compatibility rows assume its default
+                    <a href="/postbag/">Postbag <code>Full</code></a> codec.
+                </p>
             </div>
         </section>
 
@@ -125,9 +436,11 @@ nav_url: /comparison.html
                     <a href="https://docs.rs/tarpc">tarpc</a> is the closest alternative: it also
                     defines services as Rust traits without a separate schema. It focuses on
                     request/response RPC; a server may keep application state, but calls do not pass
-                    remote channels or object handles. Tarpc provides request contexts with propagated
-                    deadlines and tracing metadata. Remoc propagates cancellation when call futures are
-                    dropped, but does not automatically propagate tracing context.
+                    remote channels or object handles. Tarpc includes a deadline and trace id in every
+                    request context. Remoc instead propagates cancellation through the call tree: dropping
+                    a call future, for example through <code>tokio::time::timeout</code>, cancels the
+                    server call and remote calls made while handling it. Trace context must be passed
+                    explicitly.
                 </p>
 
                 <h3>gRPC, through tonic</h3>
@@ -151,35 +464,70 @@ nav_url: /comparison.html
             </div>
         </section>
 
-        <section class="section alt">
-            <div class="wrap">
-                <h2>Limitations</h2>
-                <div class="grid">
-                    <article>
-                        <h3>Rust peers only</h3>
-                        <p>
-                            Remoc's protocol is defined by Rust types and has no implementations for
-                            other languages. A language-neutral schema such as Protocol Buffers or
-                            Cap'n Proto is needed when a peer is not written in Rust.
-                        </p>
-                    </article>
-                    <article>
-                        <h3>Calls are opaque to intermediaries</h3>
-                        <p>
-                            A proxy sees a Remoc connection as one byte or packet stream. Per-method
-                            routing, rate limiting and metrics therefore require application support
-                            rather than configuration in an HTTP proxy or service mesh.
-                        </p>
-                    </article>
-                    <article>
-                        <h3>Remote values belong to a connection</h3>
-                        <p>
-                            Channels and remote objects remain attached to the connection and endpoint
-                            serving them. They do not move transparently between interchangeable
-                            replicas as independent requests can.
-                        </p>
-                    </article>
-                </div>
-            </div>
-        </section>
     </main>
+
+    <script>
+        (() => {
+            const scroller = document.querySelector(".comparison-table.verdicts")?.parentElement;
+            const table = scroller?.querySelector("table");
+            const head = table?.tHead;
+            if (!scroller || !table || !head) return;
+
+            const sticky = document.createElement("div");
+            sticky.className = "verdict-header-sticky";
+            sticky.setAttribute("aria-hidden", "true");
+
+            const stickyScroller = document.createElement("div");
+            stickyScroller.className = "verdict-header-sticky-scroll";
+
+            const stickyTable = table.cloneNode(false);
+            stickyTable.append(head.cloneNode(true));
+            stickyTable.querySelectorAll("a").forEach(link => link.removeAttribute("href"));
+            stickyScroller.append(stickyTable);
+            sticky.append(stickyScroller);
+            document.body.append(sticky);
+
+            const syncLayout = () => {
+                const rect = scroller.getBoundingClientRect();
+                sticky.style.left = `${rect.left}px`;
+                sticky.style.width = `${rect.width}px`;
+                stickyTable.style.width = `${table.scrollWidth}px`;
+
+                const sourceCells = head.rows[0].cells;
+                const stickyCells = stickyTable.tHead.rows[0].cells;
+                for (let i = 0; i < sourceCells.length; i++) {
+                    stickyCells[i].style.width = `${sourceCells[i].getBoundingClientRect().width}px`;
+                }
+
+                stickyScroller.scrollLeft = scroller.scrollLeft;
+            };
+
+            let updatePending = false;
+            const updateVisibility = () => {
+                updatePending = false;
+                const headRect = head.getBoundingClientRect();
+                const tableRect = table.getBoundingClientRect();
+                const visible = headRect.bottom <= 0 && tableRect.bottom > sticky.offsetHeight;
+                sticky.classList.toggle("visible", visible);
+            };
+
+            const requestVisibilityUpdate = () => {
+                if (updatePending) return;
+                updatePending = true;
+                requestAnimationFrame(updateVisibility);
+            };
+
+            scroller.addEventListener("scroll", () => {
+                stickyScroller.scrollLeft = scroller.scrollLeft;
+            }, { passive: true });
+            window.addEventListener("scroll", requestVisibilityUpdate, { passive: true });
+            window.addEventListener("resize", () => {
+                syncLayout();
+                requestVisibilityUpdate();
+            }, { passive: true });
+
+            new ResizeObserver(syncLayout).observe(table);
+            syncLayout();
+            updateVisibility();
+        })();
+    </script>

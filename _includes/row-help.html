@@ -1,0 +1,3 @@
+<button class="row-help" type="button" popovertarget="row-help-{{ include.id }}"
+    title="{{ include.text | escape }}" aria-label="Explain this comparison property">?</button>
+<span class="row-help-popover" id="row-help-{{ include.id }}" popover>{{ include.text }}</span>
