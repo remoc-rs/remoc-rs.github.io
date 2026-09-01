@@ -10,6 +10,7 @@ docs: https://docs.rs/remoc
 projects:
   - id: remoc
     name: Remoc
+    summary: RPC and typed channels between Rust programs
     url: /
     logo: /logo.png
     social_image: /social/remoc.png
@@ -25,6 +26,7 @@ projects:
       - { title: GitHub, url: "https://github.com/remoc-rs/remoc", icon: github }
   - id: postbag
     name: Postbag
+    summary: Binary Serde codec that survives schema changes
     url: /postbag/
     logo: /postbag/logo.png
     social_image: /social/postbag.png
@@ -39,6 +41,7 @@ projects:
       - { title: GitHub, url: "https://github.com/remoc-rs/postbag", icon: github }
   - id: aggligator
     name: Aggligator
+    summary: Combines network links into one resilient connection
     url: /aggligator/
     logo: /aggligator/logo.png
     social_image: /social/aggligator.png

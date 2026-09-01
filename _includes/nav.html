@@ -1,8 +1,12 @@
 <nav aria-label="Primary">
     <div class="projects">
         {%- for project in site.projects %}
+        {%- comment -%}
+        The other projects carry their purpose as a tooltip, since their names do not say
+        what they are. The current one does not need it; the page below says so already.
+        {%- endcomment -%}
         <a class="brand{% if project.id == page.project %} current{% endif %}" href="{{ project.url }}"
-            {% if project.id == page.project %}aria-current="page"{% endif %}>
+            {% if project.id == page.project %}aria-current="page"{% else %}title="{{ project.summary }}"{% endif %}>
             <img src="{{ project.logo }}" alt="" width="31" height="32">
             <span>{{ project.name }}</span>
         </a>
