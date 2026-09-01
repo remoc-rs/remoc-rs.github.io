@@ -1098,6 +1098,13 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     height: auto;
 }
 
+/* The Postbag byte diagrams sit in a narrow section, where they render at about their
+   drawn size. They start at the left edge, like the text above them. */
+
+.diagram-svg.diagram-compact {
+    margin-inline: 0;
+}
+
 .diagram figcaption {
     color: var(--fg-muted);
     font-size: 0.92rem;

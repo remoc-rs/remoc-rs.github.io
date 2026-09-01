@@ -1,63 +1,63 @@
 <svg viewBox="0 0 700 496" role="img" aria-labelledby="postbag-full-title postbag-full-desc"
-     xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
+     xmlns="http://www.w3.org/2000/svg" class="diagram-svg diagram-compact">
   <title id="postbag-full-title">How Postbag encodes a struct with identifiers</title>
   <desc id="postbag-full-desc">A Rust struct with three fields on the left, and on the right the fourteen bytes Postbag writes for it in its Full format, in three columns: the identifier of each field, the length of its value in bytes, and the value. Every field is numbered, so each identifier takes a single byte.</desc>
-  <text x="0" y="26" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg-muted)">Your types</text>
-  <text x="390" y="26" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="600" fill="var(--fg-muted)">14 bytes</text>
+  <text x="0" y="26" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">Your types</text>
+  <text x="390" y="26" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">14 bytes</text>
   <rect x="390" y="52" width="34" height="32" rx="5" fill="var(--fg-muted)"/>
-  <text x="407.0" y="73" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">03</text>
-  <text x="436" y="73" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--fg-muted)">three fields follow</text>
-  <text x="390" y="110" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--fg-muted)">identifier</text>
-  <text x="454" y="110" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--fg-muted)">length</text>
-  <text x="518" y="110" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--fg-muted)">value</text>
-  <text x="0" y="46" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--attr)">#[derive(</tspan><tspan fill="var(--ty)">Serialize</tspan><tspan fill="var(--attr)">, </tspan><tspan fill="var(--ty)">Deserialize</tspan><tspan fill="var(--attr)">)]</tspan></text>
-  <text x="0" y="68" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--kw)">struct</tspan><tspan fill="var(--fg)"> </tspan><tspan fill="var(--ty)">Reading</tspan><tspan fill="var(--fg)"> {</tspan></text>
-  <text x="16" y="146" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg)">sensor: </tspan><tspan fill="var(--ty)">u32</tspan><tspan fill="var(--fg)">,</tspan></text>
-  <text x="16" y="126" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_0&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
-  <text x="182" y="146" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg-muted)">= </tspan><tspan fill="var(--num)">300</tspan></text>
+  <text x="407.0" y="73" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">03</text>
+  <text x="436" y="73" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--fg-muted)">three fields follow</text>
+  <text x="390" y="110" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg-muted)">identifier</text>
+  <text x="454" y="110" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg-muted)">length</text>
+  <text x="518" y="110" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="var(--fg-muted)">value</text>
+  <text x="0" y="46" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--attr)">#[derive(</tspan><tspan fill="var(--ty)">Serialize</tspan><tspan fill="var(--attr)">, </tspan><tspan fill="var(--ty)">Deserialize</tspan><tspan fill="var(--attr)">)]</tspan></text>
+  <text x="0" y="68" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="15"><tspan fill="var(--kw)">struct</tspan><tspan fill="var(--fg)"> </tspan><tspan fill="var(--ty)">Reading</tspan><tspan fill="var(--fg)"> {</tspan></text>
+  <text x="16" y="146" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--fg)">sensor: </tspan><tspan fill="var(--ty)">u32</tspan><tspan fill="var(--fg)">,</tspan></text>
+  <text x="16" y="126" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_0&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
+  <text x="182" y="146" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--fg-muted)">= </tspan><tspan fill="var(--num)">300</tspan></text>
   <rect x="390" y="124" width="34" height="32" rx="5" fill="var(--accent)"/>
-  <text x="407.0" y="145" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">41</text>
-  <text x="407.0" y="172" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--accent)">_0</text>
+  <text x="407.0" y="145" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">41</text>
+  <text x="407.0" y="172" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--accent)">_0</text>
   <rect x="454" y="124" width="34" height="32" rx="5" fill="var(--ty)"/>
-  <text x="471.0" y="145" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">02</text>
+  <text x="471.0" y="145" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">02</text>
   <rect x="518" y="124" width="34" height="32" rx="5" fill="var(--str)"/>
-  <text x="535.0" y="145" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">ac</text>
+  <text x="535.0" y="145" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">ac</text>
   <rect x="557" y="124" width="34" height="32" rx="5" fill="var(--str)"/>
-  <text x="574.0" y="145" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">02</text>
-  <text x="554.5" y="172" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--str)">300 as a varint</text>
-  <text x="16" y="220" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg)">label: </tspan><tspan fill="var(--ty)">String</tspan><tspan fill="var(--fg)">,</tspan></text>
-  <text x="16" y="200" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_1&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
-  <text x="182" y="220" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg-muted)">= </tspan><tspan fill="var(--str)">&quot;temp&quot;</tspan></text>
+  <text x="574.0" y="145" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">02</text>
+  <text x="554.5" y="172" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--str)">300 as a varint</text>
+  <text x="16" y="220" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--fg)">label: </tspan><tspan fill="var(--ty)">String</tspan><tspan fill="var(--fg)">,</tspan></text>
+  <text x="16" y="200" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_1&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
+  <text x="182" y="220" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--fg-muted)">= </tspan><tspan fill="var(--str)">&quot;temp&quot;</tspan></text>
   <rect x="390" y="198" width="34" height="32" rx="5" fill="var(--accent)"/>
-  <text x="407.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">42</text>
-  <text x="407.0" y="246" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--accent)">_1</text>
+  <text x="407.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">42</text>
+  <text x="407.0" y="246" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--accent)">_1</text>
   <rect x="454" y="198" width="34" height="32" rx="5" fill="var(--ty)"/>
-  <text x="471.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">04</text>
+  <text x="471.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">04</text>
   <rect x="518" y="198" width="34" height="32" rx="5" fill="var(--str)"/>
-  <text x="535.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">74</text>
+  <text x="535.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">74</text>
   <rect x="557" y="198" width="34" height="32" rx="5" fill="var(--str)"/>
-  <text x="574.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">65</text>
+  <text x="574.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">65</text>
   <rect x="596" y="198" width="34" height="32" rx="5" fill="var(--str)"/>
-  <text x="613.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">6d</text>
+  <text x="613.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">6d</text>
   <rect x="635" y="198" width="34" height="32" rx="5" fill="var(--str)"/>
-  <text x="652.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">70</text>
-  <text x="593.5" y="246" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--str)">"temp"</text>
-  <text x="16" y="294" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg)">unit: </tspan><tspan fill="var(--ty)">Unit</tspan><tspan fill="var(--fg)">,</tspan></text>
-  <text x="16" y="274" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_2&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
-  <text x="182" y="294" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg-muted)">= </tspan><tspan fill="var(--ty)">Celsius</tspan></text>
+  <text x="652.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">70</text>
+  <text x="593.5" y="246" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--str)">"temp"</text>
+  <text x="16" y="294" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--fg)">unit: </tspan><tspan fill="var(--ty)">Unit</tspan><tspan fill="var(--fg)">,</tspan></text>
+  <text x="16" y="274" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_2&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
+  <text x="182" y="294" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--fg-muted)">= </tspan><tspan fill="var(--ty)">Celsius</tspan></text>
   <rect x="390" y="272" width="34" height="32" rx="5" fill="var(--accent)"/>
-  <text x="407.0" y="293" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">43</text>
-  <text x="407.0" y="320" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--accent)">_2</text>
+  <text x="407.0" y="293" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">43</text>
+  <text x="407.0" y="320" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--accent)">_2</text>
   <rect x="454" y="272" width="34" height="32" rx="5" fill="var(--ty)"/>
-  <text x="471.0" y="293" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">01</text>
+  <text x="471.0" y="293" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">01</text>
   <rect x="518" y="272" width="34" height="32" rx="5" fill="var(--str)"/>
-  <text x="535.0" y="293" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13" fill="var(--bg)">41</text>
-  <text x="535.0" y="320" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" fill="var(--str)">variant _0</text>
-  <text x="0" y="338" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">}</text>
-  <text x="0" y="372" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--kw)">enum</tspan><tspan fill="var(--fg)"> </tspan><tspan fill="var(--ty)">Unit</tspan><tspan fill="var(--fg)"> {</tspan></text>
-  <text x="31" y="392" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_0&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
-  <text x="31" y="412" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--ty)">Celsius</tspan><tspan fill="var(--fg)">,</tspan></text>
-  <text x="31" y="432" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_1&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
-  <text x="31" y="452" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--ty)">Other</tspan><tspan fill="var(--fg)">(</tspan><tspan fill="var(--ty)">String</tspan><tspan fill="var(--fg)">),</tspan></text>
-  <text x="0" y="472" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="13"><tspan fill="var(--fg)">}</tspan></text>
+  <text x="535.0" y="293" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--bg)">41</text>
+  <text x="535.0" y="320" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--str)">variant _0</text>
+  <text x="0" y="338" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="15" fill="var(--fg)">}</text>
+  <text x="0" y="372" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--kw)">enum</tspan><tspan fill="var(--fg)"> </tspan><tspan fill="var(--ty)">Unit</tspan><tspan fill="var(--fg)"> {</tspan></text>
+  <text x="31" y="392" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_0&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
+  <text x="31" y="412" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--ty)">Celsius</tspan><tspan fill="var(--fg)">,</tspan></text>
+  <text x="31" y="432" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--attr)">#[serde(rename = </tspan><tspan fill="var(--str)">&quot;_1&quot;</tspan><tspan fill="var(--attr)">)]</tspan></text>
+  <text x="31" y="452" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--ty)">Other</tspan><tspan fill="var(--fg)">(</tspan><tspan fill="var(--ty)">String</tspan><tspan fill="var(--fg)">),</tspan></text>
+  <text x="0" y="472" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"><tspan fill="var(--fg)">}</tspan></text>
 </svg>
