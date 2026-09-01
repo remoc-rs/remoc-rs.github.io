@@ -1,10 +1,10 @@
 ---
 layout: base
 project: aggligator
-title: "Aggligator: many links, one connection for Rust"
+title: "Aggligator: link bonding and failover for Rust, without Multipath TCP"
 description: >-
-  Aggligator combines network links between two endpoints and keeps the logical connection alive
-  while links fail, reconnect or move between networks.
+  Link bonding, failover and roaming in user space. Aggligator combines TCP, WebSocket, USB and
+  Bluetooth links into one connection with their combined bandwidth.
 social_description: >-
   Aggligator combines TCP, WebSocket, USB or Bluetooth links and keeps one logical connection
   alive as devices move between networks.
@@ -24,9 +24,14 @@ footer_alt: true
             <h1>Aggligator</h1>
             <p class="tagline">Your friendly link aggregator.</p>
             <p class="lead">
-                Aggligator combines network links between two endpoints into one connection, distributing
-                data across those currently available. Failed links are re-established automatically, so
-                the logical connection can survive a device switching between Wi-Fi, mobile data and
+                Aggligator combines the network links between two endpoints into one connection with
+                their combined bandwidth. It serves the same purpose as Multipath&nbsp;TCP, but works
+                in user space over ordinary TCP, TLS, WebSocket, USB and Bluetooth links, so neither
+                the operating system nor the network in between needs to support it.
+            </p>
+            <p class="lead">
+                Links may fail, return or be added while the connection runs, so failover is automatic
+                and the connection survives a device switching between Wi-Fi, mobile data and
                 Ethernet, even when its IP&nbsp;address changes.
             </p>
 
@@ -181,8 +186,9 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                             <svg class="feature-icon" aria-hidden="true"><use href="#feature-transport"/></svg>
                         </h3>
                         <p>
-                            Aggligator runs in user space over ordinary ordered byte streams or packet
-                            streams, without multipath support from the operating system or network.
+                            Aggligator does its link aggregation in user space, over ordinary ordered
+                            byte streams or packet streams, without multipath support from the
+                            operating system or network.
                         </p>
                         <p><a href="#transports">Transports &rarr;</a></p>
                     </article>
