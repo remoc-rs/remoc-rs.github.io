@@ -131,15 +131,30 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
                 </figure>
                 </div>
 
-                <p class="section-foot">
-                    The listings are excerpts showing using an existing channel for sending the count request.
-                    The example pages include all source files.
-                </p>
-                <p class="section-foot">
-                    <a class="button" href="/examples/channels.html">Channels example &rarr;</a>
-                    <a class="button" href="/examples/rtc.html">Trait calling example &rarr;</a>
-                    <a class="button" href="/examples/rtc-web.html">Web browser example &rarr;</a>
-                </p>
+                <aside class="examples-banner" aria-labelledby="examples-heading">
+                    <h3 id="examples-heading">Complete runnable examples</h3>
+                    <p>
+                        These excerpts assume an existing connection. The examples include every source
+                        file and the complete connection setup.
+                    </p>
+                    <div class="example-links">
+                        <a class="example-link" href="/examples/channels.html">
+                            <strong>Remote channels</strong>
+                            <span>Send channel endpoints inside messages and use them from the other peer.</span>
+                            <b>View example &rarr;</b>
+                        </a>
+                        <a class="example-link" href="/examples/rtc.html">
+                            <strong>Trait-based RPC</strong>
+                            <span>Generate a client and server from an async Rust trait.</span>
+                            <b>View example &rarr;</b>
+                        </a>
+                        <a class="example-link" href="/examples/rtc-web.html">
+                            <strong>Web browser</strong>
+                            <span>Connect Rust compiled to WebAssembly to a Rust server over WebSocket.</span>
+                            <b>View example &rarr;</b>
+                        </a>
+                    </div>
+                </aside>
             </div>
         </section>
 
