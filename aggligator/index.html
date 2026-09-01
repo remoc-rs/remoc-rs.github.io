@@ -50,6 +50,14 @@ footer_alt: true
                     </button>
                 </div>
             </div>
+
+            <div class="hero-tool">
+                <h2>Aggligator tunnel utility
+                    (<a href="/aggligator/tunnel.html"><code>agg-tunnel</code></a>)</h2>
+                <div class="cta">
+                    {% include agg-downloads.html %}
+                </div>
+            </div>
         </div>
     </header>
 
@@ -69,25 +77,7 @@ footer_alt: true
             </div>
         </section>
 
-        <section id="tunnel" class="section alt">
-            <div class="wrap tunnel-promo">
-                <div>
-                    <h2>Use Aggligator with existing TCP applications</h2>
-                    <p class="section-lead">
-                        The <code>agg-tunnel</code> utility carries ordinary TCP connections over
-                        Aggligator. Existing clients and servers can use aggregated links without changes
-                        to their code.
-                    </p>
-                    <p class="section-foot">
-                        <a class="button" href="/aggligator/tunnel.html">How to use <code>agg-tunnel</code>
-                            &rarr;</a>
-                    </p>
-                </div>
-                {% include agg-tunnel-illustration.svg %}
-            </div>
-        </section>
-
-        <section id="usage" class="section">
+        <section id="usage" class="section alt">
             <div class="wrap">
                 <h2>Use it like a socket from Rust</h2>
                 <p class="section-lead">
@@ -139,6 +129,24 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                     <a href="https://docs.rs/aggligator/latest/aggligator/transport/index.html">Connecting
                         and accepting with custom transports &rarr;</a>
                 </p>
+            </div>
+        </section>
+
+        <section id="tunnel" class="section">
+            <div class="wrap tunnel-promo">
+                <div>
+                    <h2>Use Aggligator with existing TCP applications</h2>
+                    <p class="section-lead">
+                        The <code>agg-tunnel</code> utility carries ordinary TCP connections over
+                        Aggligator. Existing clients and servers can use aggregated links without changes
+                        to their code.
+                    </p>
+                    <p class="section-foot">
+                        <a class="button" href="/aggligator/tunnel.html">How to use <code>agg-tunnel</code>
+                            &rarr;</a>
+                    </p>
+                </div>
+                {% include agg-tunnel-illustration.svg %}
             </div>
         </section>
 

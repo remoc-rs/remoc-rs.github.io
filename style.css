@@ -654,6 +654,26 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     width: 100%;
 }
 
+/* The tunnel utility needs no Rust, so its downloads are offered in the hero as well.
+   It stays quieter than the buttons above it, since most visitors came for the library. */
+
+.hero-tool {
+    max-width: 34rem;
+    margin: 2.5rem auto 0;
+    padding-top: 0.4rem;
+}
+
+.hero-tool h2 {
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin: 0 0 0.9rem;
+}
+
+.hero-tool h2 code {
+    font-size: 0.95em;
+}
+
 /* Sections */
 
 .section {
