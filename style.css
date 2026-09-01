@@ -67,6 +67,8 @@
 
     --measure: 68rem;
     --radius: 10px;
+
+    --scroll-thumb: #c4bec6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -95,6 +97,8 @@
         --yes: #8fd18a;
         --partial: #f0b060;
         --no: #ff9b91;
+
+        --scroll-thumb: #45414e;
     }
 }
 
@@ -1089,6 +1093,26 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 .diagram {
     margin: 0;
     overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb) transparent;
+}
+
+/* A diagram that is wider than the screen has to say so. Touch platforms only show their
+   overlay scrollbar while a finger is moving, so the bar is styled here, which makes it a
+   permanent one that is there before anybody tries to scroll. */
+
+.diagram::-webkit-scrollbar {
+    height: 8px;
+    -webkit-appearance: none;
+}
+
+.diagram::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    border-radius: 4px;
+}
+
+.diagram::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 .diagram-svg {
