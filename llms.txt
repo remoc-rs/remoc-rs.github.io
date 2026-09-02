@@ -37,7 +37,7 @@ built on Tokio.
 - [Benchmarks](https://remoc.rs/benchmarks.html): throughput of a Remoc channel
   compared with plain TCP.
 - [Examples](https://remoc.rs/examples/channels.html): remote channels, remote
-  trait calls and a web browser endpoint.
+  trait calls, distributed tracing and a web browser endpoint.
 - [API documentation](https://docs.rs/remoc)
 
 ## Aggligator

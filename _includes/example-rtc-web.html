@@ -1,4 +1,4 @@
-<!-- generated from remoc 147456e by _tools/render_examples.py -->
+<!-- generated from remoc cc64aef by _tools/render_examples.py -->
 <section class="example-crate">
     <h3>build</h3>
     <p class="example-crate-role">Builds the WebAssembly client before compiling the server that embeds it.</p>
@@ -134,7 +134,7 @@ bytes = <span class="s">"1"</span>
 futures = <span class="s">"0.3"</span>
 tokio = { version = <span class="s">"1"</span>, features = [<span class="s">"macros"</span>, <span class="s">"net"</span>, <span class="s">"rt-multi-thread"</span>, <span class="s">"sync"</span>] }
 tracing = <span class="s">"0.1"</span>
-tracing-subscriber = <span class="s">"0.3"</span></code></pre>
+tracing-subscriber = { version = <span class="s">"0.3"</span>, features = [<span class="s">"env-filter"</span>] }</code></pre>
     </article>
     <article class="example-file" id="counter-server-web-src-main-rs">
         <h4><code>counter-server-web/src/main.rs</code></h4>
@@ -201,7 +201,15 @@ tracing-subscriber = <span class="s">"0.3"</span></code></pre>
 
 <span class="a">#[tokio::main]</span>
 <span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() -&gt; <span class="t">anyhow</span>::<span class="t">Result</span>&lt;()&gt; {
-    tracing_subscriber::fmt::init();
+    <span class="c">// Initialize logging to the terminal at info level, overridable using
+</span>    <span class="c">// the `RUST_LOG` environment variable.
+</span>    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::builder()
+                .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
+                .from_env_lossy(),
+        )
+        .init();
 
     <span class="k">let</span> counter = Arc::new(RwLock::new(CounterObj::default()));
     <span class="k">let</span> app = Router::new()
@@ -236,7 +244,7 @@ tracing-subscriber = <span class="s">"0.3"</span></code></pre>
     <span class="c">// Axum hands the upgraded WebSocket to this future.
 </span>    upgrade.on_upgrade(<span class="k">move</span> |socket| <span class="k">async</span> <span class="k">move</span> {
         <span class="k">if</span> <span class="k">let</span> <span class="t">Err</span>(error) = serve_client(socket, counter).<span class="k">await</span> {
-            tracing::warn!(%error, <span class="s">"Remoc client connection failed"</span>);
+            tracing::warn!(%error, <span class="s">"remoc client connection failed"</span>);
         }
     })
 }

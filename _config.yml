@@ -60,6 +60,7 @@ projects:
 examples:
   - { id: channels, name: Remote channels, url: /examples/channels.html }
   - { id: rtc, name: Remote trait calls, url: /examples/rtc.html }
+  - { id: tracing, name: Distributed tracing, url: /examples/tracing.html }
   - { id: rtc-web, name: Web browser, url: /examples/rtc-web.html }
 
 # GitHub Pages builds this with Jekyll; the layout and includes exist only to keep

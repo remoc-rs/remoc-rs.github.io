@@ -20,5 +20,6 @@ permalink: /sitemap.xml
     <url><loc>{{ site.url }}/comparison.html</loc></url>
     <url><loc>{{ site.url }}/examples/channels.html</loc></url>
     <url><loc>{{ site.url }}/examples/rtc.html</loc></url>
+    <url><loc>{{ site.url }}/examples/tracing.html</loc></url>
     <url><loc>{{ site.url }}/examples/rtc-web.html</loc></url>
 </urlset>

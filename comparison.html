@@ -397,7 +397,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="trace-context"
                                         text="Whether distributed tracing identity travels with calls so spans can be connected across peers." %}
                                 </th>
-                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">pass it explicitly</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">OpenTelemetry context with each call</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">trace id in the request context</span></td>
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">via metadata and an interceptor</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">pass it explicitly</span></td>
@@ -436,11 +436,12 @@ nav_url: /comparison.html
                     <a href="https://docs.rs/tarpc">tarpc</a> is the closest alternative: it also
                     defines services as Rust traits without a separate schema. It focuses on
                     request/response RPC; a server may keep application state, but calls do not pass
-                    remote channels or object handles. Tarpc includes a deadline and trace id in every
-                    request context. Remoc instead propagates cancellation through the call tree: dropping
-                    a call future, for example through <code>tokio::time::timeout</code>, cancels the
-                    server call and remote calls made while handling it. Trace context must be passed
-                    explicitly.
+                    remote channels or object handles. Tarpc includes a deadline in every request
+                    context; both libraries send the OpenTelemetry trace context with each call, so
+                    the server's spans join the caller's trace. Remoc additionally propagates
+                    cancellation through the call tree: dropping a call future, for example through
+                    <code>tokio::time::timeout</code>, cancels the server call and remote calls made
+                    while handling it.
                 </p>
 
                 <h3>gRPC, through tonic</h3>

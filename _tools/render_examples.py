@@ -132,6 +132,48 @@ EXAMPLES = [
         ],
     ),
     Example(
+        id="tracing",
+        directory="examples/tracing",
+        crates=[
+            Crate(
+                "pizzeria",
+                "Defines the remote trait shared by the client and server.",
+                [
+                    File("Cargo.toml", MANIFEST),
+                    File(
+                        "src/lib.rs",
+                        "Defines the trait whose <code>tracing</code> argument makes the server "
+                        "create a span for processing each call.",
+                    ),
+                ],
+            ),
+            Crate(
+                "pizzeria-server",
+                "Prepares each ordered pizza in instrumented steps.",
+                [
+                    File("Cargo.toml", MANIFEST),
+                    File(
+                        "src/main.rs",
+                        "Implements the trait with <code>#[instrument]</code> steps and exports "
+                        "its spans when an OpenTelemetry endpoint is configured.",
+                    ),
+                ],
+            ),
+            Crate(
+                "pizzeria-client",
+                "Orders one of each pizza on the menu, all at once.",
+                [
+                    File("Cargo.toml", MANIFEST),
+                    File(
+                        "src/main.rs",
+                        "Places the orders concurrently within one span and exports the "
+                        "resulting trace.",
+                    ),
+                ],
+            ),
+        ],
+    ),
+    Example(
         id="rtc-web",
         directory="examples/rtc-web",
         crates=[

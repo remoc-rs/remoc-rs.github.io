@@ -1,4 +1,4 @@
-<!-- generated from remoc 62d1ab4 by _tools/render_examples.py -->
+<!-- generated from remoc cc64aef by _tools/render_examples.py -->
 <section class="example-crate">
     <h3>counter</h3>
     <p class="example-crate-role">Defines the remote trait shared by the client and server.</p>
@@ -83,7 +83,7 @@ counter = { path = <span class="s">"../counter"</span> }
 remoc = { version = <span class="s">"0.20"</span> }
 tokio = { version = <span class="s">"1"</span>, features = [<span class="s">"rt-multi-thread"</span>, <span class="s">"net"</span>, <span class="s">"sync"</span>, <span class="s">"time"</span>] }
 tracing = <span class="s">"0.1"</span>
-tracing-subscriber = <span class="s">"0.3.22"</span></code></pre>
+tracing-subscriber = { version = <span class="s">"0.3.22"</span>, features = [<span class="s">"env-filter"</span>] }</code></pre>
     </article>
     <article class="example-file" id="counter-server-src-main-rs">
         <h4><code>counter-server/src/main.rs</code></h4>
@@ -168,8 +168,15 @@ tracing-subscriber = <span class="s">"0.3.22"</span></code></pre>
 
 <span class="a">#[tokio::main]</span>
 <span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() {
-    <span class="c">// Initialize logging.
-</span>    tracing_subscriber::fmt::init();
+    <span class="c">// Initialize logging to the terminal at info level, overridable using
+</span>    <span class="c">// the `RUST_LOG` environment variable.
+</span>    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::builder()
+                .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
+                .from_env_lossy(),
+        )
+        .init();
 
     <span class="c">// Create a counter object that will be shared between all clients.
 </span>    <span class="c">// You could also create one counter object per connection.
@@ -196,8 +203,7 @@ tracing-subscriber = <span class="s">"0.3.22"</span></code></pre>
 
                 <span class="c">// Create a server proxy and client for the accepted connection.
 </span>                <span class="c">//
-</span>                <span class="c">// The server proxy executes all incoming method calls on the shared counter_obj
-</span>                <span class="c">// with a request queue length of 1.
+</span>                <span class="c">// The server proxy executes all incoming method calls on the shared counter_obj.
 </span>                <span class="c">//
 </span>                <span class="c">// Current limitations of the Rust compiler require that we explicitly
 </span>                <span class="c">// specify the codec.
@@ -208,7 +214,8 @@ tracing-subscriber = <span class="s">"0.3.22"</span></code></pre>
 </span>                remoc::Connect::io(remoc::Cfg::default(), socket_rx, socket_tx).provide(client).<span class="k">await</span>.unwrap();
 
                 <span class="c">// Serve incoming requests from the client on this task.
-</span>                <span class="c">// `true` indicates that requests are handled in parallel.
+</span>                <span class="c">// Calls taking `&amp;self` are executed in parallel, while calls taking
+</span>                <span class="c">// `&amp;mut self` are serialized through the lock on the counter object.
 </span>                server.serve().<span class="k">await</span>.unwrap();
             }
             .instrument(info_span!(<span class="s">"incoming"</span>, %addr)),
@@ -232,7 +239,7 @@ edition = <span class="s">"2024"</span>
 counter = { path = <span class="s">"../counter"</span> }
 remoc = { version = <span class="s">"0.20"</span> }
 tokio = { version = <span class="s">"1"</span>, features = [<span class="s">"rt-multi-thread"</span>, <span class="s">"net"</span>, <span class="s">"sync"</span>, <span class="s">"time"</span>] }
-tracing-subscriber = <span class="s">"0.3.22"</span></code></pre>
+tracing-subscriber = { version = <span class="s">"0.3.22"</span>, features = [<span class="s">"env-filter"</span>] }</code></pre>
     </article>
     <article class="example-file" id="counter-client-src-main-rs">
         <h4><code>counter-client/src/main.rs</code></h4>
@@ -248,8 +255,15 @@ tracing-subscriber = <span class="s">"0.3.22"</span></code></pre>
 
 <span class="a">#[tokio::main]</span>
 <span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() {
-    <span class="c">// Initialize logging.
-</span>    tracing_subscriber::fmt::init();
+    <span class="c">// Initialize logging to the terminal at info level, overridable using
+</span>    <span class="c">// the `RUST_LOG` environment variable.
+</span>    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::builder()
+                .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
+                .from_env_lossy(),
+        )
+        .init();
 
     <span class="c">// Establish TCP connection to server.
 </span>    <span class="k">let</span> socket = TcpStream::connect((Ipv4Addr::LOCALHOST, TCP_PORT)).<span class="k">await</span>.unwrap();

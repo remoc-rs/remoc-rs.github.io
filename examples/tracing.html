@@ -1,0 +1,107 @@
+---
+layout: base
+project: remoc
+title: "Distributed tracing of remote trait calls: a Remoc example"
+description: >-
+  A pizzeria served over Remoc whose calls appear as spans in the caller's
+  trace, viewed in an OpenTelemetry collector.
+social_description: >-
+  Remote calls that show up in the caller's trace via OpenTelemetry.
+canonical: /examples/tracing.html
+example: tracing
+nav_url: /examples/channels.html
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Example: distributed tracing</h1>
+            <p class="lead">
+                The client orders pizzas and the calls executed by the server appear as
+                spans in the client's trace.
+            </p>
+
+            {% include example-tabs.html %}
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <p>
+                    The pizzeria trait specifies the <code>tracing</code> argument in its
+                    <code>#[rtc::remote]</code> attribute, so the client creates a span for
+                    each call and the server one for processing it. The tracing context
+                    travels with the call, linking the span of the server to the span of the
+                    call across the connection.
+                </p>
+                <p>
+                    The server prepares each pizza in steps carrying the
+                    <code>#[instrument]</code> attribute of the
+                    <a href="https://docs.rs/tracing">tracing</a> crate, whose spans nest
+                    within the span of the call. The client orders all pizzas at once, so
+                    their preparation runs in parallel on the server, which is visible in
+                    the timing of the spans.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Running it</h2>
+                <p>
+                    Clone the repository:
+                </p>
+                <pre class="cmd"><code>git clone {{ site.repo }}
+cd remoc</code></pre>
+                <p class="section-foot">
+                    Run an OpenTelemetry collector, for example
+                    <a href="https://github.com/ymtdzzz/otel-tui">otel-tui</a>, which
+                    displays the traces directly in the terminal:
+                </p>
+                <pre class="cmd"><code>otel-tui</code></pre>
+                <p class="section-foot">
+                    Start the server:
+                </p>
+                <pre class="cmd"><code>OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 \
+    cargo run --manifest-path examples/tracing/Cargo.toml -p pizzeria-server</code></pre>
+                <p class="section-foot">
+                    Then, in another terminal, start the client:
+                </p>
+                <pre class="cmd"><code>OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 \
+    cargo run --manifest-path examples/tracing/Cargo.toml -p pizzeria-client</code></pre>
+                <p class="section-foot">
+                    The collector shows the trace of the pizza order, with the three orders
+                    executing in parallel on the server:
+                </p>
+                <pre class="cmd"><code>[pizzeria-client] pizza order
+├─ [pizzeria-client] Pizzeria::order
+│  └─ [pizzeria-server] Pizzeria::order
+│     ├─ prepare_dough
+│     ├─ add_toppings
+│     └─ bake
+├─ [pizzeria-client] Pizzeria::order
+│  └─ …
+└─ [pizzeria-client] Pizzeria::order
+   └─ …</code></pre>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>The program</h2>
+                <p class="section-lead">
+                    The shared crate defines the remote trait, and the other two crates provide the
+                    server and client binaries.
+                </p>
+
+                {% include example-tracing.html %}
+
+                <p class="section-foot">
+                    <a class="button icon-link" href="{{ site.repo }}/tree/master/examples/tracing"><span
+                            class="icon github" aria-hidden="true"></span>Browse it on GitHub</a>
+                </p>
+            </div>
+        </section>
+    </main>
