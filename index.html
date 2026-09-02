@@ -130,12 +130,14 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
 }</code></pre>
                 </figure>
                 </div>
+            </div>
 
-                <aside class="examples-banner" aria-labelledby="examples-heading">
+            <aside class="examples-banner" aria-labelledby="examples-heading">
+                <div class="wrap">
                     <h3 id="examples-heading">Complete runnable examples</h3>
                     <p>
-                        These excerpts assume an existing connection. The examples include every source
-                        file and the complete connection setup.
+                        The excerpts above assume an existing connection.
+                        The examples here include every source file and the complete connection setup.
                     </p>
                     <div class="example-links">
                         <a class="example-link" href="/examples/channels.html">
@@ -154,8 +156,8 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
                             <b>View example &rarr;</b>
                         </a>
                     </div>
-                </aside>
-            </div>
+                </div>
+            </aside>
         </section>
 
         <section id="pipelining" class="section">
@@ -230,18 +232,27 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
         </section>
 
         <section id="schema-evolution" class="section">
-            <div class="wrap">
-                <h2>Messages that <strong>evolve</strong> with your application</h2>
-                <p class="section-lead">
-                    Remoc uses Postbag to encode your data, allowing independently deployed versions
-                    to keep communicating as their message types change. Fields and enum variants can
-                    be <strong>added, removed, renamed or reordered</strong>, while
-                    <strong>recoverable fields</strong> can isolate an incompatible change instead of
-                    losing the entire enclosing message.
-                </p>
-                <p class="section-foot">
-                    <a href="/postbag/">How Postbag handles schema evolution &rarr;</a>
-                </p>
+            <div class="wrap home-promo">
+                <div class="home-promo-copy">
+                    <h2>Messages that <strong>evolve</strong> with your application</h2>
+                    <p class="section-lead">
+                        Remoc uses <a href="/postbag/">Postbag</a> to encode your data, allowing
+                        independently deployed versions to keep communicating as their message types
+                        change. Fields and enum variants can be
+                        <strong>added, removed, renamed or reordered</strong>, while
+                        <strong>recoverable fields</strong> can isolate an incompatible change instead
+                        of losing the entire enclosing message.
+                    </p>
+                    <p class="section-foot">
+                        <a href="/postbag/">How Postbag handles schema evolution &rarr;</a>
+                    </p>
+                </div>
+
+                <a class="home-promo-logo-link" href="/postbag/">
+                    <img src="/postbag/logo.png"
+                        alt="Postbag logo: messages entering a satchel surrounded by a gear"
+                        width="362" height="363">
+                </a>
             </div>
         </section>
 
@@ -346,29 +357,94 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     </p>
                 </article>
                 </div>
-                <p class="section-foot">
-                    <a href="comparison.html">How Remoc compares with other RPC libraries &rarr;</a>
-                </p>
             </div>
         </section>
 
-        <section id="connection-resilience" class="section">
-            <div class="wrap">
-                <h2>Connection resilience with Aggligator</h2>
-                <p class="section-lead">
-                    Remoc sessions are <strong>stateful</strong>: channels and remote objects remain
-                    connected for as long as the session does. The Aggligator crate provides a
-                    transport that <strong>keeps Remoc's logical connection alive</strong> when
-                    underlying links fail, reconnecting automatically without requiring the session
-                    to start over. It can also combine the bandwidth of multiple links.
-                </p>
-                <p class="section-foot">
-                    <a href="/aggligator/">How Aggligator keeps connections alive &rarr;</a>
-                </p>
+        <section id="comparison" class="section">
+            <div class="wrap home-promo">
+                <div class="home-promo-copy">
+                    <h2>How does Remoc compare?</h2>
+                    <p class="section-lead">
+                        See where Remoc, tarpc, gRPC and Cap'n Proto differ in their contracts,
+                        transferable capabilities, conversation patterns and deployment trade-offs.
+                    </p>
+                    <p class="section-foot">
+                        <a class="button" href="/comparison.html">Compare RPC libraries &rarr;</a>
+                    </p>
+                </div>
+
+                <a class="comparison-preview" href="/comparison.html"
+                    aria-label="Open the full RPC library comparison">
+                    <table>
+                        <caption class="sr">Selected capabilities from the full RPC library comparison</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Capability</th>
+                                <th class="own" scope="col">Remoc</th>
+                                <th scope="col">tarpc</th>
+                                <th scope="col">gRPC</th>
+                                <th scope="col">Cap'n</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Rust trait contract</th>
+                                <td class="good"><span aria-hidden="true">&check;</span><span class="sr">yes</span></td>
+                                <td class="good"><span aria-hidden="true">&check;</span><span class="sr">yes</span></td>
+                                <td class="poor"><span aria-hidden="true">&cross;</span><span class="sr">no</span></td>
+                                <td class="poor"><span aria-hidden="true">&cross;</span><span class="sr">no</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Typed channels as values</th>
+                                <td class="good"><span aria-hidden="true">&check;</span><span class="sr">yes</span></td>
+                                <td class="poor"><span aria-hidden="true">&cross;</span><span class="sr">no</span></td>
+                                <td class="poor"><span aria-hidden="true">&cross;</span><span class="sr">no</span></td>
+                                <td class="poor"><span aria-hidden="true">&cross;</span><span class="sr">no</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Promise pipelining</th>
+                                <td class="good"><span aria-hidden="true">&check;</span><span class="sr">yes</span></td>
+                                <td class="poor"><span aria-hidden="true">&cross;</span><span class="sr">no</span></td>
+                                <td class="poor"><span aria-hidden="true">&cross;</span><span class="sr">no</span></td>
+                                <td class="good"><span aria-hidden="true">&check;</span><span class="sr">yes</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Either peer can serve</th>
+                                <td class="good"><span aria-hidden="true">&check;</span><span class="sr">yes</span></td>
+                                <td class="poor"><span aria-hidden="true">&cross;</span><span class="sr">no</span></td>
+                                <td class="poor"><span aria-hidden="true">&cross;</span><span class="sr">no</span></td>
+                                <td class="good"><span aria-hidden="true">&check;</span><span class="sr">yes</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </a>
             </div>
         </section>
 
-        <section id="topics" class="section alt">
+        <section id="connection-resilience" class="section alt">
+            <div class="wrap home-promo">
+                <div class="home-promo-copy">
+                    <h2>Connection resilience with Aggligator</h2>
+                    <p class="section-lead">
+                        Remoc sessions are <strong>stateful</strong>: channels and remote objects remain
+                        connected for as long as the session does. The Aggligator crate provides a
+                        transport that <strong>keeps Remoc's logical connection alive</strong> when
+                        underlying links fail, reconnecting automatically without requiring the session
+                        to start over. It can also combine the bandwidth of multiple links.
+                    </p>
+                    <p class="section-foot">
+                        <a class="button" href="/aggligator/">Explore Aggligator &rarr;</a>
+                    </p>
+                </div>
+
+                <a class="home-promo-logo-link" href="/aggligator/">
+                    <img src="/aggligator/logo.png" alt="Aggligator's green crocodile logo"
+                        width="467" height="482">
+                </a>
+            </div>
+        </section>
+
+        <section id="topics" class="section">
             <div class="wrap">
                 <h2>Common uses</h2>
                 <p class="section-lead">

@@ -799,6 +799,135 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     overflow-wrap: anywhere;
 }
 
+/* Homepage promos pair a short introduction with one strong visual, keeping the
+   comparison and companion transport visible without turning them into feature grids. */
+
+.home-promo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.9fr);
+    gap: clamp(2.5rem, 7vw, 6rem);
+    align-items: center;
+}
+
+.home-promo-copy .section-lead {
+    margin-bottom: 0;
+}
+
+.home-promo-copy .section-foot {
+    margin-top: 1.75rem;
+}
+
+.comparison-preview {
+    display: block;
+    min-width: 0;
+    margin: 0;
+    padding: 1rem 1rem 2.5rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+    border-top-width: 3px;
+    border-radius: var(--radius);
+    background: var(--bg);
+    box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--fg) 9%, transparent);
+    color: var(--fg);
+    text-decoration: none;
+    transition: transform 0.15s;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
+}
+
+.comparison-preview:hover {
+    color: var(--fg);
+    transform: translateY(-2px);
+}
+
+.comparison-preview:focus-visible,
+.home-promo-logo-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+
+.comparison-preview table {
+    table-layout: fixed;
+    font-size: 0.72rem;
+    line-height: 1.25;
+}
+
+.comparison-preview th,
+.comparison-preview td {
+    padding: 0.55rem 0.3rem;
+    text-align: center;
+    white-space: normal;
+}
+
+.comparison-preview tr > :first-child {
+    width: 38%;
+    padding-left: 0.35rem;
+    text-align: left;
+}
+
+.comparison-preview thead th {
+    font-size: 0.68rem;
+}
+
+.comparison-preview tbody th {
+    color: var(--fg-muted);
+    font-weight: 500;
+}
+
+.comparison-preview td {
+    border-left: 1px solid var(--border);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.comparison-preview td.good {
+    background: var(--cell-good);
+    color: var(--yes);
+}
+
+.comparison-preview td.poor {
+    background: var(--cell-poor);
+    color: var(--no);
+}
+
+.comparison-preview .own {
+    color: var(--accent);
+}
+
+.home-promo-logo-link {
+    width: min(100%, 13rem);
+    justify-self: center;
+    filter: drop-shadow(0 1rem 1.5rem color-mix(in srgb, var(--fg) 13%, transparent));
+}
+
+.home-promo-logo-link img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+@media (max-width: 48rem) {
+    .home-promo {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2.5rem;
+    }
+
+    .comparison-preview {
+        padding-inline: 0.6rem;
+    }
+
+    .comparison-preview table {
+        font-size: 0.65rem;
+    }
+
+    .comparison-preview thead th {
+        font-size: 0.6rem;
+    }
+
+    .home-promo-logo-link {
+        width: 9rem;
+    }
+}
+
 /* The traffic strategy is a set of related rules, not another feature grid.
    Horizontal rows keep it visually distinct from the cards above. */
 
@@ -942,10 +1071,9 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 }
 
 .examples-banner {
-    margin-top: 2.75rem;
-    padding: clamp(1.25rem, 3vw, 1.75rem);
-    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
-    border-radius: var(--radius);
+    margin: 2.75rem -1.25rem 0;
+    padding: clamp(1.25rem, 3vw, 1.75rem) 1.25rem;
+    border-block: 2px solid color-mix(in srgb, var(--accent) 30%, var(--border));
     background: color-mix(in srgb, var(--accent) 5%, var(--bg-alt));
 }
 
@@ -954,7 +1082,7 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     margin-bottom: 0.35rem;
 }
 
-.examples-banner > p {
+.examples-banner .wrap > p {
     max-width: 46rem;
     margin-bottom: 1.25rem;
     color: var(--fg-muted);

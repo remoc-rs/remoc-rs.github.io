@@ -24,45 +24,43 @@ nav_url: /comparison.html
 
     <main id="content">
         <section class="section">
-            <div class="wrap">
-                <h2>What makes Remoc different</h2>
+            <div class="wrap narrow">
+                <h2>Goal: seamless RPC between Rust programs</h2>
                 <p>
-                    Most RPC libraries model a call as arguments followed by one result or a stream
-                    attached to that method. Remoc also lets arguments and results contain communication
-                    endpoints. A call can return a channel receiver, accept a channel sender or hand out
-                    a client for another remote trait.
+                    Remoc treats an RPC connection as an ongoing typed relationship between two Rust
+                    programs, not only a sequence of requests and responses. Traits, ordinary Rust data,
+                    channels and remote objects can all cross the same connection.
                 </p>
 
-                <div class="grid">
-                    <article>
-                        <h3>Rust types are the contract</h3>
-                        <p>
-                            Traits become remotely callable with <code>#[rtc::remote]</code>. Arguments
-                            and results are Serde types, so there is no separate interface language or
-                            generated source to keep alongside them.
-                        </p>
-                    </article>
-                    <article>
-                        <h3>Either end can serve</h3>
-                        <p>
-                            The peer that opens a connection can also send back a channel or remote
-                            trait client. A device that connects through NAT can therefore expose an
-                            interface over the same connection.
-                        </p>
-                    </article>
-                    <article>
-                        <h3>One multiplexed connection</h3>
-                        <p>
-                            Channels, calls and objects share one byte or packet stream. Each has
-                            independent flow control, so a receiver that stops reading stalls its own
-                            sender rather than unrelated traffic.
-                        </p>
-                    </article>
-                </div>
+                <h3>Rust types are the contract</h3>
+                <p>
+                    Traits become remotely callable with
+                    <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html"><code>#[rtc::remote]</code></a>.
+                    Arguments and results are Serde types, so there is no separate interface language
+                    or generated source to keep alongside them.
+                </p>
 
-                <p class="section-foot">
-                    See the <a href="/examples/channels.html">remote channels</a> and
-                    <a href="/examples/rtc.html">remote trait calls</a> examples.
+                <h3>Channels are transferable values</h3>
+                <p>
+                    <a href="https://docs.rs/remoc/latest/remoc/rch/index.html">Typed channel endpoints</a>
+                    can travel inside messages and calls, then continue carrying values after the
+                    original call returns. They can be created dynamically, sent in either direction
+                    and nested inside other channels.
+                </p>
+
+                <h3>Either end can serve</h3>
+                <p>
+                    The peer that opens a connection can also send back a channel or
+                    <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">remote trait client</a>.
+                    A device that connects through NAT can therefore expose an interface over the same
+                    connection.
+                </p>
+
+                <h3>One connection carries everything</h3>
+                <p>
+                    Channels, calls and objects share one byte or packet stream. Each has independent
+                    flow control, so a receiver that stops reading stalls its own sender rather than
+                    unrelated traffic.
                 </p>
             </div>
         </section>
@@ -71,11 +69,10 @@ nav_url: /comparison.html
             <div class="wrap">
                 <h2>Feature comparison</h2>
                 <p class="section-lead">
-                    Remoc is designed for seamless RPC between Rust programs, so the table compares
-                    each library against that goal. <span class="verdict-key good">Green</span> means
-                    built in, <span class="verdict-key fair">amber</span> means constraints or extra
-                    setup, and <span class="verdict-key poor">red</span> means no documented built-in
-                    support.
+                    The table compares each library against that goal.
+                    <span class="verdict-key good">Green</span> means built in,
+                    <span class="verdict-key fair">amber</span> means constraints or extra setup, and
+                    <span class="verdict-key poor">red</span> means no documented built-in support.
                 </p>
 
                 <div class="table-scroll">
@@ -99,7 +96,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="contract"
                                         text="The source from which both peers derive the service methods and message shapes." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">Rust traits and types</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">Rust traits and types</a></span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">Rust traits</span></td>
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual"><code>.proto</code> schema</span></td>
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual"><code>.capnp</code> schema</span></td>
@@ -110,7 +107,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="rust-trait"
                                         text="Whether you write the RPC API directly as a Rust trait rather than in a separate schema language." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html"><code>#[rtc::remote]</code></a></span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">generated from the schema</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">generated from the schema</span></td>
@@ -157,7 +154,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="live-reference"
                                         text="Whether a call can pass a handle to a remote service or object that the recipient invokes after the original call finishes." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">remote trait client</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">remote trait client</a> or <a href="https://docs.rs/remoc/latest/remoc/robj/index.html">remote object</a></span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">capability reference</span></td>
@@ -168,7 +165,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="dependent-calls"
                                         text="Whether a method can be called on a remote value returned by another call before the first result arrives, also known as promise pipelining." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">promise pipelining</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/rtc/pipelining/index.html">promise pipelining</a></span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">promise pipelining</span></td>
@@ -190,7 +187,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="typed-channels"
                                         text="Whether arguments and results can contain typed channel endpoints that continue carrying values after the call." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/rch/index.html">remote channels</a></span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">capability interfaces can model streams</span></td>
@@ -201,7 +198,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="callbacks"
                                         text="Whether a call can pass behavior that the recipient invokes later, allowing it to call back the sender." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">remote functions and closures</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/rfn/index.html">remote functions and closures</a></span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not transferable in calls</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">bidirectional streams, not callable values</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">schema-declared capabilities</span></td>
@@ -215,7 +212,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="either-peer"
                                         text="Whether the connection initiator and acceptor can both expose callable APIs over that same connection." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">send back a trait client</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">send back a <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">trait client</a></span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">bidirectional streams, not reverse calls</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">callback capabilities</span></td>
@@ -226,7 +223,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="server-push"
                                         text="Whether a server can send updates over an established communication path without waiting for another client request." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">transferred channel or callback</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/rch/index.html">transferred channel</a> or <a href="https://docs.rs/remoc/latest/remoc/rfn/index.html">callback</a></span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">server streaming</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">callback capability</span></td>
@@ -237,7 +234,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="streaming"
                                         text="How the library represents a sequence of values: transferable channels, method-declared streams or application-defined interfaces." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">transferable mpsc, watch and broadcast channels</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/rch/index.html">transferable mpsc, watch and broadcast channels</a></span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not built in</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">method-declared client, server or bidirectional streams</span></td>
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">capability interfaces; <code>-&gt; stream</code> adds flow control</span></td>
@@ -248,7 +245,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="observable-collections"
                                         text="Whether built-in collection types can notify a remote peer when their entries change." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/robs/index.html">observable collections</a></span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span></td>
@@ -262,7 +259,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="transport"
                                         text="Whether the RPC layer can run over application-chosen transports instead of requiring a specific network protocol." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">any byte or packet stream</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="https://docs.rs/remoc/latest/remoc/transports/index.html">any byte or packet stream</a></span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">any byte stream</span></td>
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">requires HTTP/2 framing</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">any byte stream</span></td>
@@ -295,7 +292,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="browser"
                                         text="Whether the library provides a supported way to make its RPC calls from within a web browser." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">WebAssembly, full API</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="/examples/rtc-web.html">WebAssembly, full API</a></span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not documented</span></td>
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">grpc-web: unary and server streaming only</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not documented</span></td>
@@ -370,7 +367,7 @@ nav_url: /comparison.html
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">pointer fields are read separately; the caller handles each error</span></td>
                             </tr>
                             <tr class="group">
-                                <th colspan="5" scope="colgroup">Reach and operations</th>
+                                <th colspan="5" scope="colgroup">Operations and infrastructure</th>
                             </tr>
                             <tr>
                                 <th scope="row">
@@ -378,7 +375,7 @@ nav_url: /comparison.html
                                     {% include row-help.html id="cancellation"
                                         text="Whether a caller can bound work by time and tell the server to stop calls that are no longer needed." %}
                                 </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">a tokio timeout cancels the whole call tree</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">a Tokio timeout <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html#cancellation">cancels</a> the whole call tree</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">deadline on every request</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><code>grpc-timeout</code> header</span></td>
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">cancellation only</span></td>
@@ -404,6 +401,9 @@ nav_url: /comparison.html
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">trace id in the request context</span></td>
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">via metadata and an interceptor</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">pass it explicitly</span></td>
+                            </tr>
+                            <tr class="group">
+                                <th colspan="5" scope="colgroup">Choosing a library</th>
                             </tr>
                             <tr>
                                 <th scope="row">
