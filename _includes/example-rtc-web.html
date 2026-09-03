@@ -1,4 +1,4 @@
-<!-- generated from remoc cc64aef by _tools/render_examples.py -->
+<!-- generated from remoc f821cdc by _tools/render_examples.py -->
 <section class="example-crate">
     <h3>build</h3>
     <p class="example-crate-role">Builds the WebAssembly client before compiling the server that embeds it.</p>
@@ -152,6 +152,7 @@ tracing-subscriber = { version = <span class="s">"0.3"</span>, features = [<span
     http::{HeaderValue, header},
     response::{Html, IntoResponse, Response},
     routing::{any, get},
+    serve::ListenerExt,
 };
 <span class="k">use</span> counter_web::{ChangeError, Counter, CounterServerSharedMut, HTTP_PORT};
 <span class="k">use</span> futures::{SinkExt, StreamExt, future};
@@ -222,7 +223,10 @@ tracing-subscriber = { version = <span class="s">"0.3"</span>, features = [<span
     <span class="k">let</span> address = (Ipv4Addr::LOCALHOST, HTTP_PORT);
     <span class="k">let</span> listener = tokio::net::TcpListener::bind(address)
         .<span class="k">await</span>
-        .with_context(|| <span class="m">format!</span>(<span class="s">"failed to listen on {}:{}"</span>, address.<span class="n">0</span>, address.<span class="n">1</span>))?;
+        .with_context(|| <span class="m">format!</span>(<span class="s">"failed to listen on {}:{}"</span>, address.<span class="n">0</span>, address.<span class="n">1</span>))?
+        .tap_io(|tcp| {
+            <span class="k">let</span> _ = tcp.set_nodelay(<span class="k">true</span>);
+        });
 
     <span class="m">println!</span>(<span class="s">"Open http://{}:{} in a web browser."</span>, address.<span class="n">0</span>, address.<span class="n">1</span>);
     axum::serve(listener, app).<span class="k">await</span>.context(<span class="s">"web server failed"</span>)

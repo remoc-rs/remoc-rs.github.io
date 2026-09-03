@@ -44,6 +44,12 @@ nav_url: /examples/channels.html
                     their preparation runs in parallel on the server, which is visible in
                     the timing of the spans.
                 </p>
+                <p>
+                    The client also passes a remote callback with each order, through which
+                    the server reports the progress of the preparation. Calling it is a
+                    remote call in the opposite direction, from the server to the client,
+                    and its spans are linked into the same trace.
+                </p>
             </div>
         </section>
 
@@ -73,14 +79,21 @@ cd remoc</code></pre>
     cargo run --manifest-path examples/tracing/Cargo.toml -p pizzeria-client</code></pre>
                 <p class="section-foot">
                     The collector shows the trace of the pizza order, with the three orders
-                    executing in parallel on the server:
+                    executing in parallel on the server and the progress reports crossing
+                    back to the client:
                 </p>
-                <pre class="cmd"><code>[pizzeria-client] pizza order
+                <pre class="cmd"><code>[pizzeria-client] order_pizzas
 ├─ [pizzeria-client] Pizzeria::order
 │  └─ [pizzeria-server] Pizzeria::order
 │     ├─ prepare_dough
+│     ├─ [pizzeria-server] progress
+│     │  └─ [pizzeria-client] progress
 │     ├─ add_toppings
-│     └─ bake
+│     ├─ [pizzeria-server] progress
+│     │  └─ [pizzeria-client] progress
+│     ├─ bake
+│     └─ [pizzeria-server] progress
+│        └─ [pizzeria-client] progress
 ├─ [pizzeria-client] Pizzeria::order
 │  └─ …
 └─ [pizzeria-client] Pizzeria::order
@@ -92,8 +105,8 @@ cd remoc</code></pre>
             <div class="wrap">
                 <h2>The program</h2>
                 <p class="section-lead">
-                    The shared crate defines the remote trait, and the other two crates provide the
-                    server and client binaries.
+                    The shared crate defines the remote trait, the progress callback and the
+                    tracing setup, and the other two crates provide the server and client binaries.
                 </p>
 
                 {% include example-tracing.html %}

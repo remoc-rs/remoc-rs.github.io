@@ -145,6 +145,17 @@ nav_url: /comparison.html
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span></td>
                             </tr>
+                            <tr>
+                                <th scope="row">
+                                    Runs in a web browser
+                                    {% include row-help.html id="browser"
+                                        text="Whether the library provides a supported way to make its RPC calls from within a web browser." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="/examples/rtc-web.html">WebAssembly, full API</a></span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not documented</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">grpc-web: unary and server streaming only</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not documented</span></td>
+                            </tr>
                             <tr class="group">
                                 <th colspan="5" scope="colgroup">Transferable channels, objects and functions</th>
                             </tr>
@@ -286,17 +297,6 @@ nav_url: /comparison.html
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">per-stream window; connection window also shared</span></td>
                                 <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">only for <code>-&gt; stream</code> methods; ordinary calls have none</span></td>
                             </tr>
-                            <tr>
-                                <th scope="row">
-                                    Runs in a web browser
-                                    {% include row-help.html id="browser"
-                                        text="Whether the library provides a supported way to make its RPC calls from within a web browser." %}
-                                </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual"><a href="/examples/rtc-web.html">WebAssembly, full API</a></span></td>
-                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not documented</span></td>
-                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">grpc-web: unary and server streaming only</span></td>
-                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not documented</span></td>
-                            </tr>
                             <tr class="group">
                                 <th colspan="5" scope="colgroup">Compatibility across versions</th>
                             </tr>
@@ -382,6 +382,17 @@ nav_url: /comparison.html
                             </tr>
                             <tr>
                                 <th scope="row">
+                                    Built-in trace-context propagation
+                                    {% include row-help.html id="trace-context"
+                                        text="Whether distributed tracing identity travels with calls so spans can be connected across peers." %}
+                                </th>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">OpenTelemetry context with each call</span></td>
+                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">OpenTelemetry context with each call</span></td>
+                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">via metadata and an interceptor</span></td>
+                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">pass it explicitly</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
                                     HTTP-aware proxies and service meshes
                                     {% include row-help.html id="http-infrastructure"
                                         text="Whether standard HTTP infrastructure can inspect individual RPC methods for routing, metrics and rate limits." %}
@@ -390,17 +401,6 @@ nav_url: /comparison.html
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not HTTP-based</span></td>
                                 <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">per-method routing, metrics and limits</span></td>
                                 <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">not HTTP-based</span></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    Built-in trace-context propagation
-                                    {% include row-help.html id="trace-context"
-                                        text="Whether distributed tracing identity travels with calls so spans can be connected across peers." %}
-                                </th>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">OpenTelemetry context with each call</span></td>
-                                <td class="good"><span class="mark yes" aria-hidden="true">✓</span><span class="sr">yes</span><span class="qual">trace id in the request context</span></td>
-                                <td class="fair"><span class="mark partial" aria-hidden="true">±</span><span class="sr">partly</span><span class="qual">via metadata and an interceptor</span></td>
-                                <td class="poor"><span class="mark no" aria-hidden="true">✗</span><span class="sr">no</span><span class="qual">pass it explicitly</span></td>
                             </tr>
                             <tr class="group">
                                 <th colspan="5" scope="colgroup">Choosing a library</th>
@@ -412,7 +412,7 @@ nav_url: /comparison.html
                                         text="The scenario that most directly matches each library's design strengths." %}
                                 </th>
                                 <td>Rust-to-Rust RPC with evolvable types, from simple calls to channels and remote objects</td>
-                                <td>request/response Rust RPC with a built-in request context</td>
+                                <td>request/response RPC between Rust programs, with plain values in and out</td>
                                 <td>services cross languages or ride HTTP infrastructure</td>
                                 <td>capability RPC and pipelining must work across languages</td>
                             </tr>
@@ -434,14 +434,16 @@ nav_url: /comparison.html
                 <h3>tarpc</h3>
                 <p>
                     <a href="https://docs.rs/tarpc">tarpc</a> is the closest alternative: it also
-                    defines services as Rust traits without a separate schema. It focuses on
-                    request/response RPC; a server may keep application state, but calls do not pass
-                    remote channels or object handles. Tarpc includes a deadline in every request
-                    context; both libraries send the OpenTelemetry trace context with each call, so
-                    the server's spans join the caller's trace. Remoc additionally propagates
-                    cancellation through the call tree: dropping a call future, for example through
-                    <code>tokio::time::timeout</code>, cancels the server call and remote calls made
-                    while handling it.
+                    defines services as Rust traits without a separate schema, uses Serde for the
+                    messages and sends the trace context with each call. It stays with
+                    request/response RPC: a call takes values and returns a value.
+                </p>
+                <p>
+                    In Remoc a call
+                    may also carry a channel half, a callback or a remote object, so a method can
+                    return a stream of updates, hand out a further object or report progress while
+                    it runs, and with the <a href="/postbag/">Postbag</a> codec the two endpoints
+                    may run different versions of the types.
                 </p>
 
                 <h3>gRPC, through tonic</h3>
@@ -449,18 +451,26 @@ nav_url: /comparison.html
                     <a href="https://github.com/hyperium/tonic">tonic</a> implements gRPC for Rust.
                     A <code>.proto</code> schema defines the service and generates code for each
                     language. Calls run over HTTP/2, which makes gRPC a good match for cross-language
-                    APIs and infrastructure that routes, measures or limits individual calls. Remoc
-                    instead keeps Rust types as the contract and multiplexes its own channels over the
-                    supplied transport.
+                    APIs and infrastructure that routes, measures or limits individual calls.
+                </p>
+                <p>
+                    Remoc instead keeps Rust types as the contract: there is no schema and no code
+                    generator, and any Serde type, including enums carrying data and generics, is
+                    passed as it is. It multiplexes its own channels over the supplied transport, so
+                    a call can return a stream in either direction and a channel can be sent along
+                    with any value, not only as the result of a streaming method.
                 </p>
 
                 <h3>Cap'n Proto</h3>
                 <p>
                     <a href="https://capnproto.org/rpc.html">Cap'n Proto RPC</a> also lets references
                     to callable objects travel in messages and supports pipelining dependent calls. Its
-                    schema and capability model work across supported languages. Remoc offers related
-                    patterns using Rust traits and channel endpoints, including
-                    <a href="/#pipelining">pipelined trait calls</a>, but is limited to Rust peers.
+                    schema and capability model work across supported languages.
+                </p>
+                <p>
+                    Remoc offers the same patterns using Rust traits and channel endpoints, including
+                    <a href="/#pipelining">pipelined trait calls</a>, with ordinary Rust types in
+                    place of generated readers and builders, but is limited to Rust peers.
                 </p>
             </div>
         </section>

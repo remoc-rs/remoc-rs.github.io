@@ -1,7 +1,7 @@
-<!-- generated from remoc cc64aef by _tools/render_examples.py -->
+<!-- generated from remoc f821cdc by _tools/render_examples.py -->
 <section class="example-crate">
     <h3>pizzeria</h3>
-    <p class="example-crate-role">Defines the remote trait shared by the client and server.</p>
+    <p class="example-crate-role">Defines the remote trait and the tracing setup shared by the client and server.</p>
     <article class="example-file" id="pizzeria-Cargo-toml">
         <h4><code>pizzeria/Cargo.toml</code></h4>
         <p>Its dependencies.</p>
@@ -12,12 +12,18 @@ edition = <span class="s">"2024"</span>
 
 <span class="t">[dependencies]</span>
 remoc = { version = <span class="s">"0.20"</span> }
-serde = { version = <span class="s">"1.0"</span>, features = [<span class="s">"derive"</span>] }</code></pre>
+serde = { version = <span class="s">"1.0"</span>, features = [<span class="s">"derive"</span>] }
+tracing-subscriber = { version = <span class="s">"0.3.22"</span>, features = [<span class="s">"env-filter"</span>] }
+tracing-opentelemetry = <span class="s">"0.33"</span>
+opentelemetry = <span class="s">"0.32"</span>
+opentelemetry_sdk = <span class="s">"0.32"</span>
+opentelemetry-otlp = { version = <span class="s">"0.32"</span>, features = [<span class="s">"grpc-tonic"</span>] }</code></pre>
     </article>
     <article class="example-file" id="pizzeria-src-lib-rs">
         <h4><code>pizzeria/src/lib.rs</code></h4>
-        <p>Defines the trait whose <code>tracing</code> argument makes the server create a span for processing each call.</p>
-        <pre><code><span class="c">//! This library crate defines the remote pizzeria service.
+        <p>Defines the trait whose <code>tracing</code> argument makes the server create a span for processing each call, the progress callback type and the tracing subscriber with optional span export.</p>
+        <pre><code><span class="c">//! This library crate defines the remote pizzeria service and provides the
+//! tracing setup shared by client and server.
 //!
 //! The client and server depend on it.
 </span><span class="a">#![warn(missing_docs)]</span>
@@ -38,6 +44,13 @@ serde = { version = <span class="s">"1.0"</span>, features = [<span class="s">"d
 </span>    Hawaii,
 }
 
+<span class="c">/// Callback reporting the progress of an order.
+///
+/// The remote function is created by the client and called by the server
+/// for each completed step of preparing the pizza. Its calls are traced as
+/// well, when the client enables it on the function.
+</span><span class="k">pub</span> <span class="k">type</span> <span class="t">Progress</span> = rfn::RFn&lt;(<span class="t">String</span>,), ()&gt;;
+
 <span class="c">/// Remote pizzeria service.
 ///
 /// The `tracing` argument makes the client create a span at info level for
@@ -51,14 +64,52 @@ serde = { version = <span class="s">"1.0"</span>, features = [<span class="s">"d
 </span>    <span class="a">#[tracing(level = </span><span class="s">"off"</span><span class="a">)]</span>
     <span class="k">async</span> <span class="k">fn</span> <span class="f">menu</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">Vec</span>&lt;Pizza&gt;, rtc::CallError&gt;;
 
-    <span class="c">/// Prepares and bakes the specified pizza.
-</span>    <span class="k">async</span> <span class="k">fn</span> <span class="f">order</span>(&amp;<span class="k">self</span>, pizza: <span class="t">Pizza</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">String</span>, rtc::CallError&gt;;
+    <span class="c">/// Prepares and bakes the specified pizza, reporting each completed step
+</span>    <span class="c">/// through the progress callback.
+</span>    <span class="k">async</span> <span class="k">fn</span> <span class="f">order</span>(&amp;<span class="k">self</span>, pizza: <span class="t">Pizza</span>, progress: <span class="t">Progress</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">String</span>, rtc::CallError&gt;;
+}
+
+<span class="c">/// Initializes logging to the terminal and, if the environment variable
+/// `OTEL_EXPORTER_OTLP_ENDPOINT` is set, span export to the OpenTelemetry
+/// collector at that endpoint.
+///
+/// The spans are exported under the specified service name.
+</span><span class="k">pub</span> <span class="k">fn</span> <span class="f">init_tracing</span>(service_name: <span class="k">&amp;</span>'<span class="t">static</span> <span class="t">str</span>) -&gt; <span class="t">Option</span>&lt;opentelemetry_sdk::trace::SdkTracerProvider&gt; {
+    <span class="k">use</span> opentelemetry::trace::TracerProvider;
+    <span class="k">use</span> tracing_subscriber::{
+        Layer, filter, fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt,
+    };
+
+    <span class="k">let</span> provider = std::env::var_os(<span class="s">"OTEL_EXPORTER_OTLP_ENDPOINT"</span>).map(|_| {
+        <span class="k">let</span> exporter = opentelemetry_otlp::SpanExporter::builder().with_tonic().build().unwrap();
+        opentelemetry_sdk::trace::SdkTracerProvider::builder()
+            .with_batch_exporter(exporter)
+            .with_resource(opentelemetry_sdk::Resource::builder().with_service_name(service_name).build())
+            .build()
+    });
+
+    <span class="c">// The OpenTelemetry layer assigns globally meaningful identifiers to the
+</span>    <span class="c">// spans of the tracing crate and exports them.
+</span>    <span class="k">let</span> otel_layer = provider.as_ref().map(|p| {
+        tracing_opentelemetry::layer().with_tracer(p.tracer(service_name)).with_filter(filter::LevelFilter::INFO)
+    });
+
+    <span class="c">// Log to the terminal at info level, overridable via `RUST_LOG`.
+</span>    <span class="c">// Opening and closing spans are logged as well, so that the spans of the
+</span>    <span class="c">// calls and their identifiers are visible without a collector.
+</span>    <span class="k">let</span> fmt_layer = tracing_subscriber::fmt::layer().with_span_events(FmtSpan::NEW | FmtSpan::CLOSE).with_filter(
+        filter::EnvFilter::builder().with_default_directive(filter::LevelFilter::INFO.into()).from_env_lossy(),
+    );
+
+    tracing_subscriber::registry().with(fmt_layer).with(otel_layer).init();
+
+    provider
 }</code></pre>
     </article>
 </section>
 <section class="example-crate">
     <h3>pizzeria-server</h3>
-    <p class="example-crate-role">Prepares each ordered pizza in instrumented steps.</p>
+    <p class="example-crate-role">Prepares each ordered pizza in instrumented steps, reporting progress to the client.</p>
     <article class="example-file" id="pizzeria-server-Cargo-toml">
         <h4><code>pizzeria-server/Cargo.toml</code></h4>
         <p>Its dependencies.</p>
@@ -71,16 +122,11 @@ edition = <span class="s">"2024"</span>
 pizzeria = { path = <span class="s">"../pizzeria"</span> }
 remoc = { version = <span class="s">"0.20"</span> }
 tokio = { version = <span class="s">"1"</span>, features = [<span class="s">"rt-multi-thread"</span>, <span class="s">"net"</span>, <span class="s">"signal"</span>, <span class="s">"sync"</span>, <span class="s">"time"</span>] }
-tracing = <span class="s">"0.1"</span>
-tracing-subscriber = { version = <span class="s">"0.3.22"</span>, features = [<span class="s">"env-filter"</span>] }
-tracing-opentelemetry = <span class="s">"0.33"</span>
-opentelemetry = <span class="s">"0.32"</span>
-opentelemetry_sdk = <span class="s">"0.32"</span>
-opentelemetry-otlp = { version = <span class="s">"0.32"</span>, features = [<span class="s">"grpc-tonic"</span>] }</code></pre>
+tracing = <span class="s">"0.1"</span></code></pre>
     </article>
     <article class="example-file" id="pizzeria-server-src-main-rs">
         <h4><code>pizzeria-server/src/main.rs</code></h4>
-        <p>Implements the trait with <code>#[instrument]</code> steps and exports its spans when an OpenTelemetry endpoint is configured.</p>
+        <p>Implements the trait with <code>#[instrument]</code> steps and calls the progress callback of the client after each of them.</p>
         <pre><code><span class="c">//! This crate implements the server of the remote pizzeria service.
 </span><span class="a">#![warn(missing_docs)]</span>
 
@@ -89,7 +135,7 @@ opentelemetry-otlp = { version = <span class="s">"0.32"</span>, features = [<spa
 <span class="k">use</span> tokio::{net::TcpListener, time::sleep};
 <span class="k">use</span> tracing::{Instrument, info_span, instrument};
 
-<span class="k">use</span> pizzeria::{Pizza, Pizzeria, PizzeriaServerShared, TCP_PORT};
+<span class="k">use</span> pizzeria::{Pizza, Pizzeria, PizzeriaServerShared, Progress, TCP_PORT, init_tracing};
 
 <span class="c">/// Server object for the pizzeria service.
 </span><span class="k">pub</span> <span class="k">struct</span> <span class="t">PizzeriaObj</span>;
@@ -122,60 +168,30 @@ opentelemetry-otlp = { version = <span class="s">"0.32"</span>, features = [<spa
         <span class="t">Ok</span>(<span class="m">vec!</span>[Pizza::Margherita, Pizza::Salami, Pizza::Hawaii])
     }
 
-    <span class="k">async</span> <span class="k">fn</span> <span class="f">order</span>(&amp;<span class="k">self</span>, pizza: <span class="t">Pizza</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">String</span>, rtc::CallError&gt; {
+    <span class="k">async</span> <span class="k">fn</span> <span class="f">order</span>(&amp;<span class="k">self</span>, pizza: <span class="t">Pizza</span>, progress: <span class="t">Progress</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">String</span>, rtc::CallError&gt; {
         <span class="c">// These methods carry the #[instrument] attribute of the tracing
 </span>        <span class="c">// crate, thus their spans become children of the span of this call.
+</span>        <span class="c">//
+</span>        <span class="c">// After each step the progress callback of the client is called.
+</span>        <span class="c">// This is a remote function call in the opposite direction, whose
+</span>        <span class="c">// spans are linked into the trace of this call as well.
+</span>        <span class="c">// Reporting is best-effort, so failures to reach the client are
+</span>        <span class="c">// ignored and the pizza is finished regardless.
 </span>        <span class="k">self</span>.prepare_dough(pizza).<span class="k">await</span>;
+        <span class="k">let</span> _ = progress.try_call(<span class="m">format!</span>(<span class="s">"{pizza:?}: dough is ready"</span>)).<span class="k">await</span>;
         <span class="k">self</span>.add_toppings(pizza).<span class="k">await</span>;
+        <span class="k">let</span> _ = progress.try_call(<span class="m">format!</span>(<span class="s">"{pizza:?}: toppings are on"</span>)).<span class="k">await</span>;
         <span class="k">self</span>.bake().<span class="k">await</span>;
+        <span class="k">let</span> _ = progress.try_call(<span class="m">format!</span>(<span class="s">"{pizza:?}: baked"</span>)).<span class="k">await</span>;
 
         <span class="t">Ok</span>(<span class="m">format!</span>(<span class="s">"{pizza:?} pizza, fresh out of the oven"</span>))
     }
 }
 
-<span class="c">/// Initializes logging to the terminal and, if the environment variable
-/// `OTEL_EXPORTER_OTLP_ENDPOINT` is set, span export to the OpenTelemetry
-/// collector at that endpoint.
-</span><span class="k">fn</span> <span class="f">init_tracing</span>() -&gt; <span class="t">Option</span>&lt;opentelemetry_sdk::trace::SdkTracerProvider&gt; {
-    <span class="k">use</span> opentelemetry::trace::TracerProvider;
-    <span class="k">use</span> tracing_subscriber::{Layer, filter, layer::SubscriberExt, util::SubscriberInitExt};
-
-    <span class="k">let</span> provider = std::env::var_os(<span class="s">"OTEL_EXPORTER_OTLP_ENDPOINT"</span>).map(|_| {
-        <span class="k">let</span> exporter = opentelemetry_otlp::SpanExporter::builder().with_tonic().build().unwrap();
-        opentelemetry_sdk::trace::SdkTracerProvider::builder()
-            .with_batch_exporter(exporter)
-            .with_resource(
-                opentelemetry_sdk::Resource::builder().with_service_name(<span class="s">"pizzeria-server"</span>).build(),
-            )
-            .build()
-    });
-
-    <span class="c">// The OpenTelemetry layer assigns globally meaningful identifiers to the
-</span>    <span class="c">// spans of the tracing crate and exports them.
-</span>    <span class="c">// Only spans of level info and above are exported; this also excludes the
-</span>    <span class="c">// spans of the HTTP/2 library that performs the export.
-</span>    <span class="k">let</span> otel_layer = provider.as_ref().map(|p| {
-        tracing_opentelemetry::layer()
-            .with_tracer(p.tracer(<span class="s">"pizzeria-server"</span>))
-            .with_filter(filter::LevelFilter::INFO)
-    });
-
-    <span class="c">// Log to the terminal at info level, overridable via `RUST_LOG`.
-</span>    <span class="k">let</span> fmt_layer = tracing_subscriber::fmt::layer().with_filter(
-        filter::EnvFilter::builder()
-            .with_default_directive(filter::LevelFilter::INFO.into())
-            .from_env_lossy(),
-    );
-
-    tracing_subscriber::registry().with(fmt_layer).with(otel_layer).init();
-
-    provider
-}
-
 <span class="a">#[tokio::main]</span>
 <span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() {
     <span class="c">// Initialize logging and trace export.
-</span>    <span class="k">let</span> provider = init_tracing();
+</span>    <span class="k">let</span> provider = init_tracing(<span class="s">"pizzeria-server"</span>);
 
     <span class="c">// Create a pizzeria object that will be shared between all clients.
 </span>    <span class="k">let</span> pizzeria_obj = Arc::new(PizzeriaObj);
@@ -189,6 +205,7 @@ opentelemetry-otlp = { version = <span class="s">"0.32"</span>, features = [<spa
         <span class="k">loop</span> {
             <span class="c">// Accept an incoming TCP connection.
 </span>            <span class="k">let</span> (socket, addr) = listener.accept().<span class="k">await</span>.unwrap();
+            socket.set_nodelay(<span class="k">true</span>).unwrap();
             <span class="k">let</span> (socket_rx, socket_tx) = socket.into_split();
             <span class="m">println!</span>(<span class="s">"Accepted connection from {}"</span>, addr);
 
@@ -254,72 +271,77 @@ pizzeria = { path = <span class="s">"../pizzeria"</span> }
 remoc = { version = <span class="s">"0.20"</span> }
 futures = <span class="s">"0.3"</span>
 tokio = { version = <span class="s">"1"</span>, features = [<span class="s">"rt-multi-thread"</span>, <span class="s">"net"</span>, <span class="s">"sync"</span>, <span class="s">"time"</span>] }
-tracing = <span class="s">"0.1"</span>
-tracing-subscriber = { version = <span class="s">"0.3.22"</span>, features = [<span class="s">"env-filter"</span>] }
-tracing-opentelemetry = <span class="s">"0.33"</span>
-opentelemetry = <span class="s">"0.32"</span>
-opentelemetry_sdk = <span class="s">"0.32"</span>
-opentelemetry-otlp = { version = <span class="s">"0.32"</span>, features = [<span class="s">"grpc-tonic"</span>] }</code></pre>
+tracing = <span class="s">"0.1"</span></code></pre>
     </article>
     <article class="example-file" id="pizzeria-client-src-main-rs">
         <h4><code>pizzeria-client/src/main.rs</code></h4>
-        <p>Places the orders concurrently within one span and exports the resulting trace.</p>
+        <p>Places the orders concurrently within one span, passing a traced progress callback with each.</p>
         <pre><code><span class="c">//! This crate implements the client of the remote pizzeria service.
 </span><span class="a">#![warn(missing_docs)]</span>
 
 <span class="k">use</span> remoc::prelude::*;
-<span class="k">use</span> std::net::Ipv4Addr;
+<span class="k">use</span> std::{net::Ipv4Addr, time::Duration};
 <span class="k">use</span> tokio::net::TcpStream;
-<span class="k">use</span> tracing::{Instrument, info_span};
+<span class="k">use</span> tracing::{Span, instrument, level_filters::LevelFilter};
 
-<span class="k">use</span> pizzeria::{Pizzeria, PizzeriaClient, TCP_PORT};
+<span class="k">use</span> pizzeria::{Pizzeria, PizzeriaClient, Progress, TCP_PORT, init_tracing};
 
-<span class="c">/// Initializes logging to the terminal and, if the environment variable
-/// `OTEL_EXPORTER_OTLP_ENDPOINT` is set, span export to the OpenTelemetry
-/// collector at that endpoint.
-</span><span class="k">fn</span> <span class="f">init_tracing</span>() -&gt; <span class="t">Option</span>&lt;opentelemetry_sdk::trace::SdkTracerProvider&gt; {
-    <span class="k">use</span> opentelemetry::trace::TracerProvider;
-    <span class="k">use</span> tracing_subscriber::{Layer, filter, layer::SubscriberExt, util::SubscriberInitExt};
+<span class="c">/// Orders one of each pizza on the menu.
+///
+/// The `#[instrument]` attribute of the tracing crate creates a span for this
+/// function, so that the spans of the calls executed by the server are
+/// linked to it in one distributed trace.
+</span><span class="a">#[instrument(skip(client))]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="f">order_pizzas</span>(client: <span class="k">&amp;</span><span class="t">PizzeriaClient</span>) {
+    <span class="c">// Query the menu. No span is created for this call, since the menu
+</span>    <span class="c">// method sets the tracing level "off".
+</span>    <span class="k">let</span> menu = client.menu().<span class="k">await</span>.unwrap();
+    <span class="m">println!</span>(<span class="s">"On the menu today: {menu:?}\n"</span>);
 
-    <span class="k">let</span> provider = std::env::var_os(<span class="s">"OTEL_EXPORTER_OTLP_ENDPOINT"</span>).map(|_| {
-        <span class="k">let</span> exporter = opentelemetry_otlp::SpanExporter::builder().with_tonic().build().unwrap();
-        opentelemetry_sdk::trace::SdkTracerProvider::builder()
-            .with_batch_exporter(exporter)
-            .with_resource(
-                opentelemetry_sdk::Resource::builder().with_service_name(<span class="s">"pizzeria-client"</span>).build(),
-            )
-            .build()
+    <span class="c">// Create the callback through which the server reports the progress of
+</span>    <span class="c">// the orders. It is executed here, at the client, whenever the server
+</span>    <span class="c">// calls it.
+</span>    <span class="c">//
+</span>    <span class="c">// Calls of a remote function are not traced by default. Enabling them at
+</span>    <span class="c">// info level makes the server create a span for each call and the client
+</span>    <span class="c">// one for processing it, which is linked into the trace of the order.
+</span>    <span class="c">// The name is recorded in these spans.
+</span>    <span class="c">//
+</span>    <span class="c">// The callback is only called while the orders are running, so its calls
+</span>    <span class="c">// are processed within the span of this function. The span then stays
+</span>    <span class="c">// open until the callback is dropped by the server and the client, which
+</span>    <span class="c">// happens shortly after the orders complete. To close it exactly when
+</span>    <span class="c">// this function returns, create the callback using `provided_1` and keep
+</span>    <span class="c">// its provider in this function instead.
+</span>    <span class="k">let</span> <span class="k">mut</span> progress = Progress::new_1(|step: <span class="t">String</span>| <span class="k">async</span> <span class="k">move</span> {
+        tracing::info!(<span class="s">"progress report: {step}"</span>);
     });
+    progress.set_name(<span class="s">"progress"</span>);
+    progress.set_tracing_level(LevelFilter::INFO);
+    progress.set_span(Span::current());
 
-    <span class="c">// The OpenTelemetry layer assigns globally meaningful identifiers to the
-</span>    <span class="c">// spans of the tracing crate and exports them.
-</span>    <span class="c">// Only spans of level info and above are exported; this also excludes the
-</span>    <span class="c">// spans of the HTTP/2 library that performs the export.
-</span>    <span class="k">let</span> otel_layer = provider.as_ref().map(|p| {
-        tracing_opentelemetry::layer()
-            .with_tracer(p.tracer(<span class="s">"pizzeria-client"</span>))
-            .with_filter(filter::LevelFilter::INFO)
-    });
+    <span class="c">// Order one of each pizza, all at once.
+</span>    <span class="c">// The server prepares the pizzas in parallel, which is visible in
+</span>    <span class="c">// the timing of their spans within the trace.
+</span>    <span class="m">println!</span>(<span class="s">"Ordering one of each..."</span>);
+    <span class="k">let</span> deliveries =
+        futures::future::try_join_all(menu.iter().map(|&amp;pizza| client.order(pizza, progress.clone())))
+            .<span class="k">await</span>
+            .unwrap();
 
-    <span class="c">// Log to the terminal at info level, overridable via `RUST_LOG`.
-</span>    <span class="k">let</span> fmt_layer = tracing_subscriber::fmt::layer().with_filter(
-        filter::EnvFilter::builder()
-            .with_default_directive(filter::LevelFilter::INFO.into())
-            .from_env_lossy(),
-    );
-
-    tracing_subscriber::registry().with(fmt_layer).with(otel_layer).init();
-
-    provider
+    <span class="k">for</span> delivery <span class="k">in</span> deliveries {
+        <span class="m">println!</span>(<span class="s">"Received: {delivery}"</span>);
+    }
 }
 
 <span class="a">#[tokio::main]</span>
 <span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() {
     <span class="c">// Initialize logging and trace export.
-</span>    <span class="k">let</span> provider = init_tracing();
+</span>    <span class="k">let</span> provider = init_tracing(<span class="s">"pizzeria-client"</span>);
 
     <span class="c">// Establish TCP connection to server.
 </span>    <span class="k">let</span> socket = TcpStream::connect((Ipv4Addr::LOCALHOST, TCP_PORT)).<span class="k">await</span>.unwrap();
+    socket.set_nodelay(<span class="k">true</span>).unwrap();
     <span class="k">let</span> (socket_rx, socket_tx) = socket.into_split();
 
     <span class="c">// Establish a Remoc connection with default configuration over the TCP
@@ -327,30 +349,12 @@ opentelemetry-otlp = { version = <span class="s">"0.32"</span>, features = [<spa
 </span>    <span class="k">let</span> client: <span class="t">PizzeriaClient</span> =
         remoc::Connect::io(remoc::Cfg::default(), socket_rx, socket_tx).consume().<span class="k">await</span>.unwrap();
 
-    <span class="c">// Order pizzas within a span, so that the spans of the calls executed by
-</span>    <span class="c">// the server are linked to it in one distributed trace.
-</span>    <span class="k">async</span> {
-        <span class="c">// Query the menu. No span is created for this call, since the menu
-</span>        <span class="c">// method sets the tracing level "off".
-</span>        <span class="k">let</span> menu = client.menu().<span class="k">await</span>.unwrap();
-        <span class="m">println!</span>(<span class="s">"On the menu today: {menu:?}\n"</span>);
+    order_pizzas(&amp;client).<span class="k">await</span>;
 
-        <span class="c">// Order one of each pizza, all at once.
-</span>        <span class="c">// The server prepares the pizzas in parallel, which is visible in
-</span>        <span class="c">// the timing of their spans within the trace.
-</span>        <span class="m">println!</span>(<span class="s">"Ordering one of each..."</span>);
-        <span class="k">let</span> deliveries =
-            futures::future::try_join_all(menu.iter().map(|&amp;pizza| client.order(pizza))).<span class="k">await</span>.unwrap();
-
-        <span class="k">for</span> delivery <span class="k">in</span> deliveries {
-            <span class="m">println!</span>(<span class="s">"Received: {delivery}"</span>);
-        }
-    }
-    .instrument(info_span!(<span class="s">"pizza order"</span>))
-    .<span class="k">await</span>;
-
-    <span class="c">// Send the spans of the order to the collector.
+    <span class="c">// Send the spans of the order to the collector, after giving the span
+</span>    <span class="c">// of the order a moment to close, see above.
 </span>    <span class="k">if</span> <span class="k">let</span> <span class="t">Some</span>(provider) = &amp;provider {
+        tokio::time::sleep(Duration::from_millis(<span class="n">100</span>)).<span class="k">await</span>;
         provider.force_flush().unwrap();
     }
 }</code></pre>

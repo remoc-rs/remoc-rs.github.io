@@ -137,25 +137,26 @@ EXAMPLES = [
         crates=[
             Crate(
                 "pizzeria",
-                "Defines the remote trait shared by the client and server.",
+                "Defines the remote trait and the tracing setup shared by the client and server.",
                 [
                     File("Cargo.toml", MANIFEST),
                     File(
                         "src/lib.rs",
                         "Defines the trait whose <code>tracing</code> argument makes the server "
-                        "create a span for processing each call.",
+                        "create a span for processing each call, the progress callback type and "
+                        "the tracing subscriber with optional span export.",
                     ),
                 ],
             ),
             Crate(
                 "pizzeria-server",
-                "Prepares each ordered pizza in instrumented steps.",
+                "Prepares each ordered pizza in instrumented steps, reporting progress to the client.",
                 [
                     File("Cargo.toml", MANIFEST),
                     File(
                         "src/main.rs",
-                        "Implements the trait with <code>#[instrument]</code> steps and exports "
-                        "its spans when an OpenTelemetry endpoint is configured.",
+                        "Implements the trait with <code>#[instrument]</code> steps and calls "
+                        "the progress callback of the client after each of them.",
                     ),
                 ],
             ),
@@ -166,8 +167,8 @@ EXAMPLES = [
                     File("Cargo.toml", MANIFEST),
                     File(
                         "src/main.rs",
-                        "Places the orders concurrently within one span and exports the "
-                        "resulting trace.",
+                        "Places the orders concurrently within one span, passing a traced "
+                        "progress callback with each.",
                     ),
                 ],
             ),

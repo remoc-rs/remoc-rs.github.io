@@ -1,4 +1,4 @@
-<!-- generated from remoc cc64aef by _tools/render_examples.py -->
+<!-- generated from remoc f821cdc by _tools/render_examples.py -->
 <section class="example-crate">
     <h3>counter</h3>
     <p class="example-crate-role">Defines the remote trait shared by the client and server.</p>
@@ -190,6 +190,7 @@ tracing-subscriber = { version = <span class="s">"0.3.22"</span>, features = [<s
     <span class="k">loop</span> {
         <span class="c">// Accept an incoming TCP connection.
 </span>        <span class="k">let</span> (socket, addr) = listener.accept().<span class="k">await</span>.unwrap();
+        socket.set_nodelay(<span class="k">true</span>).unwrap();
         <span class="k">let</span> (socket_rx, socket_tx) = socket.into_split();
         <span class="m">println!</span>(<span class="s">"Accepted connection from {}"</span>, addr);
 
@@ -267,6 +268,7 @@ tracing-subscriber = { version = <span class="s">"0.3.22"</span>, features = [<s
 
     <span class="c">// Establish TCP connection to server.
 </span>    <span class="k">let</span> socket = TcpStream::connect((Ipv4Addr::LOCALHOST, TCP_PORT)).<span class="k">await</span>.unwrap();
+    socket.set_nodelay(<span class="k">true</span>).unwrap();
     <span class="k">let</span> (socket_rx, socket_tx) = socket.into_split();
 
     <span class="c">// Establish a Remoc connection with default configuration over the TCP connection and

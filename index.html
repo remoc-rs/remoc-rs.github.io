@@ -286,16 +286,17 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                         Putting <code>#[rtc::remote]</code> on a trait generates client and server
                         implementations. Arguments and return values may contain channels, allowing a
                         method to return a stream of updates instead of a single value.
-                        Multiple calls can be pipelined, saving round trips.
+                        Calls can be traced across both endpoints with OpenTelemetry.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/rtc/index.html">rtc module &rarr;</a></p>
                 </article>
                 <article>
-                    <h3>Remote functions
+                    <h3>Remote callbacks
                         <svg class="feature-icon" aria-hidden="true"><use href="#feature-functions"/></svg>
                     </h3>
                     <p>
-                        Send a closure over and let the other side call it. The arguments travel one way,
+                        Send a closure over and let the other side call it, for example to report
+                        progress or to be told when something happens. The arguments travel one way,
                         the result comes back.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/rfn/index.html">rfn module &rarr;</a></p>
