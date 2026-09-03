@@ -4,7 +4,7 @@ project: remoc
 title: "Remoc vs. tarpc, gRPC (tonic) and Cap'n Proto: Rust RPC compared"
 description: >-
   Remoc is stateful RPC: calls hand over channels and objects that stay alive. How that
-  differs from gRPC, tarpc and Cap'n Proto.
+  differs from gRPC frameworks such as tonic and Volo, tarpc and Cap'n Proto.
 canonical: /comparison.html
 nav_url: /comparison.html
 ---
@@ -429,7 +429,7 @@ nav_url: /comparison.html
 
         <section class="section">
             <div class="wrap narrow">
-                <h2>tarpc, tonic and Cap'n Proto</h2>
+                <h2>The compared libraries</h2>
 
                 <h3>tarpc</h3>
                 <p>
@@ -459,6 +459,24 @@ nav_url: /comparison.html
                     used directly. It multiplexes its own channels over the supplied transport, so
                     a call can return a stream in either direction and a channel can be sent along
                     with any value, not only as the result of a streaming method.
+                </p>
+
+                <h3>Volo (gRPC and Thrift)</h3>
+                <p>
+                    <a href="https://github.com/cloudwego/volo">Volo</a> is a high-performance Rust
+                    microservice framework with gRPC and Thrift implementations, generated
+                    interfaces, middleware, and extension points for service discovery and load
+                    balancing. Its gRPC mode broadly follows the communication model shown in the
+                    gRPC column above: calls exchange schema-defined values and method-declared
+                    streams rather than transferable Rust channels, callbacks or remote objects.
+                    Volo is a good fit for polyglot microservices and conventional service
+                    infrastructure.
+                </p>
+                <p>
+                    Remoc is the stronger fit when both endpoints are Rust and calls
+                    need to pass typed channels, callbacks or remote objects that remain usable after
+                    the call returns. These can be created dynamically, sent in either direction and
+                    multiplexed over a single application-provided connection.
                 </p>
 
                 <h3>Cap'n Proto</h3>
