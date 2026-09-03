@@ -132,8 +132,8 @@ footer_alt: true
                         <thead>
                             <tr>
                                 <th>Change to your types</th>
-                                <th>Postbag <code>Full</code><span class="badge">recommended</span></th>
-                                <th>Postbag <code>Slim</code><span class="badge slim">minimal size</span></th>
+                                <th>Postbag <code>Full</code><br><span class="badge">recommended</span></th>
+                                <th>Postbag <code>Slim</code><br><span class="badge slim">minimal size</span></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -186,6 +186,28 @@ footer_alt: true
                             </tr>
                             <tr>
                                 <td>Reorder variants</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> yes</td>
+                                <td><span class="mark no" aria-hidden="true">✗</span> no</td>
+                            </tr>
+                            <tr>
+                                <td>Struct variant to newtype variant</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> yes</td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> yes</td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <th scope="rowgroup">Field types</th>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Wrap in <a href="#recoverable"><code>Recoverable</code></a></td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> yes</td>
+                                <td><span class="mark no" aria-hidden="true">✗</span> no</td>
+                            </tr>
+                            <tr>
+                                <td><code>bool</code> to <code>Option&lt;Recoverable&lt;T&gt;&gt;</code></td>
                                 <td><span class="mark yes" aria-hidden="true">✓</span> yes</td>
                                 <td><span class="mark no" aria-hidden="true">✗</span> no</td>
                             </tr>
@@ -246,6 +268,9 @@ footer_alt: true
 
                 <p class="section-foot">
                     Recoverable values can be added to an existing field without changing its wire representation.
+                    The attribute is equivalent to wrapping the field type in
+                    <a href="https://docs.rs/postbag/latest/postbag/recoverable/struct.Recoverable.html"><code>Recoverable&lt;Details&gt;</code></a>,
+                    which also allows custom recovery policies.
                 </p>
                 <p class="section-foot">
                     <a href="/postbag/file-formats.html">Keeping config and save files readable

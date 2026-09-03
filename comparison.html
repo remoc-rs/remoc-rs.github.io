@@ -439,14 +439,14 @@ nav_url: /comparison.html
                     request/response RPC: a call takes values and returns a value.
                 </p>
                 <p>
-                    In Remoc a call
+                    In Remoc, a call
                     may also carry a channel half, a callback or a remote object, so a method can
-                    return a stream of updates, hand out a further object or report progress while
+                    return a stream of updates, return another remote object or report progress while
                     it runs, and with the <a href="/postbag/">Postbag</a> codec the two endpoints
                     may run different versions of the types.
                 </p>
 
-                <h3>gRPC, through tonic</h3>
+                <h3>gRPC with tonic</h3>
                 <p>
                     <a href="https://github.com/hyperium/tonic">tonic</a> implements gRPC for Rust.
                     A <code>.proto</code> schema defines the service and generates code for each
@@ -456,7 +456,7 @@ nav_url: /comparison.html
                 <p>
                     Remoc instead keeps Rust types as the contract: there is no schema and no code
                     generator, and any Serde type, including enums carrying data and generics, is
-                    passed as it is. It multiplexes its own channels over the supplied transport, so
+                    used directly. It multiplexes its own channels over the supplied transport, so
                     a call can return a stream in either direction and a channel can be sent along
                     with any value, not only as the result of a streaming method.
                 </p>
@@ -468,10 +468,27 @@ nav_url: /comparison.html
                     schema and capability model work across supported languages.
                 </p>
                 <p>
-                    Remoc offers the same patterns using Rust traits and channel endpoints, including
+                    Remoc supports similar patterns using Rust traits and channel endpoints, including
                     <a href="/#pipelining">pipelined trait calls</a>, with ordinary Rust types in
                     place of generated readers and builders, but is limited to Rust peers.
                 </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>See whether Remoc fits your application</h2>
+                <p>
+                    Start with an RPC example, read the RPC documentation, or explore the complete
+                    API.
+                </p>
+                <div class="cta cta-three section-foot">
+                    <a class="button icon-link" href="/examples/rtc.html">View RPC example</a>
+                    <a class="button icon-link" href="https://docs.rs/remoc"><span class="icon docs"
+                            aria-hidden="true"></span>Documentation</a>
+                    <a class="button icon-link" href="https://github.com/remoc-rs/remoc"><span class="icon github"
+                            aria-hidden="true"></span>Source on GitHub</a>
+                </div>
             </div>
         </section>
 

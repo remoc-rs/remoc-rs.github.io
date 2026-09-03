@@ -541,6 +541,17 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     margin: 0 auto;
 }
 
+.cta.cta-three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: none;
+}
+
+@media (max-width: 42rem) {
+    .cta.cta-three {
+        grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+    }
+}
+
 .button {
     display: inline-block;
     padding: 0.6rem 1.25rem;
@@ -1230,6 +1241,22 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 #compatibility th:first-child,
 #compatibility td:first-child {
     padding-right: 2rem;
+}
+
+/* The badge sits under the format name so the column is only as wide as the
+   answers, not as wide as name and badge side by side. */
+
+#compatibility thead .badge {
+    margin-left: 0;
+    margin-top: 0.3rem;
+}
+
+/* The summary row says the most and is read last, so it wraps rather than
+   widening the whole table. */
+
+#compatibility tbody:last-child td {
+    white-space: normal;
+    max-width: 12rem;
 }
 
 /* Structs and enums answer these questions separately, so the rows are
