@@ -81,9 +81,9 @@ nav_url: /comparison.html
                             <tr>
                                 <th></th>
                                 <th class="own">Remoc</th>
-                                <th><a href="https://docs.rs/tarpc">tarpc</a></th>
-                                <th><a href="https://github.com/hyperium/tonic">gRPC (tonic)</a></th>
-                                <th><a href="https://capnproto.org/rpc.html">Cap'n Proto</a></th>
+                                <th><a href="#tarpc">tarpc</a></th>
+                                <th><a href="#grpc-tonic">gRPC (tonic)</a></th>
+                                <th><a href="#capn-proto">Cap'n Proto</a></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -431,7 +431,7 @@ nav_url: /comparison.html
             <div class="wrap narrow">
                 <h2>The compared libraries</h2>
 
-                <h3>tarpc</h3>
+                <h3 id="tarpc">tarpc</h3>
                 <p>
                     <a href="https://docs.rs/tarpc">tarpc</a> is the closest alternative: it also
                     defines services as Rust traits without a separate schema, uses Serde for the
@@ -446,7 +446,7 @@ nav_url: /comparison.html
                     may run different versions of the types.
                 </p>
 
-                <h3>gRPC with tonic</h3>
+                <h3 id="grpc-tonic">gRPC with tonic</h3>
                 <p>
                     <a href="https://github.com/hyperium/tonic">tonic</a> implements gRPC for Rust.
                     A <code>.proto</code> schema defines the service and generates code for each
@@ -461,7 +461,7 @@ nav_url: /comparison.html
                     with any value, not only as the result of a streaming method.
                 </p>
 
-                <h3>Volo (gRPC and Thrift)</h3>
+                <h3 id="volo">Volo (gRPC and Thrift)</h3>
                 <p>
                     <a href="https://github.com/cloudwego/volo">Volo</a> is a high-performance Rust
                     microservice framework with gRPC and Thrift implementations, generated
@@ -479,7 +479,7 @@ nav_url: /comparison.html
                     multiplexed over a single application-provided connection.
                 </p>
 
-                <h3>Cap'n Proto</h3>
+                <h3 id="capn-proto">Cap'n Proto</h3>
                 <p>
                     <a href="https://capnproto.org/rpc.html">Cap'n Proto RPC</a> also lets references
                     to callable objects travel in messages and supports pipelining dependent calls. Its
