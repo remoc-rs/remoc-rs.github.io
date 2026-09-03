@@ -1799,7 +1799,10 @@ footer {
     color: var(--fg-muted);
 }
 
-footer.alt {
+/* The footer takes the tint that the last section does not have, so the two never
+   blend together. A script tag can sit between main and footer, hence the ~. */
+
+main:has(> section:last-of-type:not(.alt)) ~ footer {
     background: var(--bg-alt);
 }
 
