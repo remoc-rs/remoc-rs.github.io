@@ -3,10 +3,8 @@ layout: base
 project: remoc
 title: "RPC with server push and client callbacks in Rust"
 description: >-
-  Request/response RPC breaks down when the server must notify its clients. How Remoc
-  makes RPC bidirectional: a call can return or accept a channel and the client can
-  serve a trait of its own, so the server pushes events and calls back, even through
-  NAT.
+  Plain RPC breaks down when the server must notify clients. How Remoc makes RPC
+  bidirectional, so the server pushes events and calls back, even through NAT.
 social_description: >-
   RPC where a call can hand over a channel and the server can call the client back,
   over the one connection the client opened.

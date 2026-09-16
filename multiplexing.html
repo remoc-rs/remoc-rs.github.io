@@ -3,9 +3,8 @@ layout: base
 project: remoc
 title: "Multiplex many typed channels over one TCP connection in Rust"
 description: >-
-  How to run many independent streams over a single TCP, TLS or WebSocket connection in
-  Rust: what stream multiplexing involves, and how Remoc multiplexes typed channels with
-  per-channel flow control instead of raw byte streams.
+  How to run many independent streams over one TCP, QUIC or WebSocket connection in
+  Rust, and how Remoc multiplexes typed channels with per-channel flow control.
 social_description: >-
   Many independent, typed channels over one TCP connection, with per-channel flow
   control and no framing code to write.
@@ -25,8 +24,8 @@ faq:
       therefore its total bandwidth.
   - q: "Which transports can carry the multiplexed connection?"
     a: >-
-      Any ordered byte or packet stream can be used, for example TCP, TLS, a WebSocket,
-      a UNIX pipe or a serial link. Remoc's channel multiplexer runs on top of it and
+      Any ordered byte or packet stream can be used, for example TCP, TLS, a QUIC stream,
+      a WebSocket, a UNIX pipe or a serial link. Remoc's channel multiplexer runs on top of it and
       does not depend on a particular transport type.
   - q: "Do both ends have to be written in Rust?"
     a: >-

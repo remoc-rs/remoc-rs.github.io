@@ -3,9 +3,8 @@ layout: base
 project: remoc
 title: "Rust channels over the network: remote mpsc, oneshot and watch between processes and machines"
 description: >-
-  How to keep using the channel model when a Rust program is split into two processes
-  or machines. Remoc provides mpsc, oneshot, watch and broadcast channels that work
-  over a network connection, pipe or socket.
+  How to keep using channels when a Rust program is split into two processes. Remoc
+  provides mpsc, oneshot, watch and broadcast channels over a network.
 social_description: >-
   Channels with the API you know from Tokio, working between processes and machines
   instead of only between tasks.
@@ -35,8 +34,8 @@ faq:
       channels.
   - q: "Which transports can I use?"
     a: >-
-      Any ordered byte or packet stream, for example TCP, TLS, a WebSocket, a UNIX
-      socket, a pipe to a child process or a serial link. Remoc implements no transport
+      Any ordered byte or packet stream, for example TCP, TLS, a QUIC stream, a
+      WebSocket, a UNIX socket, a pipe to a child process or a serial link. Remoc implements no transport
       itself and runs over the connection you already have.
 ---
 
@@ -85,7 +84,7 @@ faq:
                     over the network inside a message, like you would hand its endpoint to
                     another task. Each
                     channel is typed and all channels between two peers are multiplexed over one
-                    connection, which may be TCP, TLS, a WebSocket, a UNIX socket or a pipe.
+                    connection, which may be TCP, TLS, QUIC, a WebSocket, a UNIX socket or a pipe.
                 </p>
                 <p>
                     The program keeps its architecture. Tasks still talk through channels;

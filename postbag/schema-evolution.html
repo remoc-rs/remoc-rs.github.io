@@ -4,8 +4,7 @@ project: postbag
 title: "Binary serialization that survives schema changes in Rust"
 description: >-
   Formats like bincode break when a struct changes. How Postbag encodes Serde types so
-  that fields and enum variants can be added, removed and reordered while old and new
-  programs keep reading each other's data.
+  that old and new programs keep reading each other's data as fields change.
 social_description: >-
   Binary Serde serialization whose data stays readable while your structs and enums
   keep changing.

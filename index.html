@@ -32,7 +32,7 @@ nav: home
                 A channel endpoint is
                 an ordinary value that can travel inside a message, creating a new communication path
                 wherever it arrives, without opening a port, looking up a name or registering anything.
-                RPC calls, channels and remote&nbsp;objects are multiplexed over one TCP, TLS, WebSocket,
+                RPC calls, channels and remote&nbsp;objects are multiplexed over one TCP, TLS, QUIC, WebSocket,
                 pipe or other transport connection, each with independent flow control.
             </p>
 
@@ -328,7 +328,7 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     <p>
                         Remoc is transport-independent. It operates over an <code>AsyncRead</code> and
                         <code>AsyncWrite</code> pair or a <code>Sink</code> and <code>Stream</code> of
-                        packets. Worked examples cover TCP, TLS, WebSockets and pipes.
+                        packets. Worked examples cover TCP, TLS, QUIC, WebSockets and pipes.
                     </p>
                     <p><a href="https://docs.rs/remoc/latest/remoc/transports/index.html">transports &rarr;</a></p>
                 </article>
