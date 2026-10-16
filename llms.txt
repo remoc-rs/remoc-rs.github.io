@@ -43,7 +43,7 @@ built on Tokio.
 ## Aggligator
 
 - [Overview](https://remoc.rs/aggligator/): combines network links (TCP,
-  WebSocket, USB, Bluetooth) between two endpoints into one connection with
+  QUIC, WebSocket, USB, Bluetooth) between two endpoints into one connection with
   their combined bandwidth.
 - [Keeping connections alive while switching networks](https://remoc.rs/aggligator/network-switching.html):
   a connection that survives a device moving between Wi-Fi, mobile data and

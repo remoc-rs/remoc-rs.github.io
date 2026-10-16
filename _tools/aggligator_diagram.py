@@ -43,7 +43,7 @@ BELOW_STRONG_1 = "one"
 BELOW_MID = " connection, carried by "
 BELOW_STRONG_2 = "every"
 BELOW_END = " link that works"
-BELOW_2 = "TCP, TLS, WebSockets, USB or Bluetooth, mixed freely and changed while it runs"
+BELOW_2 = "TCP, TLS, QUIC, WebSockets, USB or Bluetooth, mixed freely and changed while it runs"
 
 TITLE = "How Aggligator aggregates links"
 DESC = (

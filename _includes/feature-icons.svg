@@ -118,6 +118,11 @@
         <path d="M8 12h4V6h4m-4 6v6h4"/>
     </symbol>
 
+    <symbol id="transport-quic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/>
+    </symbol>
+
     <symbol id="transport-websocket" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <path d="M7 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M17 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/>
@@ -170,5 +175,11 @@
         <path d="M12 2 20 5v6c0 5-3.4 8.5-8 11-4.6-2.5-8-6-8-11V5l8-3Z"/>
         <rect x="8.5" y="10.5" width="7" height="6" rx="1"/>
         <path d="M10 10.5V9a2 2 0 0 1 4 0v1.5"/>
+    </symbol>
+
+    <symbol id="transport-zstd" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v6m0 8v6M2 12h2m4 0h2m4 0h2m4 0h2"/>
+        <path d="m9 5 3 3 3-3M9 19l3-3 3 3"/>
     </symbol>
 </svg>

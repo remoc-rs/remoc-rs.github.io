@@ -14,7 +14,7 @@ faq:
   - q: "Does this need Multipath TCP or support from the operating system?"
     a: >-
       No. Aggligator is completely implemented in user space and works over ordinary
-      transports such as TCP, TLS or WebSockets. It serves the same purpose as Multipath
+      transports such as TCP, TLS, QUIC or WebSockets. It serves the same purpose as Multipath
       TCP, but neither the operating system nor the network in between needs to know
       about it.
   - q: "Does the connection survive an IP address change?"
@@ -83,8 +83,8 @@ faq:
                 <h2>Links can leave and rejoin</h2>
                 <p>
                     Aggligator separates the logical connection from the network links that carry
-                    it. Each link is an ordinary transport connection, for example TCP, TLS, a
-                    WebSocket, USB or Bluetooth. Links can fail, return, be added or be removed
+                    it. Each link is an ordinary transport connection, for example TCP, TLS, QUIC,
+                    a WebSocket, USB or Bluetooth. Links can fail, return, be added or be removed
                     while the logical connection runs. Data that a failed link did not deliver is
                     resent over the remaining links.
                 </p>

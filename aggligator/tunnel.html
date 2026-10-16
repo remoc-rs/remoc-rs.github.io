@@ -165,9 +165,15 @@ faq:
                 <h3>Adding links</h3>
                 <p>
                     The TCP transport tries the usable combinations of local interfaces and resolved
-                    server addresses. Repeat <code>--tcp</code> for additional targets. Depending on
-                    the build and platform, clients can also add links through SOCKS5 proxies, USB or
-                    Bluetooth.
+                    server addresses. Repeat <code>--tcp</code> for additional targets. With
+                    <code>--quic</code> on both ends, links are established over QUIC instead of or
+                    in addition to TCP. Depending on the build and platform, clients can also add
+                    links through SOCKS5 proxies, USB or Bluetooth.
+                </p>
+                <p>
+                    <code>--compress</code> on both ends compresses the links using zstd.
+                    This only helps when the forwarded data is compressible; SSH traffic, for
+                    example, is encrypted and does not become smaller.
                 </p>
             </div>
         </section>

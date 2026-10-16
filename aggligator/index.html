@@ -3,10 +3,10 @@ layout: base
 project: aggligator
 title: "Aggligator: link bonding and failover for Rust, without Multipath TCP"
 description: >-
-  Link bonding, failover and roaming in user space. Aggligator combines TCP, WebSocket, USB and
-  Bluetooth links into one connection with their combined bandwidth.
+  Link bonding, failover and roaming in user space. Aggligator combines TCP, QUIC, WebSocket, USB
+  and Bluetooth links into one connection with their combined bandwidth.
 social_description: >-
-  Aggligator combines TCP, WebSocket, USB or Bluetooth links and keeps one logical connection
+  Aggligator combines TCP, QUIC, WebSocket, USB or Bluetooth links and keeps one logical connection
   alive as devices move between networks.
 canonical: /aggligator/
 schema: software
@@ -25,7 +25,7 @@ nav_url: /aggligator/
             <p class="lead">
                 Aggligator combines the network links between two endpoints into one connection with
                 their combined bandwidth. It serves the same purpose as Multipath&nbsp;TCP, but works
-                in user space over ordinary TCP, TLS, WebSocket, USB and Bluetooth links, so neither
+                in user space over ordinary TCP, TLS, QUIC, WebSocket, USB and Bluetooth links, so neither
                 the operating system nor the network in between needs to support it.
             </p>
             <p class="lead">
@@ -197,8 +197,8 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                         </h3>
                         <p>
                             A secret established with Diffie-Hellman protects the connection identifier
-                            used when adding links. Payload data is not encrypted; use TLS for untrusted
-                            links.
+                            used when adding links. Payload data is not encrypted; use TLS or QUIC for
+                            untrusted links.
                         </p>
                         <p><a href="https://crates.io/crates/aggligator-wrapper-tls">TLS wrapper &rarr;</a></p>
                     </article>
@@ -314,6 +314,16 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                             <tr>
                                 <td>
                                     <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-quic"/></svg>
+                                        <span>QUIC</span>
+                                    </span>
+                                </td>
+                                <td><a href="https://crates.io/crates/aggligator-transport-quic">aggligator-transport-quic</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="transport-name">
                                         <svg class="transport-icon" aria-hidden="true"><use href="#transport-websocket"/></svg>
                                         <span>WebSockets</span>
                                     </span>
@@ -384,6 +394,16 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                                     </span>
                                 </td>
                                 <td><a href="https://crates.io/crates/aggligator-wrapper-tls">aggligator-wrapper-tls</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="transport-name">
+                                        <svg class="transport-icon" aria-hidden="true"><use href="#transport-zstd"/></svg>
+                                        <span>Byte-stream links, compressed with zstd</span>
+                                    </span>
+                                </td>
+                                <td><a href="https://crates.io/crates/aggligator-wrapper-zstd">aggligator-wrapper-zstd</a>
                                 </td>
                             </tr>
                         </tbody>

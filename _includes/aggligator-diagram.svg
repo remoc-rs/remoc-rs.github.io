@@ -52,5 +52,5 @@
   <path d="M 194,160.0 C 224,160.0 220,244.0 250,244.0" fill="none" stroke="var(--border)" stroke-width="2" stroke-dasharray="5 5"/>
   <path d="M 710,244.0 C 740,244.0 736,160.0 766,160.0" fill="none" stroke="var(--border)" stroke-width="2" stroke-dasharray="5 5"/>
   <text x="480.0" y="302" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="15" fill="var(--fg-muted)"><tspan font-weight="700" fill="var(--fg)">one</tspan> connection, carried by <tspan font-weight="700" fill="var(--fg)">every</tspan> link that works</text>
-  <text x="480.0" y="324" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--fg-muted)">TCP, TLS, WebSockets, USB or Bluetooth, mixed freely and changed while it runs</text>
+  <text x="480.0" y="324" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" fill="var(--fg-muted)">TCP, TLS, QUIC, WebSockets, USB or Bluetooth, mixed freely and changed while it runs</text>
 </svg>
