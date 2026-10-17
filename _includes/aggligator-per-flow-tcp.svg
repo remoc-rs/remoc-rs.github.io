@@ -1,0 +1,64 @@
+<svg viewBox="0 0 960 296" role="img" aria-labelledby="pf-tcp-title pf-tcp-desc"
+     xmlns="http://www.w3.org/2000/svg" class="diagram-svg">
+  <title id="pf-tcp-title">Parallel TCP links over one path</title>
+  <desc id="pf-tcp-desc">A client and a server each hold one byte stream. Between them run four separate TCP connections over the same network path, each subject to a per-flow limit, combining their bandwidth into one stream.</desc>
+  <rect x="0.5" y="44.5" width="199" height="223" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <text x="100.0" y="34" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">Client</text>
+  <rect x="16" y="125.0" width="168" height="62" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="100.0" y="152.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">alc::Stream</text>
+  <text x="100.0" y="173.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11" fill="var(--fg-muted)">1 byte stream</text>
+  <rect x="760.5" y="44.5" width="199" height="223" rx="12" fill="var(--bg-alt)" stroke="var(--border)"/>
+  <text x="860.0" y="34" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">Server</text>
+  <rect x="776" y="125.0" width="168" height="62" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="860.0" y="152.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14" fill="var(--fg)">alc::Stream</text>
+  <text x="860.0" y="173.0" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11" fill="var(--fg-muted)">server.example:5800</text>
+  <text x="480.0" y="34" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="var(--fg-muted)">Same network path — 4 separate TCP flows</text>
+  <rect x="246" y="61.0" width="468" height="34" rx="8" fill="var(--bg-alt)" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="258" y="83.0" font-family="Inter, system-ui, sans-serif" font-size="13.5" fill="var(--fg)">TCP link #0</text>
+  <text x="350" y="82.5" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11.5" fill="var(--fg-muted)">:50338 → :5800</text>
+  <rect x="478" y="70.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="496" y="70.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="514" y="70.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="532" y="70.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="550" y="70.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="568" y="70.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="586" y="70.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <path d="M 184,156.0 C 214,156.0 216,78.0 246,78.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 714,78.0 C 744,78.0 746,156.0 776,156.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <rect x="246" y="113.0" width="468" height="34" rx="8" fill="var(--bg-alt)" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="258" y="135.0" font-family="Inter, system-ui, sans-serif" font-size="13.5" fill="var(--fg)">TCP link #1</text>
+  <text x="350" y="134.5" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11.5" fill="var(--fg-muted)">:50348 → :5800</text>
+  <rect x="478" y="122.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="496" y="122.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="514" y="122.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="532" y="122.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="550" y="122.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="568" y="122.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="586" y="122.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <path d="M 184,156.0 C 214,156.0 216,130.0 246,130.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 714,130.0 C 744,130.0 746,156.0 776,156.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <rect x="246" y="165.0" width="468" height="34" rx="8" fill="var(--bg-alt)" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="258" y="187.0" font-family="Inter, system-ui, sans-serif" font-size="13.5" fill="var(--fg)">TCP link #2</text>
+  <text x="350" y="186.5" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11.5" fill="var(--fg-muted)">:50360 → :5800</text>
+  <rect x="478" y="174.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="496" y="174.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="514" y="174.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="532" y="174.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="550" y="174.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="568" y="174.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="586" y="174.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <path d="M 184,156.0 C 214,156.0 216,182.0 246,182.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 714,182.0 C 744,182.0 746,156.0 776,156.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <rect x="246" y="217.0" width="468" height="34" rx="8" fill="var(--bg-alt)" stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="258" y="239.0" font-family="Inter, system-ui, sans-serif" font-size="13.5" fill="var(--fg)">TCP link #3</text>
+  <text x="350" y="238.5" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="11.5" fill="var(--fg-muted)">:50366 → :5800</text>
+  <rect x="478" y="226.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="496" y="226.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="514" y="226.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="532" y="226.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="550" y="226.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="568" y="226.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <rect x="586" y="226.0" width="12" height="16" rx="2" fill="var(--accent)"/>
+  <path d="M 184,156.0 C 214,156.0 216,234.0 246,234.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M 714,234.0 C 744,234.0 746,156.0 776,156.0" fill="none" stroke="var(--accent)" stroke-width="2"/>
+</svg>

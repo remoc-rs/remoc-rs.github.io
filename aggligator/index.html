@@ -24,9 +24,11 @@ nav_url: /aggligator/
             <p class="tagline">Your friendly link aggregator.</p>
             <p class="lead">
                 Aggligator combines the network links between two endpoints into one connection with
-                their combined bandwidth. It serves the same purpose as Multipath&nbsp;TCP, but works
-                in user space over ordinary TCP, TLS, QUIC, WebSocket, USB and Bluetooth links, so neither
-                the operating system nor the network in between needs to support it.
+                their combined bandwidth, whether across several internet uplinks or across multiple
+                flows and proxies when individual connections are throttled. It serves the same
+                purpose as Multipath&nbsp;TCP, but works in user space over ordinary TCP, TLS, QUIC,
+                WebSocket, SOCKS5, USB and Bluetooth links, so neither the operating system nor the
+                network in between needs to support it.
             </p>
             <p class="lead">
                 Links may fail, return or be added while the connection runs, so failover is automatic
@@ -416,7 +418,8 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
             <div class="wrap">
                 <h2>Common uses</h2>
                 <p class="section-lead">
-                    How to bond internet connections and keep them alive when the network changes.
+                    How to bond internet connections, overcome per-flow throttling and keep
+                    connections alive when the network changes.
                 </p>
                 <ul class="topics">
                     <li>
@@ -424,6 +427,14 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
                         <p>
                             How Aggligator splits a connection across multiple uplinks, including
                             which workloads benefit.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/aggligator/per-flow-limits.html">Overcome per-flow bandwidth
+                            limits</a>
+                        <p>
+                            How distributing a connection across multiple TCP flows or SOCKS5
+                            proxies speeds up transfers when individual flows are throttled.
                         </p>
                     </li>
                     <li>

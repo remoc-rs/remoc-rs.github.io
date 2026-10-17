@@ -15,6 +15,7 @@ permalink: /sitemap.xml
     <url><loc>{{ site.url }}/aggligator/</loc></url>
     <url><loc>{{ site.url }}/aggligator/network-switching.html</loc></url>
     <url><loc>{{ site.url }}/aggligator/bonding.html</loc></url>
+    <url><loc>{{ site.url }}/aggligator/per-flow-limits.html</loc></url>
     <url><loc>{{ site.url }}/aggligator/tunnel.html</loc></url>
     <url><loc>{{ site.url }}/benchmarks.html</loc></url>
     <url><loc>{{ site.url }}/comparison.html</loc></url>

@@ -1,0 +1,270 @@
+---
+layout: base
+project: aggligator
+title: "Overcome per-TCP-flow bandwidth limits by splitting a connection across multiple links"
+description: >-
+  How to speed up a single transfer when an ISP or middlebox throttles individual TCP
+  flows, or when high latency limits single-connection throughput, using Aggligator.
+social_description: >-
+  Distribute one logical connection across multiple independent TCP flows or SOCKS5
+  proxies in user space to overcome per-connection bandwidth limits.
+canonical: /aggligator/per-flow-limits.html
+favicon: /aggligator/logo.png
+faq:
+  - q: "Why does multiplexing streams inside one connection not help?"
+    a: >-
+      Stream multiplexers such as HTTP/2, yamux or SSH connection sharing still send
+      all data through one outer TCP connection. A traffic shaper that limits each
+      flow by its address and port pair applies the same limit regardless of how many
+      streams are multiplexed inside it. Aggligator instead distributes one stream
+      across several separate transport connections.
+  - q: "Does this increase speed when the whole line is already saturated?"
+    a: >-
+      No. Combining multiple flows only helps when individual TCP connections are
+      held below the capacity of the line, for example by per-flow traffic shaping or
+      single-connection window limits on high-latency paths. It cannot exceed the
+      total bandwidth of the internet connection.
+  - q: "How many parallel links can be opened over one interface?"
+    a: >-
+      By default, the TCP, SOCKS5 and WebSocket transports establish one link per
+      path. Calling <code>set_links_per_path</code> on their connector (or passing
+      <code>--tcp-links</code> or <code>--socks-links</code> to
+      <code>agg-tunnel</code>) opens multiple parallel connections over each path.
+  - q: "Is this suitable for real-time traffic such as voice or gaming?"
+    a: >-
+      Aggligator provides an ordered, reliable byte stream. When a packet is lost on
+      one link, later packets received on other links wait in the receive buffer until
+      the missing packet is retransmitted. This head-of-line blocking does not hurt
+      bulk transfers or shell sessions, but can add latency spikes to real-time UDP
+      traffic tunneled over TCP.
+  - q: "Do both ends need to run Aggligator?"
+    a: >-
+      Yes. Packets sent over the separate flows must be reordered and reassembled at
+      the receiving end, so the server must run Aggligator or <code>agg-tunnel</code>
+      as well.
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Overcome per-flow bandwidth limits</h1>
+            <p class="lead">
+                Sometimes an internet connection has plenty of capacity, yet a single TCP
+                transfer only achieves a small fraction of it. <a href="/aggligator/">Aggligator</a>
+                distributes one logical connection across multiple independent transport flows
+                so that a single stream can use their combined throughput.
+            </p>
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Why one TCP connection can be slow on a fast line</h2>
+                <p>
+                    Tools that open many parallel connections, such as <code>iperf3 -P</code>
+                    or multi-connection download managers, often achieve much higher speed than
+                    a single transfer over the same line. This usually happens for one of two
+                    reasons:
+                </p>
+                <ul>
+                    <li>
+                        <b>Per-flow traffic shaping:</b> the provider or a middlebox limits
+                        bandwidth per TCP flow (source and destination address and port) rather
+                        than only capping the line as a whole.
+                    </li>
+                    <li>
+                        <b>High latency and packet loss:</b> on long-distance paths with a high
+                        bandwidth-delay product, loss-based TCP congestion control shrinks its
+                        sending window after a dropped packet and takes many round trips to
+                        recover.
+                    </li>
+                </ul>
+                <p>
+                    Opening more application streams inside one connection does not avoid
+                    either limit, because all traffic still shares the same outer TCP flow.
+                </p>
+
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>TCP flows</th>
+                                <th>App interface</th>
+                                <th>Per-flow limit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Single TCP connection</td>
+                                <td>1</td>
+                                <td>1 stream</td>
+                                <td><span class="mark no" aria-hidden="true">✗</span> limited to one flow</td>
+                            </tr>
+                            <tr>
+                                <td>Multiplexed streams (HTTP/2, <code>yamux</code>)</td>
+                                <td>1</td>
+                                <td>many streams</td>
+                                <td><span class="mark no" aria-hidden="true">✗</span> limited to one flow</td>
+                            </tr>
+                            <tr>
+                                <td>Parallel transfers (<code>iperf3 -P</code>)</td>
+                                <td>many</td>
+                                <td>many connections</td>
+                                <td><span class="mark partial" aria-hidden="true">±</span> needs app support</td>
+                            </tr>
+                            <tr>
+                                <td><b>Aggligator</b></td>
+                                <td><b>many</b></td>
+                                <td><b>1 stream</b></td>
+                                <td><span class="mark yes" aria-hidden="true">✓</span> combines flows</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Splitting one stream across multiple flows</h2>
+                <p>
+                    Aggligator accepts a single byte stream from the application and sends its
+                    packets across multiple independent transport links. The receiving endpoint
+                    reorders the incoming packets back into one stream and resends unacknowledged
+                    data if a link fails.
+                </p>
+                <p>
+                    To get higher throughput in practice, three settings matter:
+                </p>
+                <ul>
+                    <li>
+                        <b>Multiple flows at the bottleneck:</b> open several parallel links
+                        with <code>set_links_per_path</code> on the TCP, SOCKS5 or WebSocket
+                        connector (or <code>--tcp-links</code> and <code>--socks-links</code>
+                        in <code>agg-tunnel</code>).
+                    </li>
+                    <li>
+                        <b>Buffer sizes:</b> on high-latency paths with many links, increasing
+                        <code>send_buffer</code> and <code>recv_buffer</code> in the
+                        <a href="https://docs.rs/aggligator/latest/aggligator/cfg/struct.Cfg.html">configuration</a>
+                        allows enough in-flight data to keep all links busy.
+                    </li>
+                    <li>
+                        <b>Congestion control:</b> enabling BBR (<code>--tcp-congestion bbr</code>)
+                        prevents occasional packet loss from throttling individual TCP links.
+                    </li>
+                </ul>
+                <p>
+                    In a <a href="https://github.com/remoc-rs/aggligator/discussions/29">practical
+                    user report</a> on a line where each outgoing TCP flow was throttled to
+                    2.5&nbsp;Mbit/s, combining 16 parallel flows with Aggligator raised the
+                    throughput of a single logical connection to about 180&nbsp;Mbit/s.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2>Direct TCP: multiple parallel links per path</h2>
+                <p class="section-lead">
+                    When connecting directly over TCP, calling <code>set_links_per_path</code>
+                    on <code>TcpConnector</code> (or passing <code>--tcp-links</code> to
+                    <code>agg-tunnel</code>) opens multiple TCP connections with distinct
+                    source ports over each network path.
+                </p>
+
+                <figure class="diagram">
+                    {% include aggligator-per-flow-tcp.svg %}
+                    <figcaption>
+                        Each link uses its own TCP socket and ephemeral source port, so a
+                        per-flow traffic shaper treats them as separate TCP flows while the
+                        application reads and writes one stream.
+                    </figcaption>
+                </figure>
+
+                <figure class="code-single spaced">
+                    <figcaption>Four parallel TCP links in Rust</figcaption>
+                    <pre><code><span class="k">use</span> aggligator_transport_tcp::<span class="t">TcpConnector</span>;
+
+<span class="k">let</span> <span class="k">mut</span> tcp = <span class="t">TcpConnector</span>::new([<span class="s">"server.example"</span>], <span class="n">5800</span>).<span class="k">await</span>?;
+tcp.set_links_per_path(<span class="n">4</span>);
+
+<span class="k">let</span> <span class="k">mut</span> connector = <span class="t">Connector</span>::new();
+connector.add(tcp);
+
+<span class="k">let</span> stream = connector.channel().unwrap().<span class="k">await</span>?.into_stream();</code></pre>
+                </figure>
+
+                <figure class="code-single">
+                    <figcaption>Four parallel TCP links with <code>agg-tunnel</code></figcaption>
+                    <pre class="cmd"><code>agg-tunnel client --tcp server.example:5800 --tcp-links 4 --port 22:2222</code></pre>
+                </figure>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap">
+                <h2>SOCKS5 proxies: multiple tunnel or proxy paths</h2>
+                <p class="section-lead">
+                    When traffic goes through local tunnel instances (such as <code>ssh -D</code>
+                    or an encrypted proxy client) or remote SOCKS5 servers, the
+                    <a href="https://crates.io/crates/aggligator-transport-socks">SOCKS5
+                    transport</a> can combine several proxy endpoints, or open multiple
+                    parallel links through one proxy with <code>set_links_per_path</code>
+                    (<code>--socks-links</code>).
+                </p>
+
+                <figure class="diagram">
+                    {% include aggligator-per-flow-socks.svg %}
+                    <figcaption>
+                        Each local tunnel or SOCKS5 proxy establishes its own independent
+                        outer TCP connection to the server, while Aggligator distributes the
+                        stream across all of them.
+                    </figcaption>
+                </figure>
+
+                <figure class="code-single spaced">
+                    <figcaption>Combining multiple SOCKS5 proxy paths in Rust</figcaption>
+                    <pre><code><span class="k">use</span> aggligator_transport_socks::{<span class="t">Socks5Connector</span>, <span class="t">Socks5Target</span>};
+
+<span class="k">let</span> target = <span class="t">Socks5Target</span>::parse(<span class="s">"server.example"</span>, <span class="n">5800</span>)?;
+<span class="k">let</span> proxies = [<span class="s">"127.0.0.1:1081"</span>, <span class="s">"127.0.0.1:1082"</span>, <span class="s">"127.0.0.1:1083"</span>, <span class="s">"127.0.0.1:1084"</span>];
+
+<span class="k">let</span> <span class="k">mut</span> connector = <span class="t">Connector</span>::new();
+connector.add(<span class="t">Socks5Connector</span>::new(proxies, target)?);
+
+<span class="k">let</span> stream = connector.channel().unwrap().<span class="k">await</span>?.into_stream();</code></pre>
+                </figure>
+
+                <figure class="code-single">
+                    <figcaption>Forwarding a port over multiple SOCKS5 proxies with <code>agg-tunnel</code></figcaption>
+                    <pre class="cmd"><code>agg-tunnel client \
+    --socks 127.0.0.1:1081 --socks 127.0.0.1:1082 \
+    --socks 127.0.0.1:1083 --socks 127.0.0.1:1084 \
+    --socks-target server.example:5800 \
+    --port 22:2222</code></pre>
+                </figure>
+            </div>
+        </section>
+
+        {% include faq.html %}
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2>Related pages</h2>
+                <p>
+                    The <a href="/aggligator/">Aggligator overview</a> explains
+                    <a href="/aggligator/#design">how capacity is discovered on each link</a>
+                    and lists all <a href="/aggligator/#transports">transports</a>. See also
+                    <a href="/aggligator/bonding.html">combining multiple internet connections</a>,
+                    <a href="/aggligator/network-switching.html">keeping connections alive while
+                    switching networks</a> and
+                    <a href="/aggligator/tunnel.html">tunneling existing applications with
+                    <code>agg-tunnel</code></a>.
+                </p>
+            </div>
+        </section>
+    </main>

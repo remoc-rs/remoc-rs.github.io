@@ -50,6 +50,9 @@ built on Tokio.
   Ethernet, even when its IP address changes.
 - [Combining multiple internet connections](https://remoc.rs/aggligator/bonding.html):
   link bonding in user space, without Multipath TCP or special routers.
+- [Overcoming per-flow bandwidth limits](https://remoc.rs/aggligator/per-flow-limits.html):
+  distributing a connection across multiple TCP flows or SOCKS5 proxies when
+  individual flows are throttled or limited by high latency.
 - [agg-tunnel](https://remoc.rs/aggligator/tunnel.html): forward TCP ports of
   existing, unmodified applications over an aggregated connection.
 - [API documentation](https://docs.rs/aggligator)

@@ -48,8 +48,9 @@ faq:
                 <h1>Tunnel existing applications</h1>
                 <p class="lead">
                     <a href="/aggligator/">Aggligator</a> combines the available network links between two
-                    machines into one bonded connection. It distributes traffic across them and can keep the
-                    connection alive as links fail, reconnect or the device changes networks.
+                    machines into one bonded connection. It distributes traffic across multiple interfaces,
+                    internet uplinks or proxy paths to combine their bandwidth and overcome per-flow limits,
+                    and keeps the connection alive as links fail, reconnect or the device changes networks.
                     <code>agg-tunnel</code> is a standalone command-line tool for Linux, macOS and Windows
                     that brings this to existing TCP applications: the server permits targets, the client
                     exposes local ports, and neither application needs modification.
@@ -165,10 +166,12 @@ faq:
                 <h3>Adding links</h3>
                 <p>
                     The TCP transport tries the usable combinations of local interfaces and resolved
-                    server addresses. Repeat <code>--tcp</code> for additional targets. With
-                    <code>--quic</code> on both ends, links are established over QUIC instead of or
-                    in addition to TCP. Depending on the build and platform, clients can also add
-                    links through SOCKS5 proxies, USB or Bluetooth.
+                    server addresses. Repeat <code>--tcp</code> for additional targets, or pass
+                    <code>--tcp-links</code> to open <a href="/aggligator/per-flow-limits.html">multiple
+                    parallel TCP links per path</a>. With <code>--quic</code> on both ends, links are
+                    established over QUIC instead of or in addition to TCP. Depending on the build and
+                    platform, clients can also add links through SOCKS5 proxies (with
+                    <code>--socks-links</code> for multiple links per proxy), USB or Bluetooth.
                 </p>
                 <p>
                     <code>--compress</code> on both ends compresses the links using zstd.
