@@ -144,7 +144,7 @@ task_tx.send(<span class="t">Request</span> { reply_tx: tx }).<span class="k">aw
     reply_tx: rch::mpsc::<span class="t">Sender</span>&lt;<span class="t">Item</span>&gt;,
 }
 
-<span class="k">let</span> (tx, <span class="k">mut</span> rx) = rch::mpsc::with_local_buffer(<span class="n">16</span>);
+<span class="k">let</span> (tx, <span class="k">mut</span> rx) = rch::mpsc::channel();
 remote_tx.send(<span class="t">Request</span> { reply_tx: tx }).<span class="k">await</span>?;
 
 <span class="k">while let</span> <span class="t">Some</span>(item) = rx.recv().<span class="k">await</span>? {
