@@ -19,6 +19,7 @@ projects:
     branch: master
     crate: remoc
     links:
+      - { title: Guides, url: /#topics }
       - { title: Examples, url: /examples/channels.html }
       - { title: Benchmarks, url: /benchmarks.html }
       - { title: Comparison, url: /comparison.html }
@@ -62,6 +63,8 @@ examples:
   - { id: rtc, name: Remote trait calls, url: /examples/rtc.html }
   - { id: tracing, name: Distributed tracing, url: /examples/tracing.html }
   - { id: rtc-web, name: Web browser, url: /examples/rtc-web.html }
+  - { id: daemon, name: Local daemon, url: /examples/daemon.html }
+  - { id: pipelining, name: RPC pipelining, url: /examples/pipelining.html }
 
 # GitHub Pages builds this with Jekyll; the layout and includes exist only to keep
 # the shared chrome in one place. Nothing here is a blog, so no plugins are needed.

@@ -50,7 +50,7 @@ faq:
             <h1>Erlang-style message passing in Rust</h1>
             <p class="lead">
                 Erlang made sending a message to a process on another machine as natural as
-                sending one within the program, and few languages since have offered the same.
+                sending one within the program.
                 <a href="/">Remoc</a> brings this model to Rust, with channels that work
                 between machines and messages that are typed.
             </p>
@@ -92,9 +92,9 @@ faq:
                 </p>
                 <p>
                     Two things are deliberately different from Erlang. Messages are typed:
-                    a channel carries one Serde type, the compiler checks what may be sent, and
-                    a trait carrying <code>#[rtc::remote]</code> gives an interface more precise
-                    than any receive clause. And channels are bounded: a slow receiver stalls
+                    a channel carries one Serde type, and the compiler checks what may be sent.
+                    A trait carrying <code>#[rtc::remote]</code> defines the remote methods and their
+                    argument and return types. Channels are also bounded: a slow receiver stalls
                     only its own sender instead of accumulating an unbounded mailbox.
                 </p>
 
@@ -137,11 +137,15 @@ faq:
                     you assemble it yourself.
                 </p>
                 <p>
-                    Rust provides compile-time checked messages, no garbage collector, single
-                    static binaries and native-code performance in a general-purpose language.
-                    Parts of a system that are not message passing, such as numerics, embedded
-                    targets or a user interface, can remain in the same language. To keep the
-                    connection itself alive across link failures and network changes,
+                    <strong>Why Rust:</strong> Rust provides compile-time checked messages, no
+                    garbage collector, single static binaries and native-code performance in a
+                    general-purpose language. Parts of a system that are not message passing,
+                    such as numerics, embedded targets or a user interface, can remain in the
+                    same language.
+                </p>
+                <p>
+                    <strong>Connection resilience:</strong> To keep the connection itself alive
+                    across link failures and network changes,
                     <a href="/aggligator/">Aggligator</a> provides a resilient transport
                     underneath Remoc.
                 </p>

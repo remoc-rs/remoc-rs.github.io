@@ -1,10 +1,10 @@
 ---
 layout: base
 project: remoc
-title: "Multiplex many typed channels over one TCP connection in Rust"
+title: "Multiplex channels over one TCP connection in Rust"
 description: >-
-  How to run many independent streams over one TCP, QUIC or WebSocket connection in
-  Rust, and how Remoc multiplexes typed channels with per-channel flow control.
+  Multiplex typed Rust channels over one TCP connection with per-channel flow control.
+  See how Remoc differs from yamux byte streams and reuse the runnable TCP example.
 social_description: >-
   Many independent, typed channels over one TCP connection, with per-channel flow
   control and no framing code to write.
@@ -34,16 +34,17 @@ faq:
       schema-based system such as gRPC is the better fit.
   - q: "How many channels can one connection carry?"
     a: >-
-      Channels are cheap values rather than sockets. Opening one sends its endpoint
-      inside a message, without a port, handshake or registration. A channel per request
-      or subscriber does not require additional network connections.
+      Channels are lightweight compared with separate TCP connections because they
+      share the existing transport. Opening one sends its endpoint inside a message,
+      without a port, transport handshake or registration. A channel per request or
+      subscriber does not require additional network connections.
 ---
 
     <header class="page-header">
         {% include nav.html %}
 
         <div class="wrap">
-            <h1>Many typed channels, one connection</h1>
+            <h1>Multiplex typed Rust channels over one TCP connection</h1>
             <p class="lead">
                 <a href="/">Remoc</a> multiplexes any number of typed channels over a single
                 TCP connection between two Rust programs. Requests, responses, events and file
@@ -56,7 +57,7 @@ faq:
     <main id="content">
         <section class="section">
             <div class="wrap narrow">
-                <h2>The problem with one stream</h2>
+                <h2>Sharing a TCP connection between independent conversations</h2>
                 <p>
                     A TCP or TLS connection provides a single byte stream. As soon as two
                     independent conversations share it, for example commands and a bulk file
@@ -68,9 +69,9 @@ faq:
                     connections no longer fail together.
                 </p>
                 <p>
-                    Stream multiplexers such as <a href="https://docs.rs/yamux">yamux</a> or the
-                    streams of QUIC solve one half of the problem by providing many byte streams
-                    over one connection. However, the streams still carry raw bytes, so
+                    <strong>Compared with <a href="https://docs.rs/yamux">yamux</a> and QUIC:</strong>
+                    These stream multiplexers solve one half of the problem by providing many
+                    byte streams over one connection. However, the streams still carry raw bytes, so
                     serialization, framing and matching a stream to its purpose remain your job.
                 </p>
             </div>
@@ -78,7 +79,7 @@ faq:
 
         <section class="section alt">
             <div class="wrap narrow">
-                <h2>Channels instead of byte streams</h2>
+                <h2 id="yamux">Typed channel multiplexing vs. yamux byte streams</h2>
                 <p>
                     Remoc multiplexes at the level that Rust programs already use internally:
                     channels. A connection starts with a base channel. To open a further
@@ -87,6 +88,13 @@ faq:
                     channel</a> endpoint to another task. There is no port to open, no stream
                     number to agree on and no registry to consult; the endpoint simply arrives
                     where it is needed.
+                </p>
+                <p>
+                    Choose a byte-stream multiplexer such as yamux when each logical stream
+                    must carry an existing byte-oriented protocol. Choose Remoc when both
+                    peers are Rust programs and each conversation should carry Serde values,
+                    channel endpoints or trait calls. Remoc adds its own protocol; it is not
+                    wire-compatible with yamux and does not replace TCP with a new transport.
                 </p>
                 <p>
                     Each channel is typed and carries values of a single Serde type, serialized
@@ -106,11 +114,11 @@ faq:
 
         <section class="section">
             <div class="wrap narrow">
-                <h2>Opening a channel from a request</h2>
+                <h2>Sending a new channel over an existing TCP connection</h2>
                 <p>
-                    A request type can carry the sender of a new channel and the server replies
-                    into it. Setting up a new communication path over the existing connection
-                    takes two lines.
+                    In the <a href="/examples/channels.html">counting example</a>, a request
+                    carries the sender of a new mpsc channel. The server replies through
+                    that sender.
                 </p>
 
                 <figure class="code-single">
@@ -122,6 +130,20 @@ faq:
     seq_tx: rch::mpsc::<span class="t">Sender</span>&lt;<span class="t">u32</span>&gt;,
 }</code></pre>
                 </figure>
+
+                <ol>
+                    <li>The client creates an mpsc channel and keeps its receiver.</li>
+                    <li>It sends <code>CountReq</code>, carrying the sender, over the
+                        connection's base channel.</li>
+                    <li>The server uses <code>seq_tx</code> to send numbers; the client
+                        reads them from its receiver.</li>
+                </ol>
+                <p>
+                    Both channels share one TCP connection; no second socket is opened for
+                    the sequence. For RPC and multiple update channels
+                    sharing a connection, the <a href="/examples/rtc.html">counter example</a>
+                    returns both a watch receiver and an mpsc receiver.
+                </p>
 
                 <p class="section-foot">
                     <a class="button" href="/examples/channels.html">Complete channels example

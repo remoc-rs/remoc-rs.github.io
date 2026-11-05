@@ -1,10 +1,10 @@
 ---
 layout: base
 project: remoc
-title: "RPC with server push and client callbacks in Rust"
+title: "Bidirectional RPC in Rust: server push and client callbacks"
 description: >-
-  Plain RPC breaks down when the server must notify clients. How Remoc makes RPC
-  bidirectional, so the server pushes events and calls back, even through NAT.
+  Make bidirectional Rust RPC calls over one connection: return a channel for streamed
+  updates or pass a client callback. Follow the existing counter and pizzeria examples.
 social_description: >-
   RPC where a call can hand over a channel and the server can call the client back,
   over the one connection the client opened.
@@ -19,8 +19,16 @@ faq:
     a: >-
       A gRPC stream is tied to the method that declared it. A Remoc channel is a value:
       a call can return it, a message can carry it, and it can be stored and used long
-      after the call completed. Additionally the client can serve a trait of its own,
-      which gRPC has no equivalent for.
+      after the call completed. A gRPC bidirectional stream carries messages in both
+      directions within a client-initiated call; it does not by itself let the server
+      invoke a client-defined RPC method. With Remoc the client can also pass a remote
+      function or serve a trait of its own over the existing connection.
+  - q: "Can an RPC method return a channel or stream of updates?"
+    a: >-
+      Yes. Return an <code>rch::mpsc::Receiver</code> for a sequence or an
+      <code>rch::watch::Receiver</code> for the latest state. The caller receives the
+      endpoint as a normal result and continues receiving updates after the RPC
+      method returns. Both patterns are implemented in the counter example.
   - q: "What happens when the client disconnects?"
     a: >-
       Sending into a channel whose remote end is gone fails with an error, and calls on
@@ -42,13 +50,14 @@ faq:
         {% include nav.html %}
 
         <div class="wrap">
-            <h1>RPC with server push and callbacks</h1>
+            <h1>Bidirectional Rust RPC over one connection</h1>
             <p class="lead">
                 Classical RPC is request and response: the client asks and the server answers.
                 But often the server has something to say on its own, for example a finished
-                job, a changed value or an incoming event. <a href="/">Remoc</a> lets calls
-                carry channels in both directions and lets the client serve a trait of its own,
-                so the server can call back.
+                job, a changed value or an incoming event. <a href="/">Remoc</a> lets an
+                RPC return a channel for server push or accept a client callback. Requests,
+                streamed updates and reverse-direction calls share the same connection;
+                the server does not need a second connection back to the client.
             </p>
         </div>
     </header>
@@ -59,19 +68,24 @@ faq:
                 <h2>The limits of request and response</h2>
                 <p>
                     In a request/response framework the server cannot start a conversation.
-                    Polling wastes requests and adds latency. Server-streaming methods, as gRPC
-                    offers them, cover subscriptions, but the stream is tied to the method that
-                    opened it and cannot be passed around, and they still do not let the server
-                    invoke anything on the client. A second connection in the reverse direction
-                    requires the client to be reachable, which fails as soon as it sits behind
-                    NAT or a firewall.
+                    Polling wastes requests and adds latency.
+                </p>
+                <p>
+                    <strong>Compared with gRPC:</strong> Server-streaming methods cover
+                    subscriptions, but each stream is tied to the method that opened it and
+                    cannot be passed around. The server still cannot invoke anything on the
+                    client.
+                </p>
+                <p>
+                    A second connection in the reverse direction requires the client to be
+                    reachable, which fails as soon as it sits behind NAT or a firewall.
                 </p>
             </div>
         </section>
 
         <section class="section alt">
             <div class="wrap narrow">
-                <h2>Returning a channel from a call</h2>
+                <h2>Callbacks and transferred channel endpoints</h2>
                 <p>
                     In Remoc, channel endpoints are values that calls can return and accept. A
                     method returns an <code>rch::mpsc::Receiver</code> and the client has a
@@ -81,22 +95,36 @@ faq:
                     call that created it has returned.
                 </p>
                 <p>
-                    For callbacks, the client implements a trait carrying
-                    <code>#[rtc::remote]</code> and sends its client object to the server, which
-                    then invokes methods on it like on any remote object. Communication is
-                    therefore fully bidirectional over the single connection that the client
-                    opened, so a device behind NAT can expose an interface to its server.
+                    For callbacks, choose the shape that fits your interface:
+                </p>
+                <ul>
+                    <li><strong>A remote function</strong> wraps a closure with
+                        <code>rfn::RFn</code>. Pass it to the server, which calls it with
+                        typed arguments.</li>
+                    <li><strong>A client-served trait</strong> exposes several related
+                        methods. Implement a trait carrying <code>#[rtc::remote]</code>
+                        on the client and pass its generated client object to the server.</li>
+                </ul>
+                <p>
+                    <strong>Compared with gRPC:</strong> Bidirectional streaming exchanges
+                    messages in both directions within a streaming method. Remoc supports
+                    that through channels, but a callback is a separate callable value with
+                    its own arguments and result. The server invokes it on demand over the
+                    existing connection, without the client polling for callback requests.
                 </p>
             </div>
         </section>
 
         <section class="section">
             <div class="wrap">
-                <h2>Returning a watch receiver</h2>
+                <h2 id="return-channel">Return a channel from an RPC method</h2>
                 <p class="section-lead">
                     This trait is from the <a href="/examples/rtc.html">counter example</a>. The
                     <code>watch</code> method returns a watch channel receiver, giving the
-                    client immediate notification of every change.
+                    client notifications when the value changes. Its
+                    <code>count_to_value()</code> method similarly returns an mpsc receiver
+                    for a sequence. Use watch for the latest state; use mpsc when the
+                    receiver must read each item in a stream.
                 </p>
 
                 <figure class="code-single">
@@ -122,7 +150,38 @@ faq:
             </div>
         </section>
 
-        {% include faq.html alt=true %}
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2 id="client-callback">Server-to-client RPC callbacks: the pizzeria example</h2>
+                <p>
+                    The <a href="/examples/tracing.html">pizzeria example</a> uses the
+                    remote-function option. Its shared <code>Progress</code> type is a
+                    <code>rfn::RFn&lt;(String,), ()&gt;</code>: it accepts a progress message
+                    and returns no value.
+                </p>
+                <ol>
+                    <li>The <a href="/examples/tracing.html#pizzeria-client-src-main-rs">client
+                        wraps its progress handler</a> with <code>Progress::new_1</code>
+                        and passes it to <code>order()</code>.</li>
+                    <li>After each preparation step, the
+                        <a href="/examples/tracing.html#pizzeria-server-src-main-rs">server calls
+                        <code>progress.try_call(...)</code></a> with a progress message.</li>
+                    <li>The supplied closure runs back in the client process while the order
+                        runs on the server.</li>
+                </ol>
+                <p>
+                    Both directions use the one TCP connection opened by the client.
+                    The example includes all
+                    source files and run commands; OpenTelemetry export is optional.
+                </p>
+                <p class="section-foot">
+                    <a class="button" href="/examples/tracing.html#running">Run the client
+                        callback example &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        {% include faq.html %}
 
         <section class="section">
             <div class="wrap narrow">

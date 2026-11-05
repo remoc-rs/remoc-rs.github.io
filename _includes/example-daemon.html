@@ -1,0 +1,456 @@
+<!-- generated from remoc 6536684 by _tools/render_examples.py -->
+<section class="example-crate">
+    <h3>timer-daemon-example</h3>
+    <p class="example-crate-role">A shared RPC interface, two binaries and local transport adapters in one package.</p>
+    <article class="example-file" id="Cargo-toml">
+        <h4><code>Cargo.toml</code></h4>
+        <p>Its dependencies.</p>
+        <pre><code><span class="t">[package]</span>
+name = <span class="s">"timer-daemon-example"</span>
+version = <span class="s">"0.1.0"</span>
+edition = <span class="s">"2024"</span>
+publish = <span class="t">false</span>
+
+<span class="t">[dependencies]</span>
+clap = { version = <span class="s">"4"</span>, features = [<span class="s">"derive"</span>] }
+humantime = <span class="s">"2"</span>
+remoc = { version = <span class="s">"0.20"</span> }
+serde = { version = <span class="s">"1"</span>, features = [<span class="s">"derive"</span>] }
+thiserror = <span class="s">"2"</span>
+tokio = { version = <span class="s">"1"</span>, features = [<span class="s">"io-util"</span>, <span class="s">"macros"</span>, <span class="s">"net"</span>, <span class="s">"rt-multi-thread"</span>, <span class="s">"signal"</span>, <span class="s">"sync"</span>, <span class="s">"time"</span>] }
+
+<span class="t">[dev-dependencies]</span>
+tempfile = <span class="s">"3"</span></code></pre>
+    </article>
+    <article class="example-file" id="src-lib-rs">
+        <h4><code>src/lib.rs</code></h4>
+        <p>Defines the timer service, its data types and a request that carries an optional oneshot sender.</p>
+        <pre><code><span class="c">//! Shared interface for a local timer daemon and its command-line client.
+</span>
+<span class="a">#![warn(missing_docs)]</span>
+
+<span class="k">use</span> remoc::prelude::*;
+<span class="k">use</span> std::time::Duration;
+
+<span class="a">#[cfg(unix)]</span>
+<span class="a">#[path = </span><span class="s">"unix.rs"</span><span class="a">]</span>
+<span class="k">pub</span> <span class="k">mod</span> local;
+
+<span class="a">#[cfg(windows)]</span>
+<span class="a">#[path = </span><span class="s">"windows.rs"</span><span class="a">]</span>
+<span class="k">pub</span> <span class="k">mod</span> local;
+
+<span class="a">#[cfg(not(any(unix, windows)))]</span>
+<span class="m">compile_error!</span>(<span class="s">"This example requires Unix domain sockets or Windows named pipes."</span>);
+
+<span class="c">/// A reminder scheduled by the daemon.
+///
+/// This ordinary serializable data is used both in RPC results and channel messages.
+</span><span class="a">#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="t">Timer</span> {
+    <span class="c">/// Identifier assigned by the daemon.
+</span>    <span class="k">pub</span> id: <span class="t">u64</span>,
+    <span class="c">/// Message to display when the timer finishes.
+</span>    <span class="k">pub</span> message: <span class="t">String</span>,
+}
+
+<span class="c">/// A reminder to schedule, optionally with its own completion channel.
+///
+/// Remoc channel endpoints implement Serde too: the sender travels inside this
+/// request while its receiver stays with the client. No extra socket is needed.
+/// A channel endpoint could also be passed directly as an RPC argument instead.
+</span><span class="a">#[derive(Debug, serde::Serialize, serde::Deserialize)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="t">NewTimer</span> {
+    <span class="c">/// Delay before the reminder finishes.
+</span>    <span class="k">pub</span> after: <span class="t">Duration</span>,
+    <span class="c">/// Message to display when the timer finishes.
+</span>    <span class="k">pub</span> message: <span class="t">String</span>,
+    <span class="c">/// An optional channel to notify when this timer finishes.
+</span>    <span class="k">pub</span> notify: <span class="t">Option</span>&lt;rch::oneshot::Sender&lt;Timer&gt;&gt;,
+}
+
+<span class="c">/// Scheduling a timer failed.
+///
+/// Application errors travel back as RPC results. `Call` also represents failures
+/// to perform the call itself, such as a disconnected daemon.
+</span><span class="a">#[derive(Debug, thiserror::Error, serde::Serialize, serde::Deserialize)]</span>
+<span class="k">pub</span> <span class="k">enum</span> <span class="t">AddError</span> {
+    <span class="c">/// The delay cannot be represented by the daemon's clock.
+</span>    <span class="a">#[error(</span><span class="s">"the requested delay is too long"</span><span class="a">)]</span>
+    InvalidDelay,
+    <span class="c">/// All timer identifiers have been used.
+</span>    <span class="a">#[error(</span><span class="s">"no timer identifiers remain"</span><span class="a">)]</span>
+    IdExhausted,
+    <span class="c">/// The remote call failed.
+</span>    <span class="a">#[error(transparent)]</span>
+    Call(<span class="a">#[from]</span> rtc::CallError),
+}
+
+<span class="c">/// Timers belong to the daemon, not to the client that scheduled them.
+///
+/// The macro generates [`TimerServiceClient`] for making remote calls and
+/// [`TimerServiceServerShared`] for dispatching them to our implementation.
+/// Calling a client method sends its arguments to the daemon and awaits its result.
+///
+/// `Shared` selects a server backed by `Arc&lt;T&gt;`: callers share one object,
+/// which handles its own synchronization.
+</span><span class="a">#[rtc::remote(server(Shared))]</span>
+<span class="k">pub</span> <span class="k">trait</span> TimerService {
+    <span class="c">/// Schedule a reminder and return its identifier, without waiting for expiry.
+</span>    <span class="k">async</span> <span class="k">fn</span> <span class="f">add</span>(&amp;<span class="k">self</span>, timer: <span class="t">NewTimer</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">u64</span>, AddError&gt;;
+
+    <span class="c">/// List reminders that have not finished yet.
+</span>    <span class="k">async</span> <span class="k">fn</span> <span class="f">list</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">Vec</span>&lt;Timer&gt;, rtc::CallError&gt;;
+
+    <span class="c">/// Receive future timer completions over the existing connection.
+</span>    <span class="c">///
+</span>    <span class="c">/// The result is a live channel endpoint, not a batch of events. Completions
+</span>    <span class="c">/// continue arriving on the receiver after this RPC call has returned.
+</span>    <span class="k">async</span> <span class="k">fn</span> <span class="f">subscribe</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;rch::broadcast::Receiver&lt;Timer&gt;, rtc::CallError&gt;;
+}</code></pre>
+    </article>
+    <article class="example-file" id="src-bin-timerd-rs">
+        <h4><code>src/bin/timerd.rs</code></h4>
+        <p>Owns the timers, serves all clients and sends completion notifications.</p>
+        <pre><code><span class="c">//! A foreground daemon that keeps timers alive independently of its clients.
+</span>
+<span class="k">use</span> clap::Parser;
+<span class="k">use</span> remoc::{codec, prelude::*};
+<span class="k">use</span> std::{collections::BTreeMap, sync::Arc};
+<span class="k">use</span> timer_daemon_example::{AddError, NewTimer, Timer, TimerService, TimerServiceServerShared, local};
+<span class="k">use</span> tokio::{
+    sync::Mutex,
+    time::{Instant, sleep_until},
+};
+
+<span class="a">#[derive(Parser)]</span>
+<span class="a">#[command(about = </span><span class="s">"Run a local reminder daemon"</span><span class="a">)]</span>
+<span class="k">struct</span> <span class="t">Args</span> {
+    <span class="c">/// Unix socket path or Windows named-pipe name.
+</span>    <span class="a">#[arg(long, default_value = local::DEFAULT_ENDPOINT)]</span>
+    endpoint: <span class="t">String</span>,
+}
+
+<span class="a">#[derive(Default)]</span>
+<span class="k">struct</span> <span class="t">State</span> {
+    next_id: <span class="t">u64</span>,
+    pending: <span class="t">BTreeMap</span>&lt;<span class="t">u64</span>, Timer&gt;,
+    events: <span class="t">rch</span>::broadcast::Sender&lt;Timer&gt;,
+}
+
+<span class="a">#[derive(Default)]</span>
+<span class="k">struct</span> <span class="t">Timers</span> {
+    <span class="c">// RPC handlers and independently running timer tasks share this state.
+</span>    state: <span class="t">Arc</span>&lt;Mutex&lt;State&gt;&gt;,
+}
+
+<span class="k">impl</span> TimerService <span class="k">for</span> Timers {
+    <span class="k">async</span> <span class="k">fn</span> <span class="f">add</span>(&amp;<span class="k">self</span>, timer: <span class="t">NewTimer</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">u64</span>, AddError&gt; {
+        <span class="k">let</span> NewTimer { after, message, notify } = timer;
+        <span class="k">let</span> deadline = Instant::now().checked_add(after).ok_or(AddError::InvalidDelay)?;
+        <span class="k">let</span> id = {
+            <span class="k">let</span> <span class="k">mut</span> state = <span class="k">self</span>.state.lock().<span class="k">await</span>;
+            <span class="k">let</span> id = state.next_id.checked_add(<span class="n">1</span>).ok_or(AddError::IdExhausted)?;
+            state.next_id = id;
+            state.pending.insert(id, Timer { id, message });
+            id
+        };
+
+        <span class="c">// The RPC returns the id immediately. This task keeps running even if
+</span>        <span class="c">// the client disconnects after scheduling the timer.
+</span>        <span class="k">let</span> state = <span class="k">self</span>.state.clone();
+        tokio::spawn(<span class="k">async</span> <span class="k">move</span> {
+            sleep_until(deadline).<span class="k">await</span>;
+            <span class="k">let</span> <span class="k">mut</span> state = state.lock().<span class="k">await</span>;
+            <span class="k">let</span> timer = state.pending.remove(&amp;id).expect(<span class="s">"scheduled timer exists"</span>);
+            <span class="m">println!</span>(<span class="s">"Finished {}: {}"</span>, timer.id, timer.message);
+
+            <span class="c">// This sender arrived inside NewTimer. Its receiver is still in the
+</span>            <span class="c">// waiting client, reached over the connection that carried add().
+</span>            <span class="k">if</span> <span class="k">let</span> <span class="t">Some</span>(notify) = notify
+                &amp;&amp; <span class="k">let</span> <span class="t">Err</span>(err) = notify.send(timer.clone())
+            {
+                <span class="m">eprintln!</span>(<span class="s">"Timer notification failed: {err}"</span>);
+            }
+
+            <span class="c">// Also notify every watcher. Each receiver uses its own client's
+</span>            <span class="c">// existing connection; broadcasting needs no new connections.
+</span>            <span class="k">match</span> state.events.send(timer) {
+                <span class="t">Ok</span>(_) =&gt; (),
+                <span class="c">// Timers also run when nobody is watching.
+</span>                <span class="t">Err</span>(rch::broadcast::SendError::Closed(_)) =&gt; (),
+                <span class="t">Err</span>(err) =&gt; <span class="m">eprintln!</span>(<span class="s">"Timer notification failed: {err}"</span>),
+            }
+        });
+
+        <span class="t">Ok</span>(id)
+    }
+
+    <span class="k">async</span> <span class="k">fn</span> <span class="f">list</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">Vec</span>&lt;Timer&gt;, rtc::CallError&gt; {
+        <span class="t">Ok</span>(<span class="k">self</span>.state.lock().<span class="k">await</span>.pending.values().cloned().collect())
+    }
+
+    <span class="k">async</span> <span class="k">fn</span> <span class="f">subscribe</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">Result</span>&lt;rch::broadcast::Receiver&lt;Timer&gt;, rtc::CallError&gt; {
+        <span class="t">Ok</span>(<span class="k">self</span>.state.lock().<span class="k">await</span>.events.subscribe(<span class="n">16</span>))
+    }
+}
+
+<span class="k">async</span> <span class="k">fn</span> <span class="f">serve</span>(stream: <span class="t">local</span>::Stream, timers: <span class="t">Arc</span>&lt;Timers&gt;) -&gt; <span class="t">Result</span>&lt;(), <span class="t">Box</span>&lt;<span class="k">dyn</span> std::error::Error&gt;&gt; {
+    <span class="k">let</span> (reader, writer) = tokio::io::split(stream);
+    <span class="c">// Each connection gets an RPC server calling the same shared Timers object.
+</span>    <span class="c">// new() also creates a transferable client handle; the object stays here.
+</span>    <span class="k">let</span> (server, client) = TimerServiceServerShared::&lt;_, codec::<span class="t">Default</span>&gt;::new(timers);
+    <span class="c">// provide() establishes Remoc over the stream, sends the client handle as
+</span>    <span class="c">// the initial value, and starts the connection's background I/O task.
+</span>    <span class="c">// It returns after sending that value, not when the connection ends.
+</span>    remoc::Connect::io(remoc::Cfg::default(), reader, writer).provide(client).<span class="k">await</span>?;
+    <span class="c">// Transporting bytes and handling RPC calls are separate: serve() receives
+</span>    <span class="c">// method calls and invokes our TimerService implementation.
+</span>    server.serve().<span class="k">await</span>?;
+    <span class="t">Ok</span>(())
+}
+
+<span class="a">#[tokio::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() -&gt; <span class="t">Result</span>&lt;(), <span class="t">Box</span>&lt;<span class="k">dyn</span> std::error::Error&gt;&gt; {
+    <span class="k">let</span> args = Args::parse();
+    <span class="k">let</span> <span class="k">mut</span> listener = local::Listener::bind(&amp;args.endpoint)?;
+    <span class="k">let</span> timers = Arc::new(Timers::default());
+    <span class="m">println!</span>(<span class="s">"Listening on {}. Press Ctrl+C to stop."</span>, args.endpoint);
+
+    <span class="k">loop</span> {
+        tokio::select! {
+            stream = listener.accept() =&gt; {
+                <span class="k">let</span> stream = stream?;
+                <span class="k">let</span> timers = timers.clone();
+                tokio::spawn(<span class="k">async</span> <span class="k">move</span> {
+                    <span class="k">if</span> <span class="k">let</span> <span class="t">Err</span>(err) = serve(stream, timers).<span class="k">await</span> {
+                        <span class="m">eprintln!</span>(<span class="s">"Client connection failed: {err}"</span>);
+                    }
+                });
+            }
+            result = tokio::signal::ctrl_c() =&gt; {
+                result?;
+                <span class="k">break</span>;
+            }
+        }
+    }
+
+    <span class="t">Ok</span>(())
+}</code></pre>
+    </article>
+    <article class="example-file" id="src-bin-timerctl-rs">
+        <h4><code>src/bin/timerctl.rs</code></h4>
+        <p>Adds and lists timers, waits on a oneshot receiver or watches a returned broadcast receiver.</p>
+        <pre><code><span class="c">//! A command-line client for the timer daemon.
+</span>
+<span class="k">use</span> clap::{Parser, Subcommand};
+<span class="k">use</span> remoc::prelude::*;
+<span class="k">use</span> std::{io::Write, time::Duration};
+<span class="k">use</span> timer_daemon_example::{NewTimer, TimerService, TimerServiceClient, local};
+
+<span class="a">#[derive(Parser)]</span>
+<span class="a">#[command(about = </span><span class="s">"Schedule and watch reminders in the local timer daemon"</span><span class="a">)]</span>
+<span class="k">struct</span> <span class="t">Args</span> {
+    <span class="c">/// Unix socket path or Windows named-pipe name.
+</span>    <span class="a">#[arg(long, default_value = local::DEFAULT_ENDPOINT)]</span>
+    endpoint: <span class="t">String</span>,
+    <span class="a">#[command(subcommand)]</span>
+    command: <span class="t">Command</span>,
+}
+
+<span class="a">#[derive(Subcommand)]</span>
+<span class="k">enum</span> <span class="t">Command</span> {
+    <span class="c">/// Schedule a reminder, for example: add 30s "Check tea".
+</span>    Add {
+        <span class="c">/// Delay such as 30s, 5m or 1h.
+</span>        <span class="a">#[arg(value_parser = humantime::parse_duration)]</span>
+        after: <span class="t">Duration</span>,
+        <span class="c">/// Reminder message.
+</span>        message: <span class="t">String</span>,
+        <span class="c">/// Wait for this timer to finish.
+</span>        <span class="a">#[arg(long)]</span>
+        wait: <span class="t">bool</span>,
+    },
+    <span class="c">/// List pending reminders.
+</span>    List,
+    <span class="c">/// Print future timer completions until Ctrl+C.
+</span>    Watch,
+}
+
+<span class="a">#[tokio::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="f">main</span>() -&gt; <span class="t">Result</span>&lt;(), <span class="t">Box</span>&lt;<span class="k">dyn</span> std::error::Error&gt;&gt; {
+    <span class="k">let</span> args = Args::parse();
+    <span class="k">let</span> stream = local::connect(&amp;args.endpoint).<span class="k">await</span>?;
+    <span class="k">let</span> (reader, writer) = tokio::io::split(stream);
+    <span class="c">// consume() establishes Remoc and receives the initial value sent by the
+</span>    <span class="c">// daemon's provide(): our typed RPC client. It also starts the connection's
+</span>    <span class="c">// background I/O task, carrying both RPC traffic and transferred channels.
+</span>    <span class="k">let</span> client: <span class="t">TimerServiceClient</span> = remoc::Connect::io(remoc::Cfg::default(), reader, writer).consume().<span class="k">await</span>?;
+
+    <span class="k">match</span> args.command {
+        Command::Add { after, message, wait } =&gt; {
+            <span class="k">let</span> (notify, completion) = <span class="k">if</span> wait {
+                <span class="c">// Keep the receiver here and send its sender to the daemon.
+</span>                <span class="c">// Unlike a Tokio oneshot, this Remoc endpoint can cross the
+</span>                <span class="c">// connection, including as a field in the NewTimer struct.
+</span>                <span class="k">let</span> (sender, receiver) = rch::oneshot::channel();
+                (<span class="t">Some</span>(sender), <span class="t">Some</span>(receiver))
+            } <span class="k">else</span> {
+                (<span class="t">None</span>, <span class="t">None</span>)
+            };
+            <span class="c">// This looks like an ordinary trait call, but sends the request to
+</span>            <span class="c">// timerd. The RPC returns the id, not the eventual completion.
+</span>            <span class="k">let</span> id = client.add(NewTimer { after, message, notify }).<span class="k">await</span>?;
+            <span class="m">println!</span>(<span class="s">"Added timer {id}"</span>);
+            <span class="k">if</span> <span class="k">let</span> <span class="t">Some</span>(completion) = completion {
+                <span class="c">// The RPC is finished. Await a separate notification through
+</span>                <span class="c">// our oneshot receiver, still using the same connection.
+</span>                std::io::stdout().flush()?;
+                tokio::select! {
+                    timer = completion =&gt; {
+                        <span class="k">let</span> timer = timer?;
+                        <span class="m">println!</span>(<span class="s">"Finished {}: {}"</span>, timer.id, timer.message);
+                    }
+                    result = tokio::signal::ctrl_c() =&gt; {
+                        result?;
+                    }
+                }
+            }
+        }
+        Command::List =&gt; {
+            <span class="k">let</span> timers = client.list().<span class="k">await</span>?;
+            <span class="k">if</span> timers.is_empty() {
+                <span class="m">println!</span>(<span class="s">"No pending timers."</span>);
+            }
+            <span class="k">for</span> timer <span class="k">in</span> timers {
+                <span class="m">println!</span>(<span class="s">"{}: {}"</span>, timer.id, timer.message);
+            }
+        }
+        Command::Watch =&gt; {
+            <span class="c">// Here the direction is reversed: the daemon returns a receiver
+</span>            <span class="c">// as the RPC result and keeps the broadcast sender.
+</span>            <span class="k">let</span> <span class="k">mut</span> events = client.subscribe().<span class="k">await</span>?;
+            <span class="m">println!</span>(<span class="s">"Watching timer completions. Press Ctrl+C to stop."</span>);
+            std::io::stdout().flush()?;
+            <span class="k">loop</span> {
+                tokio::select! {
+                    event = events.recv() =&gt; {
+                        <span class="k">let</span> timer = event?;
+                        <span class="m">println!</span>(<span class="s">"Finished {}: {}"</span>, timer.id, timer.message);
+                    }
+                    result = tokio::signal::ctrl_c() =&gt; {
+                        result?;
+                        <span class="k">break</span>;
+                    }
+                }
+            }
+        }
+    }
+
+    <span class="t">Ok</span>(())
+}</code></pre>
+    </article>
+    <article class="example-file" id="src-unix-rs">
+        <h4><code>src/unix.rs</code></h4>
+        <p>Connects local clients over a Unix domain socket.</p>
+        <pre><code><span class="c">//! Local connections over Unix domain sockets.
+</span>
+<span class="k">use</span> std::{fs, io, os::unix::fs::PermissionsExt};
+<span class="k">use</span> tokio::net::{UnixListener, UnixStream};
+
+<span class="c">/// Default socket path, relative to the working directory.
+</span><span class="k">pub</span> <span class="k">const</span> DEFAULT_ENDPOINT: <span class="k">&amp;</span><span class="t">str</span> = <span class="s">"timerd.sock"</span>;
+
+<span class="c">/// A connected local client or server.
+</span><span class="k">pub</span> <span class="k">type</span> <span class="t">Stream</span> = UnixStream;
+
+<span class="c">/// A listening socket, removed when the daemon shuts down normally.
+</span><span class="k">pub</span> <span class="k">struct</span> <span class="t">Listener</span> {
+    inner: <span class="t">UnixListener</span>,
+    endpoint: <span class="t">String</span>,
+}
+
+<span class="k">impl</span> Listener {
+    <span class="c">/// Bind without removing an existing socket.
+</span>    <span class="k">pub</span> <span class="k">fn</span> <span class="f">bind</span>(endpoint: <span class="k">&amp;</span><span class="t">str</span>) -&gt; <span class="t">io</span>::<span class="t">Result</span>&lt;<span class="k">Self</span>&gt; {
+        <span class="k">let</span> listener = <span class="k">Self</span> { inner: <span class="t">UnixListener</span>::bind(endpoint)?, endpoint: <span class="t">endpoint</span>.to_owned() };
+        fs::set_permissions(endpoint, fs::Permissions::from_mode(<span class="n">0o600</span>))?;
+        <span class="t">Ok</span>(listener)
+    }
+
+    <span class="c">/// Accept another client.
+</span>    <span class="k">pub</span> <span class="k">async</span> <span class="k">fn</span> <span class="f">accept</span>(&amp;<span class="k">mut</span> <span class="k">self</span>) -&gt; <span class="t">io</span>::<span class="t">Result</span>&lt;Stream&gt; {
+        <span class="k">let</span> (stream, _) = <span class="k">self</span>.inner.accept().<span class="k">await</span>?;
+        <span class="t">Ok</span>(stream)
+    }
+}
+
+<span class="k">impl</span> <span class="t">Drop</span> <span class="k">for</span> Listener {
+    <span class="k">fn</span> <span class="f">drop</span>(&amp;<span class="k">mut</span> <span class="k">self</span>) {
+        <span class="k">match</span> fs::remove_file(&amp;<span class="k">self</span>.endpoint) {
+            <span class="t">Ok</span>(()) =&gt; (),
+            <span class="t">Err</span>(err) <span class="k">if</span> err.kind() == io::ErrorKind::NotFound =&gt; (),
+            <span class="t">Err</span>(err) =&gt; <span class="m">eprintln!</span>(<span class="s">"Cannot remove socket {}: {err}"</span>, <span class="k">self</span>.endpoint),
+        }
+    }
+}
+
+<span class="c">/// Connect to a running daemon.
+</span><span class="k">pub</span> <span class="k">async</span> <span class="k">fn</span> <span class="f">connect</span>(endpoint: <span class="k">&amp;</span><span class="t">str</span>) -&gt; <span class="t">io</span>::<span class="t">Result</span>&lt;Stream&gt; {
+    UnixStream::connect(endpoint).<span class="k">await</span>
+}</code></pre>
+    </article>
+    <article class="example-file" id="src-windows-rs">
+        <h4><code>src/windows.rs</code></h4>
+        <p>Connects local clients over instances of a Windows named pipe.</p>
+        <pre><code><span class="c">//! Local connections over Windows named pipes.
+</span>
+<span class="k">use</span> std::{io, time::Duration};
+<span class="k">use</span> tokio::{
+    net::windows::named_pipe::{ClientOptions, NamedPipeClient, NamedPipeServer, ServerOptions},
+    time::sleep,
+};
+
+<span class="c">/// Default local pipe name.
+</span><span class="k">pub</span> <span class="k">const</span> DEFAULT_ENDPOINT: <span class="k">&amp;</span><span class="t">str</span> = <span class="s">r"\\.\pipe\remoc-timerd"</span>;
+
+<span class="c">/// A connected server-side pipe.
+</span><span class="k">pub</span> <span class="k">type</span> <span class="t">Stream</span> = NamedPipeServer;
+
+<span class="c">/// A named-pipe listener with an instance ready for the next client.
+</span><span class="k">pub</span> <span class="k">struct</span> <span class="t">Listener</span> {
+    pipe: <span class="t">NamedPipeServer</span>,
+    endpoint: <span class="t">String</span>,
+}
+
+<span class="k">impl</span> Listener {
+    <span class="c">/// Claim the pipe name, failing if a daemon already owns an instance.
+</span>    <span class="k">pub</span> <span class="k">fn</span> <span class="f">bind</span>(endpoint: <span class="k">&amp;</span><span class="t">str</span>) -&gt; <span class="t">io</span>::<span class="t">Result</span>&lt;<span class="k">Self</span>&gt; {
+        <span class="k">let</span> pipe = ServerOptions::new().first_pipe_instance(<span class="k">true</span>).create(endpoint)?;
+        <span class="t">Ok</span>(<span class="k">Self</span> { pipe, endpoint: <span class="t">endpoint</span>.to_owned() })
+    }
+
+    <span class="c">/// Accept a client and immediately make another instance available.
+</span>    <span class="k">pub</span> <span class="k">async</span> <span class="k">fn</span> <span class="f">accept</span>(&amp;<span class="k">mut</span> <span class="k">self</span>) -&gt; <span class="t">io</span>::<span class="t">Result</span>&lt;Stream&gt; {
+        <span class="k">self</span>.pipe.connect().<span class="k">await</span>?;
+        <span class="k">let</span> next = ServerOptions::new().create(&amp;<span class="k">self</span>.endpoint)?;
+        <span class="t">Ok</span>(std::mem::replace(&amp;<span class="k">mut</span> <span class="k">self</span>.pipe, next))
+    }
+}
+
+<span class="c">/// Connect to a running daemon, retrying when its pipe instances are busy.
+</span><span class="k">pub</span> <span class="k">async</span> <span class="k">fn</span> <span class="f">connect</span>(endpoint: <span class="k">&amp;</span><span class="t">str</span>) -&gt; <span class="t">io</span>::<span class="t">Result</span>&lt;NamedPipeClient&gt; {
+    <span class="k">const</span> ERROR_PIPE_BUSY: <span class="t">i32</span> = <span class="n">231</span>;
+
+    <span class="k">loop</span> {
+        <span class="k">match</span> ClientOptions::new().open(endpoint) {
+            <span class="t">Ok</span>(pipe) =&gt; <span class="k">return</span> <span class="t">Ok</span>(pipe),
+            <span class="t">Err</span>(err) <span class="k">if</span> err.raw_os_error() == <span class="t">Some</span>(ERROR_PIPE_BUSY) =&gt; {
+                sleep(Duration::from_millis(<span class="n">50</span>)).<span class="k">await</span>;
+            }
+            <span class="t">Err</span>(err) =&gt; <span class="k">return</span> <span class="t">Err</span>(err),
+        }
+    }
+}</code></pre>
+    </article>
+</section>

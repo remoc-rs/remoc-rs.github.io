@@ -1,10 +1,10 @@
 ---
 layout: base
 project: remoc
-title: "A counter over remote trait calls: a Remoc example"
+title: "Rust RPC with Serde and traits: return channels and streams"
 description: >-
-  A client and server built on a trait tagged with #[rtc::remote], including watch
-  notifications and a streamed sequence.
+  Run trait-based Rust RPC without a separate protobuf schema. The counter example
+  returns watch and mpsc channels for state updates and streamed values over TCP.
 social_description: >-
   A remote trait whose methods return values and channels for subsequent updates.
 canonical: /examples/rtc.html
@@ -16,9 +16,11 @@ nav_url: /examples/channels.html
         {% include nav.html %}
 
         <div class="wrap">
-            <h1>Example: a counter over trait calls</h1>
+            <h1>Example: Rust trait-based RPC returning channels</h1>
             <p class="lead">
                 The server maintains a counter that clients can query, increase and watch.
+                RPC methods return watch and mpsc receivers that keep delivering updates
+                over the same TCP connection after the call returns.
             </p>
 
             {% include example-tabs.html %}
@@ -41,12 +43,26 @@ nav_url: /examples/channels.html
                         receiver</a>. Both receivers continue to deliver values after the method
                     call returns.
                 </p>
+                <p>
+                    <strong>Without protobuf:</strong> The shared Rust trait and Serde types
+                    define the interface; no separate Protocol Buffers schema or
+                    <code>protoc</code> step is needed. See
+                    <a href="/comparison.html#rust-traits-serde">Rust traits and Serde vs.
+                        schema-based RPC</a> for the trade-offs.
+                </p>
+                <p>
+                    <strong>Related guides:</strong> The
+                    <a href="/server-push.html#return-channel">server-push guide</a> explains
+                    when to return an mpsc channel instead of a watch channel, and the
+                    <a href="/ipc.html#unix-socket-rpc">Unix-socket IPC guide</a> explains how
+                    to change the transport without changing the service interface.
+                </p>
             </div>
         </section>
 
         <section class="section alt">
             <div class="wrap narrow">
-                <h2>Running it</h2>
+                <h2 id="running">Running the RPC client and server</h2>
                 <p>
                     Clone the repository:
                 </p>
@@ -65,7 +81,7 @@ cd remoc</code></pre>
 
         <section class="section">
             <div class="wrap">
-                <h2>The program</h2>
+                <h2>Source code</h2>
                 <p class="section-lead">
                     The shared crate defines the remote trait, and the other two crates provide the
                     server and client binaries.

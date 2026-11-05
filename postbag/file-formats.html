@@ -60,18 +60,21 @@ faq:
                 <h2>Struct changes become file format changes</h2>
                 <p>
                     When a file is written by serializing your structs, the file format is your
-                    structs, and every release changes them. With a positional binary format
-                    such as bincode or postcard, any added, removed or reordered field makes old
-                    files unreadable. MessagePack and CBOR can carry field names, but the Serde
+                    structs, and every release changes them.
+                </p>
+                <p>
+                    <strong>Other formats:</strong> With a positional binary format such as
+                    bincode or postcard, any added, removed or reordered field makes old files
+                    unreadable. MessagePack and CBOR can carry field names, but the Serde
                     libraries do not always use them; rmp-serde writes structs as arrays by
                     default, which breaks in exactly the same way.
                 </p>
                 <p>
-                    You can keep every struct frozen and add <code>ConfigV2</code>,
-                    <code>ConfigV3</code> and migration code for each step, or move to JSON and
-                    accept larger files and a flattened data model. Both approaches grow with
-                    every release, and neither helps when a user opens a file from a version
-                    newer than the installed one.
+                    <strong>Other approaches:</strong> You can keep every struct frozen and add
+                    <code>ConfigV2</code>, <code>ConfigV3</code> and migration code for each step,
+                    or move to JSON and accept larger files and a flattened data model. Both
+                    approaches grow with every release, and neither helps when a user opens a
+                    file from a version newer than the installed one.
                 </p>
             </div>
         </section>

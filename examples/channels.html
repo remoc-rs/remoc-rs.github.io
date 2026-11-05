@@ -1,9 +1,10 @@
 ---
 layout: base
 project: remoc
-title: "Counting over remote channels: a Remoc example"
+title: "Rust mpsc over TCP: send a channel to another process"
 description: >-
-  A client and server that exchange values over a channel sent inside a request.
+  Run a Rust client and server using a Tokio-style mpsc channel over TCP. Full source
+  shows connection setup, sending a channel endpoint and receiving the server's sequence.
 social_description: >-
   A client creates a channel, sends its sender in a request and reads the numbers
   produced by the server.
@@ -16,9 +17,10 @@ nav_url: /examples/channels.html
         {% include nav.html %}
 
         <div class="wrap">
-            <h1>Example: counting over channels</h1>
+            <h1>Example: Tokio-style mpsc channels over TCP</h1>
             <p class="lead">
-                The client asks the server to count, includes a channel sender in the request
+                Two Rust processes exchange a typed channel over one TCP connection.
+                The client asks the server to count, sends an mpsc sender inside the request
                 and reads the resulting sequence from the receiver.
             </p>
 
@@ -38,12 +40,24 @@ nav_url: /examples/channels.html
                     The example uses three crates. <code>counting</code> defines the request type,
                     and the client and server binaries both depend on it.
                 </p>
+                <p>
+                    <strong>Tokio compatibility:</strong> This uses <code>remoc::rch::mpsc</code>, not
+                    <code>tokio::sync::mpsc</code>: Tokio's own endpoints cannot be sent
+                    between processes. See
+                    <a href="/remote-channels.html#tokio-mpsc-over-tcp">replacing a local Tokio
+                        channel with a remote channel</a> for the API differences.
+                </p>
+                <p>
+                    <strong>Related guide:</strong> See
+                    <a href="/multiplexing.html">multiplexing channels over one TCP
+                        connection</a> for how the request and sequence share the socket.
+                </p>
             </div>
         </section>
 
         <section class="section alt">
             <div class="wrap narrow">
-                <h2>Running it</h2>
+                <h2 id="running">Running the TCP client and server</h2>
                 <p>
                     Clone the repository:
                 </p>
@@ -62,7 +76,7 @@ cd remoc</code></pre>
 
         <section class="section">
             <div class="wrap">
-                <h2>The program</h2>
+                <h2>Source code</h2>
                 <p class="section-lead">
                     The shared crate defines the request, and the other two crates provide the
                     server and client binaries.

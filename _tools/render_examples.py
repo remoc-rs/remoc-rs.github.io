@@ -233,6 +233,61 @@ EXAMPLES = [
             ),
         ],
     ),
+    Example(
+        id="daemon",
+        directory="examples/daemon",
+        crates=[
+            Crate(
+                "timer-daemon-example",
+                "A shared RPC interface, two binaries and local transport adapters in one package.",
+                [
+                    File("Cargo.toml", MANIFEST),
+                    File(
+                        "src/lib.rs",
+                        "Defines the timer service, its data types and a request that carries "
+                        "an optional oneshot sender.",
+                    ),
+                    File(
+                        "src/bin/timerd.rs",
+                        "Owns the timers, serves all clients and sends completion notifications.",
+                    ),
+                    File(
+                        "src/bin/timerctl.rs",
+                        "Adds and lists timers, waits on a oneshot receiver or watches "
+                        "a returned broadcast receiver.",
+                    ),
+                    File(
+                        "src/unix.rs",
+                        "Connects local clients over a Unix domain socket.",
+                    ),
+                    File(
+                        "src/windows.rs",
+                        "Connects local clients over instances of a Windows named pipe.",
+                    ),
+                ],
+                directory=".",
+            ),
+        ],
+    ),
+    Example(
+        id="pipelining",
+        directory="examples/pipelining",
+        crates=[
+            Crate(
+                "remoc-pipelining-example",
+                "Compares sequential and pipelined calls over a simulated high-latency connection.",
+                [
+                    File("Cargo.toml", MANIFEST),
+                    File(
+                        "src/main.rs",
+                        "Defines the directory and counter services, simulates network latency "
+                        "and measures the two calling styles.",
+                    ),
+                ],
+                directory=".",
+            ),
+        ],
+    ),
 ]
 
 # The manifests in the repository depend on Remoc by path, which is an artefact of

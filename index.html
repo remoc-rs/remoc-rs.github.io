@@ -61,7 +61,7 @@ nav: home
     <main id="content" class="home-content">
         <section id="overview" class="section">
             <div class="wrap">
-                <h2>One connection, <b>many</b> channels</h2>
+                <h2>Channel multiplexing</h2>
                 <p class="section-lead">
                     A single transport connection carries any number of independent, typed channels
                     in either direction.
@@ -84,11 +84,13 @@ nav: home
 
         <section id="channels" class="section">
             <div class="wrap">
-                <h2>Channels are cheap, <b>sendable</b> values</h2>
+                <h2>Lightweight, <b>sendable</b> channel endpoints</h2>
                 <p class="section-lead">
                     Channel endpoints can be sent inside messages, creating new communication paths
-                    without another transport connection. Here, the client asks the server to count
-                    and sends a channel for returning the numbers.
+                    over the existing transport connection. Unlike a separate TCP connection, an
+                    additional channel does not require a new socket or transport handshake.
+                    Here, the client asks the server to count and sends a channel for returning the
+                    numbers.
                 </p>
                 <figure class="diagram">
                     {% include diagram-channels.svg %}
@@ -121,7 +123,7 @@ nav: home
                 </figure>
                 <figure>
                     <figcaption>Client</figcaption>
-                    <pre><code><span class="k">let</span> (seq_tx, <span class="k">mut</span> seq_rx) = rch::mpsc::channel(<span class="n">1</span>);
+                    <pre><code><span class="k">let</span> (seq_tx, <span class="k">mut</span> seq_rx) = rch::mpsc::channel();
 tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_tx }).<span class="k">await</span>?;
 
 <span class="c">// The channel is live now, nothing to set up.</span>
@@ -141,8 +143,8 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
                     </p>
                     <div class="example-links">
                         <a class="example-link" href="/examples/channels.html">
-                            <strong>Remote channels</strong>
-                            <span>Send channel endpoints inside messages and use them from the other peer.</span>
+                            <strong>MPSC channels over TCP</strong>
+                            <span>Send a channel endpoint between Rust processes over one TCP connection.</span>
                             <b>View example &rarr;</b>
                         </a>
                         <a class="example-link" href="/examples/rtc.html">
@@ -151,13 +153,23 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
                             <b>View example &rarr;</b>
                         </a>
                         <a class="example-link" href="/examples/tracing.html">
-                            <strong>Distributed tracing</strong>
-                            <span>See remote calls as spans in the caller's trace via OpenTelemetry.</span>
+                            <strong>Client callbacks and tracing</strong>
+                            <span>Let the server call the client back, with optional OpenTelemetry traces.</span>
                             <b>View example &rarr;</b>
                         </a>
                         <a class="example-link" href="/examples/rtc-web.html">
                             <strong>Web browser</strong>
                             <span>Connect Rust compiled to WebAssembly to a Rust server over WebSocket.</span>
+                            <b>View example &rarr;</b>
+                        </a>
+                        <a class="example-link" href="/examples/daemon.html">
+                            <strong>Local timer daemon</strong>
+                            <span>Use Unix sockets or Windows named pipes, with oneshot replies and broadcast updates.</span>
+                            <b>View example &rarr;</b>
+                        </a>
+                        <a class="example-link" href="/examples/pipelining.html">
+                            <strong>RPC pipelining</strong>
+                            <span>Queue dependent remote calls without waiting for intermediate replies.</span>
                             <b>View example &rarr;</b>
                         </a>
                     </div>
@@ -167,7 +179,7 @@ tx.send(<span class="t">CountReq</span> { up_to: <span class="n">4</span>, seq_t
 
         <section id="pipelining" class="section">
             <div class="wrap">
-                <h2>Multiple RPC calls, <b>one</b> round trip</h2>
+                <h2>RPC pipelining: multiple calls in one round trip</h2>
                 <p class="section-lead">
                     A call that hands out another object normally costs a round trip before that
                     object can be used. Mark the method <code>#[pipelinable]</code> and the caller
@@ -232,6 +244,8 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
                     <br>
                     <a href="https://docs.rs/remoc/latest/remoc/rtc/pipelining/index.html">How
                         pipelining works &rarr;</a>
+                    &nbsp;&middot;&nbsp;
+                    <a href="/examples/pipelining.html">Run the comparison &rarr;</a>
                 </p>
             </div>
         </section>
@@ -239,11 +253,11 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
         <section id="schema-evolution" class="section">
             <div class="wrap home-promo">
                 <div class="home-promo-copy">
-                    <h2>Messages that <strong>evolve</strong> with your application</h2>
+                    <h2>Schema evolution with Postbag</h2>
                     <p class="section-lead">
+                        Schema evolution keeps data compatible as message types change.
                         Remoc uses <a href="/postbag/">Postbag</a> to encode your data, allowing
-                        independently deployed versions to keep communicating as their message types
-                        change. Fields and enum variants can be
+                        independently deployed versions to keep communicating. Fields and enum variants can be
                         <strong>added, removed, renamed or reordered</strong>, while
                         <strong>recoverable fields</strong> can isolate an incompatible change instead
                         of losing the entire enclosing message.
@@ -452,37 +466,43 @@ counter.<span class="f">increase</span>(<span class="n">45</span>).<span class="
 
         <section id="topics" class="section">
             <div class="wrap">
-                <h2>Common uses</h2>
+                <h2>Rust communication guides</h2>
                 <p class="section-lead">
                     More on channels, RPC and inter-process communication (IPC) across process and machine boundaries.
                 </p>
                 <ul class="topics">
                     <li>
-                        <a href="/remote-channels.html">Channels between processes and machines</a>
+                        <a href="/remote-channels.html">Tokio-style mpsc channels between processes over TCP</a>
                         <p>
-                            How channel endpoints work across process boundaries and what happens
-                            when the connection is lost.
+                            Send a channel over the network instead of replacing your task and
+                            channel architecture with a hand-rolled protocol.
                         </p>
                     </li>
                     <li>
-                        <a href="/multiplexing.html">Many typed channels, one connection</a>
+                        <a href="/multiplexing.html">Multiplex channels over one TCP connection</a>
                         <p>
                             How any number of channels share a single TCP connection without one of
                             them being able to stall the others.
                         </p>
                     </li>
                     <li>
-                        <a href="/server-push.html">RPC with server push and callbacks</a>
+                        <a href="/server-push.html">Bidirectional RPC, server push and client callbacks</a>
                         <p>
-                            Sending a channel to the other side so that a service can push events and
-                            progress instead of only answering requests.
+                            Return a stream of updates or let the server call a client callback
+                            over the same connection, including when the client is behind NAT.
                         </p>
                     </li>
                     <li>
-                        <a href="/ipc.html">IPC between Rust processes</a>
+                        <a href="/ipc.html">Rust IPC over Unix sockets, named pipes and child-process pipes</a>
                         <p>
-                            A daemon and its client over a UNIX socket or a pipe, with Rust traits as
-                            the interface instead of a hand-rolled protocol.
+                            Connect a daemon and its clients over Unix sockets or Windows named
+                            pipes, or a parent and child over stdin and stdout.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/comparison.html#rust-traits-serde">Rust RPC with traits and Serde, without protobuf</a>
+                        <p>
+                            Compare Rust-to-Rust interfaces with schema-based, cross-language RPC.
                         </p>
                     </li>
                     <li>

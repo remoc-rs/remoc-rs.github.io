@@ -21,8 +21,8 @@ built on Tokio.
   mpsc, oneshot, watch and broadcast channels with the API known from Tokio,
   working over a network connection, socket or pipe.
 - [IPC between Rust processes](https://remoc.rs/ipc.html): typed channels and
-  trait calls between a daemon and its clients over a UNIX socket, a pipe to a
-  child process or local TCP.
+  trait calls between a daemon and its clients over a Unix socket or Windows named
+  pipe, or between a parent and child process over stdin and stdout.
 - [Server push and callbacks](https://remoc.rs/server-push.html): calls that
   return or accept channels, and clients that serve traits of their own, so the
   server can push events and call back through NAT.
@@ -37,7 +37,13 @@ built on Tokio.
 - [Benchmarks](https://remoc.rs/benchmarks.html): throughput of a Remoc channel
   compared with plain TCP.
 - [Examples](https://remoc.rs/examples/channels.html): remote channels, remote
-  trait calls, distributed tracing and a web browser endpoint.
+  trait calls, distributed tracing, a web browser endpoint, a local daemon and
+  RPC pipelining.
+- [Local timer daemon](https://remoc.rs/examples/daemon.html): a daemon and CLI
+  using Unix sockets or Windows named pipes, with oneshot replies and broadcast
+  notifications.
+- [RPC pipelining](https://remoc.rs/examples/pipelining.html): compare sequential
+  and pipelined calls over a simulated high-latency connection.
 - [API documentation](https://docs.rs/remoc)
 
 ## Aggligator
@@ -59,8 +65,8 @@ built on Tokio.
 
 ## Postbag
 
-- [Overview](https://remoc.rs/postbag/): a binary Serde format that lets your
-  types keep changing.
+- [Overview](https://remoc.rs/postbag/): a binary Serde format with schema evolution:
+  compatible data as types change.
 - [Schema evolution](https://remoc.rs/postbag/schema-evolution.html): why binary
   formats like bincode break when types change and how Postbag allows fields and
   enum variants to be added, removed and reordered.

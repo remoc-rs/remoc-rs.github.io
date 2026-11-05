@@ -1,0 +1,171 @@
+---
+layout: base
+project: remoc
+title: "Rust IPC daemon: RPC over Unix sockets and Windows named pipes"
+description: >-
+  Run a Rust timer daemon and CLI over Unix sockets or Windows named pipes.
+  Pass a oneshot sender inside an RPC request and return broadcast receivers to watchers.
+social_description: >-
+  A local timer daemon with typed RPC, oneshot replies and broadcast notifications
+  over the same connections.
+canonical: /examples/daemon.html
+example: daemon
+nav_url: /examples/channels.html
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Example: a timer daemon and CLI</h1>
+            <p class="lead">
+                A Rust daemon schedules reminders independently of the clients that add them.
+                The same RPC interface works over Unix domain sockets on Unix and local named
+                pipes on Windows. Clients can list pending timers, wait for one completion or
+                watch all future completions.
+            </p>
+
+            {% include example-tabs.html %}
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>RPC methods</h2>
+                <ul>
+                    <li><code>add(NewTimer)</code> schedules a reminder and returns its identifier
+                        without waiting for it to finish.</li>
+                    <li><code>list()</code> returns the reminders that have not finished yet.</li>
+                    <li><code>subscribe()</code> returns a broadcast receiver for future
+                        completions.</li>
+                </ul>
+                <p>
+                    Each client has its own Remoc connection, but the daemon serves the same
+                    timer state to all of them. A timer belongs to the daemon, not to the
+                    connection that scheduled it.
+                </p>
+                <p>
+                    This is a foreground example with in-memory state, not an installed
+                    system service. Stopping the daemon discards its timers. For a smaller
+                    introduction to RPC, start with the <a href="/examples/rtc.html">counter
+                        example</a>.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2 id="running">Running the daemon and CLI</h2>
+                <p>Clone the repository:</p>
+                <pre class="cmd"><code>git clone {{ site.repo }}
+cd remoc</code></pre>
+                <p class="section-foot">In the first terminal, start the daemon:</p>
+                <pre class="cmd"><code>cargo run --manifest-path examples/daemon/Cargo.toml --bin timerd</code></pre>
+                <p class="section-foot">In a second terminal, watch completions:</p>
+                <pre class="cmd"><code>cargo run --manifest-path examples/daemon/Cargo.toml --bin timerctl -- watch</code></pre>
+                <p class="section-foot">In a third terminal, add a reminder and list pending timers:</p>
+                <pre class="cmd"><code>cargo run --manifest-path examples/daemon/Cargo.toml --bin timerctl -- add 30s "Check tea"
+cargo run --manifest-path examples/daemon/Cargo.toml --bin timerctl -- list</code></pre>
+                <p>
+                    The add command prints an identifier and exits. When the timer finishes,
+                    the watcher prints, for example:
+                </p>
+                <pre class="cmd"><code>Finished 1: Check tea</code></pre>
+                <p>
+                    Open another watcher to receive the same notifications in two clients.
+                    Completed timers disappear from <code>list</code>.
+                </p>
+                <p class="section-foot">To wait for one specific timer, use <code>--wait</code>:</p>
+                <pre class="cmd"><code>cargo run --manifest-path examples/daemon/Cargo.toml --bin timerctl -- add 5s "Check tea" --wait</code></pre>
+                <p>
+                    This client stays connected until its timer finishes. Watchers still receive
+                    that completion. Disconnecting the waiting client does not cancel the timer.
+                    Use Ctrl+C to stop the daemon, a watcher or a waiting client.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap narrow">
+                <h2 id="channels">Passing a channel inside a request</h2>
+                <p>
+                    <code>NewTimer</code> is a Serde struct containing a duration, a message and
+                    an optional <code>rch::oneshot::Sender&lt;Timer&gt;</code>. The channel endpoint
+                    travels with the other fields; it needs no separate socket.
+                </p>
+                <ol>
+                    <li>With <code>--wait</code>, the CLI creates a oneshot channel. It keeps
+                        the receiver and passes the sender in the <code>add</code> request.</li>
+                    <li>The RPC returns the timer's identifier. The daemon keeps the sender
+                        until the timer finishes, then sends the completed <code>Timer</code>.</li>
+                    <li>The CLI awaits its receiver over the same connection that carried
+                        the RPC call.</li>
+                </ol>
+                <p>
+                    <code>watch</code> demonstrates the opposite direction: <code>subscribe()</code>
+                    returns a channel receiver from the daemon. The daemon keeps the broadcast
+                    sender and can notify several clients. Each watcher receives future events
+                    only, not a history.
+                </p>
+                <p class="section-foot">
+                    See <a href="/remote-channels.html">remote channels</a> for the channel types
+                    and <a href="/server-push.html">server push and callbacks</a> for other
+                    notification patterns.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2 id="transports">Unix sockets and Windows named pipes</h2>
+                <p>
+                    Only <code>src/unix.rs</code> and <code>src/windows.rs</code> differ between
+                    platforms. Both expose a local listener and a connect function; the RPC
+                    implementation and Remoc connection setup stay the same.
+                </p>
+                <ul>
+                    <li><strong>Unix:</strong> the default endpoint is <code>timerd.sock</code>,
+                        relative to the working directory. Run all programs from the same
+                        directory. The socket permits access only by its owner.</li>
+                    <li><strong>Windows:</strong> the default endpoint is
+                        <code>\\.\pipe\remoc-timerd</code>. The daemon creates another listening
+                        pipe instance for each new client.</li>
+                </ul>
+                <p>
+                    Both programs accept <code>--endpoint</code> before the CLI command to
+                    select another socket path or pipe name. An existing endpoint is not taken
+                    over by a second daemon.
+                </p>
+                <p>
+                    Normal Unix shutdown removes the socket file. After a forced termination,
+                    first ensure the old daemon has stopped, then remove its leftover socket.
+                    For real applications, place it in an application-owned directory.
+                </p>
+                <p class="section-foot">
+                    The <a href="/ipc.html">IPC guide</a> also covers connecting to a child
+                    process through stdin and stdout.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2 id="program">Source code</h2>
+                <p class="section-lead">
+                    One package contains the shared interface, the <code>timerd</code> and
+                    <code>timerctl</code> binaries, and the two platform-specific adapters.
+                    <code>provide</code> sends each client its RPC handle; <code>consume</code>
+                    receives it. Both helpers start the background connection I/O, while
+                    <code>server.serve()</code> dispatches the method calls.
+                </p>
+
+                {% include example-daemon.html %}
+
+                <p class="section-foot">
+                    <a class="button icon-link" href="{{ site.repo }}/tree/master/examples/daemon"><span
+                            class="icon github" aria-hidden="true"></span>Browse it on GitHub</a>
+                </p>
+            </div>
+        </section>
+    </main>

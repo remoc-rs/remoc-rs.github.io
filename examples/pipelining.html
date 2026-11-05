@@ -1,0 +1,99 @@
+---
+layout: base
+project: remoc
+title: "Rust RPC pipelining: dependent calls in one round trip"
+description: >-
+  Compare sequential and pipelined Rust RPC over a simulated high-latency connection.
+  Queue calls on a returned RPC client before the call that returns it finishes.
+social_description: >-
+  A runnable comparison of sequential and pipelined remote trait calls, with full
+  connection setup and simulated network latency.
+canonical: /examples/pipelining.html
+example: pipelining
+nav_url: /examples/channels.html
+---
+
+    <header class="page-header">
+        {% include nav.html %}
+
+        <div class="wrap">
+            <h1>Example: pipelining dependent RPC calls</h1>
+            <p class="lead">
+                A directory returns a counter's RPC client. Normally, a caller waits for that
+                client before using it. Pipelining lets it queue the counter calls together
+                with the request that opens the counter.
+            </p>
+
+            {% include example-tabs.html %}
+        </div>
+    </header>
+
+    <main id="content">
+        <section class="section">
+            <div class="wrap narrow">
+                <h2>Sequential and pipelined calls</h2>
+                <p>The example performs the same three operations in both cases:</p>
+                <ol>
+                    <li>Open a counter through the directory.</li>
+                    <li>Increase the counter by 20.</li>
+                    <li>Read its value.</li>
+                </ol>
+                <p>
+                    The sequential version awaits each response before making the next call.
+                    The pipelined version creates a placeholder counter client locally and
+                    queues the dependent calls with <code>rtc::calls!</code>. The server
+                    connects them to the counter when it is created.
+                </p>
+                <p>
+                    The directory's <code>open_counter</code> method is marked
+                    <code>#[pipelinable]</code>. This adds a pipelined calling variant without
+                    changing how ordinary callers use the method.
+                </p>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="wrap narrow">
+                <h2 id="running">Running the comparison</h2>
+                <pre class="cmd"><code>git clone {{ site.repo }}
+cd remoc
+cargo run --manifest-path examples/pipelining/Cargo.toml</code></pre>
+                <p>
+                    Both endpoints run in one process. The transport forwards frames through
+                    in-memory channels with 150&nbsp;ms of delay in each direction, giving a
+                    simulated 300&nbsp;ms round trip.
+                </p>
+                <ul>
+                    <li><strong>Sequential:</strong> three round trips, about 900&nbsp;ms.</li>
+                    <li><strong>Pipelined:</strong> one round trip, about 300&nbsp;ms.</li>
+                </ul>
+                <p>
+                    Both return 20. The program prints the measured times; these illustrate
+                    the effect of network latency, not a throughput benchmark.
+                </p>
+                <p class="section-foot">
+                    See the <a href="https://docs.rs/remoc/latest/remoc/rtc/pipelining/index.html">pipelining
+                        documentation</a> for the generated calling variants and their use.
+                    For a first introduction to remote trait calls, see the
+                    <a href="/examples/rtc.html">counter example</a>.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <h2 id="program">Source code</h2>
+                <p class="section-lead">
+                    A single binary defines the two remote traits, serves their implementations,
+                    simulates the delayed connection and runs both calling styles.
+                </p>
+
+                {% include example-pipelining.html %}
+
+                <p class="section-foot">
+                    <a class="button icon-link" href="{{ site.repo }}/tree/master/examples/pipelining"><span
+                            class="icon github" aria-hidden="true"></span>Browse it on GitHub</a>
+                </p>
+            </div>
+        </section>
+    </main>

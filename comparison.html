@@ -25,19 +25,25 @@ nav_url: /comparison.html
     <main id="content">
         <section class="section">
             <div class="wrap narrow">
-                <h2>Goal: seamless RPC between Rust programs</h2>
+                <h2>Rust-to-Rust RPC model</h2>
                 <p>
                     Remoc treats an RPC connection as an ongoing typed relationship between two Rust
                     programs, not only a sequence of requests and responses. Traits, ordinary Rust data,
                     channels and remote objects can all cross the same connection.
                 </p>
 
-                <h3>Rust types are the contract</h3>
+                <h3 id="rust-traits-serde">Rust traits instead of a protobuf schema</h3>
                 <p>
-                    Traits become remotely callable with
-                    <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html"><code>#[rtc::remote]</code></a>.
-                    Arguments and results are Serde types, so there is no separate interface language
-                    or generated source to keep alongside them.
+                    Like <a href="#tarpc">tarpc</a>, Remoc defines RPC interfaces in Rust.
+                    The <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html"><code>#[rtc::remote]</code></a>
+                    attribute generates client and server glue at compile time. Arguments
+                    and results are Serde types, so there is no separate <code>.proto</code>
+                    file or <code>protoc</code> step.
+                </p>
+                <p>
+                    The <a href="/examples/rtc.html">counter example</a> shows the trait,
+                    Serde error types and both binaries. This is Rust-to-Rust RPC; choose
+                    a cross-language protocol when non-Rust peers need to call the service.
                 </p>
 
                 <h3>Channels are transferable values</h3>
@@ -69,7 +75,7 @@ nav_url: /comparison.html
             <div class="wrap">
                 <h2>Feature comparison</h2>
                 <p class="section-lead">
-                    The table compares each library against that goal.
+                    The table compares how each library supports this communication model.
                     <span class="verdict-key good">Green</span> means built in,
                     <span class="verdict-key fair">amber</span> means constraints or extra setup, and
                     <span class="verdict-key poor">red</span> means no documented built-in support.
@@ -454,8 +460,8 @@ nav_url: /comparison.html
                     APIs and infrastructure that routes, measures or limits individual calls.
                 </p>
                 <p>
-                    Remoc instead keeps Rust types as the contract: there is no schema and no code
-                    generator, and any Serde type, including enums carrying data and generics, is
+                    Remoc instead keeps Rust types as the contract: there is no separate schema or
+                    standalone code-generation step, and Serde types, including enums carrying data and generics, are
                     used directly. It multiplexes its own channels over the supplied transport, so
                     a call can return a stream in either direction and a channel can be sent along
                     with any value, not only as the result of a streaming method.
@@ -473,8 +479,8 @@ nav_url: /comparison.html
                     infrastructure.
                 </p>
                 <p>
-                    Remoc is the stronger fit when both endpoints are Rust and calls
-                    need to pass typed channels, callbacks or remote objects that remain usable after
+                    With Remoc, both endpoints are Rust programs, and calls can pass typed
+                    channels, callbacks or remote objects that remain usable after
                     the call returns. These can be created dynamically, sent in either direction and
                     multiplexed over a single application-provided connection.
                 </p>

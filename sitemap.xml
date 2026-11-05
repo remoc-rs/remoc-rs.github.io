@@ -23,4 +23,6 @@ permalink: /sitemap.xml
     <url><loc>{{ site.url }}/examples/rtc.html</loc></url>
     <url><loc>{{ site.url }}/examples/tracing.html</loc></url>
     <url><loc>{{ site.url }}/examples/rtc-web.html</loc></url>
+    <url><loc>{{ site.url }}/examples/daemon.html</loc></url>
+    <url><loc>{{ site.url }}/examples/pipelining.html</loc></url>
 </urlset>

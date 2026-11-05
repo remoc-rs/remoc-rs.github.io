@@ -1101,7 +1101,7 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 
 .example-links {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
     gap: 0.75rem;
 }
 

@@ -1,10 +1,10 @@
 ---
 layout: base
 project: remoc
-title: "Distributed tracing of remote trait calls: a Remoc example"
+title: "Rust RPC callbacks and distributed tracing: a Remoc example"
 description: >-
-  A pizzeria served over Remoc whose calls appear as spans in the caller's
-  trace, viewed in an OpenTelemetry collector.
+  Run a Rust RPC server that calls a client callback over the same TCP connection.
+  Follow both directions in a distributed trace, with optional OpenTelemetry export.
 social_description: >-
   Remote calls that show up in the caller's trace via OpenTelemetry.
 canonical: /examples/tracing.html
@@ -16,10 +16,11 @@ nav_url: /examples/channels.html
         {% include nav.html %}
 
         <div class="wrap">
-            <h1>Example: distributed tracing</h1>
+            <h1>Example: RPC callbacks with distributed tracing</h1>
             <p class="lead">
                 The client orders pizzas and the calls executed by the server appear as
-                spans in the client's trace.
+                spans in the client's trace. The server calls back into the client to
+                report progress over the same TCP connection.
             </p>
 
             {% include example-tabs.html %}
@@ -45,22 +46,28 @@ nav_url: /examples/channels.html
                     the timing of the spans.
                 </p>
                 <p>
-                    The client also passes a remote callback with each order, through which
-                    the server reports the progress of the preparation. Calling it is a
-                    remote call in the opposite direction, from the server to the client,
-                    and its spans are linked into the same trace.
+                    The client also passes a <code>Progress</code> callback with each
+                    <code>order()</code>. The server calls it to report preparation progress
+                    over the same TCP connection, with spans linked into the same trace.
+                    The <a href="/server-push.html#client-callback">server-to-client callback
+                        guide</a> walks through how this works.
                 </p>
             </div>
         </section>
 
         <section class="section alt">
             <div class="wrap narrow">
-                <h2>Running it</h2>
+                <h2 id="running">Running the callback and tracing example</h2>
                 <p>
                     Clone the repository:
                 </p>
                 <pre class="cmd"><code>git clone {{ site.repo }}
 cd remoc</code></pre>
+                <p>
+                    For callbacks and terminal logging alone, skip the collector and omit
+                    <code>OTEL_EXPORTER_OTLP_ENDPOINT</code> from the commands below.
+                    The same client and server work without an OpenTelemetry service.
+                </p>
                 <p class="section-foot">
                     Run an OpenTelemetry collector, for example
                     <a href="https://github.com/ymtdzzz/otel-tui">otel-tui</a>, which
@@ -103,7 +110,7 @@ cd remoc</code></pre>
 
         <section class="section">
             <div class="wrap">
-                <h2>The program</h2>
+                <h2>Source code</h2>
                 <p class="section-lead">
                     The shared crate defines the remote trait, the progress callback and the
                     tracing setup, and the other two crates provide the server and client binaries.

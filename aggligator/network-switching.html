@@ -67,8 +67,9 @@ faq:
                     progress, is lost.
                 </p>
                 <p>
-                    Application-level reconnect logic must detect the failure, resume the
-                    session and handle data that was in flight when the connection broke.
+                    <strong>Other approaches:</strong> Application-level reconnect logic must
+                    detect the failure, resume the session and handle data that was in flight
+                    when the connection broke.
                     <a href="https://en.wikipedia.org/wiki/Multipath_TCP">Multipath TCP</a>
                     solves the problem in the kernel, but requires support from both operating
                     systems and must be let through by the middleboxes on the path. QUIC supports
