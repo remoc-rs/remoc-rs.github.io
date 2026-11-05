@@ -22,6 +22,23 @@ gem install --user-install jekyll
 
 The site uses no plugins, so plain Jekyll renders exactly what GitHub Pages publishes.
 
+## IndexNow
+
+After deploying updated pages, submit the URLs in the published sitemap to IndexNow:
+
+```
+python3 _tools/indexnow.py
+```
+
+The script checks the local and published IndexNow key before submitting. It uses
+the live sitemap, so deploy sitemap changes first. A successful response means the
+URLs were received, not that they have been indexed. To print the same URLs for
+manual submission without sending them to IndexNow, run:
+
+```
+python3 _tools/indexnow.py --list
+```
+
 ## Social cards
 
 The three 1200 by 630 social preview images are rendered from editable SVG sources:
