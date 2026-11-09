@@ -1,5 +1,4 @@
-/* Remoc website — no frameworks, no external requests. The only script on the site
-   copies the install command to the clipboard. */
+/* Remoc website — no frameworks, no external requests. */
 
 /* Inter and JetBrains Mono, SIL Open Font License 1.1, see fonts/*-LICENSE.txt */
 
@@ -470,8 +469,34 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     margin-bottom: 0;
 }
 
+.tunnel-intro .lead + .lead {
+    margin-top: 1rem;
+}
+
 .tunnel-intro .tunnel-illustration {
     width: clamp(17rem, 30vw, 24rem);
+}
+
+.task-shortcuts {
+    margin-top: 1.5rem;
+}
+
+.task-shortcuts p {
+    margin-bottom: 0.65rem;
+}
+
+.task-shortcuts ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.task-shortcuts .button {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
 }
 
 @media (max-width: 48rem) {
@@ -638,6 +663,47 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     color: var(--accent);
 }
 
+.command-block {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--code-bg);
+}
+
+.command-block > pre {
+    border: 0;
+    background: none;
+}
+
+.command-block > .copy-button {
+    margin: 0.7rem 0.6rem 0 0;
+}
+
+.copy-status {
+    position: fixed;
+    z-index: 10;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100% - 2rem);
+    margin: 0;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 0.92rem;
+    text-align: center;
+}
+
+.copy-status:empty {
+    display: none;
+}
+
 .copy-button .icon.check,
 .copy-button.copied .icon.copy {
     display: none;
@@ -675,6 +741,12 @@ nav[aria-label="Primary"] a[aria-current="page"] {
 
 .install.standalone {
     width: 100%;
+}
+
+.install-label {
+    margin: 1rem 0 0.5rem;
+    color: var(--fg-muted);
+    font-size: 0.92rem;
 }
 
 /* The tunnel utility needs no Rust, so its downloads are offered in the hero as well.
@@ -1480,6 +1552,27 @@ nav[aria-label="Primary"] a[aria-current="page"] {
     margin-top: 2.5rem;
 }
 
+.cli-reference h2 {
+    margin-top: 2.5rem;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 1rem;
+    letter-spacing: 0;
+}
+
+.cli-reference h2:first-child {
+    margin-top: 0;
+}
+
+.cli-reference pre {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--fg);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 table {
     border-collapse: collapse;
     width: 100%;
@@ -1608,12 +1701,15 @@ pre.cmd {
     font-variant-ligatures: none;
 }
 
-#quick-start pre + h3 {
+#quick-start pre + h3,
+#quick-start .command-block + h3 {
     margin-top: 1.5rem;
 }
 
 #quick-start,
 #port-mappings,
+#usage-recipes,
+#unattended,
 #monitor {
     --port-tunnel: #1d5fbf;
     --port-target: #a84b00;
@@ -1623,6 +1719,8 @@ pre.cmd {
 @media (prefers-color-scheme: dark) {
     #quick-start,
     #port-mappings,
+    #usage-recipes,
+    #unattended,
     #monitor {
         --port-tunnel: #8ab4f8;
         --port-target: #fdba74;
@@ -1632,18 +1730,24 @@ pre.cmd {
 
 #quick-start .port-tunnel,
 #port-mappings .port-tunnel,
+#usage-recipes .port-tunnel,
+#unattended .port-tunnel,
 #monitor .port-tunnel {
     --port-color: var(--port-tunnel);
 }
 
 #quick-start .port-target,
 #port-mappings .port-target,
+#usage-recipes .port-target,
+#unattended .port-target,
 #monitor .port-target {
     --port-color: var(--port-target);
 }
 
 #quick-start .port-local,
 #port-mappings .port-local,
+#usage-recipes .port-local,
+#unattended .port-local,
 #monitor .port-local {
     --port-color: var(--port-local);
 }
@@ -1654,6 +1758,12 @@ pre.cmd {
 #port-mappings .port-tunnel,
 #port-mappings .port-target,
 #port-mappings .port-local,
+#usage-recipes .port-tunnel,
+#usage-recipes .port-target,
+#usage-recipes .port-local,
+#unattended .port-tunnel,
+#unattended .port-target,
+#unattended .port-local,
 #monitor .port-tunnel,
 #monitor .port-target,
 #monitor .port-local {

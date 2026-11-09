@@ -1,10 +1,10 @@
 ---
 layout: base
 project: aggligator
-title: "agg-tunnel: TCP port forwarding over multiple bonded network links"
+title: "SSH over Bluetooth or USB, plus TCP port forwarding: agg-tunnel"
 description: >-
-  agg-tunnel forwards TCP ports over several network links at once, with combined
-  bandwidth and failover between links, on Linux, macOS and Windows.
+  Use SSH over Bluetooth or USB without an IP network, or forward TCP ports over
+  bonded network links. agg-tunnel includes practical commands and failover examples.
 canonical: /aggligator/tunnel.html
 favicon: /aggligator/logo.png
 nav_url: /aggligator/tunnel.html
@@ -38,6 +38,19 @@ faq:
       Links joining a connection are authenticated, but the forwarded payload is not
       encrypted. Use a protocol that encrypts itself, such as SSH or TLS, when the
       links are not trusted.
+  - q: "Can I use Bluetooth without an IP network?"
+    a: >-
+      Yes. On Linux, a build with the optional <code>bluer</code> feature can forward
+      TCP ports over Bluetooth Classic RFCOMM alone. Both machines need Bluetooth
+      adapters; no IP connection between them is required. The same Bluetooth link
+      can also be combined with TCP links.
+  - q: "Can I use SSH over USB without configuring a network interface?"
+    a: >-
+      Yes. agg-tunnel can carry the SSH connection directly over USB, without USB
+      Ethernet or IP configuration. The server must be a Linux device with a USB device
+      controller and a peripheral-capable port; two ordinary USB host ports will not
+      work. Connect a data cable, run the tunnel server on the device and the client
+      on the USB host, then use SSH through the locally forwarded port.
 ---
 
     <header class="page-header">
@@ -45,16 +58,29 @@ faq:
 
         <div class="wrap tunnel-intro">
             <div>
-                <h1>Tunnel existing applications</h1>
+                <h1>TCP port forwarding over multiple connections</h1>
                 <p class="lead">
                     <a href="/aggligator/">Aggligator</a> combines the available network links between two
                     machines into one bonded connection. It distributes traffic across multiple interfaces,
                     internet uplinks or proxy paths to combine their bandwidth and overcome per-flow limits,
                     and keeps the connection alive as links fail, reconnect or the device changes networks.
+                </p>
+                <p class="lead">
                     <code>agg-tunnel</code> is a standalone command-line tool for Linux, macOS and Windows
                     that brings this to existing TCP applications: the server permits targets, the client
                     exposes local ports, and neither application needs modification.
+                    It can also carry SSH directly over Bluetooth or USB, without an IP network
+                    between the machines.
                 </p>
+                <nav class="task-shortcuts" aria-label="Tunnel tasks">
+                    <p><strong>What do you want to do?</strong></p>
+                    <ul>
+                        <li><a class="button" href="#network-failover">Keep SSH connected across networks</a></li>
+                        <li><a class="button" href="#adding-links">Combine network connections</a></li>
+                        <li><a class="button" href="#bluetooth">SSH over Bluetooth</a></li>
+                        <li><a class="button" href="#usb">SSH over USB</a></li>
+                    </ul>
+                </nav>
             </div>
             {% include agg-tunnel-illustration.svg %}
         </div>
@@ -83,7 +109,20 @@ faq:
                             <span class="icon check" aria-hidden="true"></span>
                         </button>
                     </div>
+                    <p class="install-label">Linux only, with all features enabled:</p>
+                    <div class="install standalone">
+                        <span class="prompt" aria-hidden="true">$</span>
+                        <code>cargo install aggligator-util --all-features</code>
+                        <button class="copy-button" type="button" data-copy="cargo install aggligator-util --all-features"
+                            aria-label="Copy the command">
+                            <span class="icon copy" aria-hidden="true"></span>
+                            <span class="icon check" aria-hidden="true"></span>
+                        </button>
+                    </div>
                 </div>
+                <p class="section-foot">
+                    <a class="button" href="/aggligator/agg-tunnel-cli.html">Command-line reference</a>
+                </p>
             </div>
         </section>
 
@@ -115,8 +154,13 @@ faq:
                 </aside>
 
                 <p class="section-foot">
+                    The <a href="/aggligator/agg-tunnel-cli.html">command-line reference</a>
+                    lists all subcommands, options and defaults.
                     Run <code>agg-tunnel client --help</code> or
                     <code>agg-tunnel server --help</code> for options available in the installed build.
+                    The <a href="#usage-recipes">usage recipes</a> below cover multiple services,
+                    network failover, parallel TCP links, SOCKS5 proxies, SSH over Bluetooth
+                    and SSH over USB.
                 </p>
             </div>
         </section>
@@ -148,7 +192,7 @@ faq:
                             </tr>
                             <tr>
                                 <td></td>
-                                <td><code>--port db.internal:<span class="port-target">5432</span></code></td>
+                                <td><code>--port db.internal:<span class="port-target">5432</span>:5432</code></td>
                                 <td>allow forwarding to port <code class="port-target">5432</code> on another host</td>
                             </tr>
                             <tr>
@@ -163,7 +207,22 @@ faq:
                     </table>
                 </div>
 
-                <h3>Adding links</h3>
+                <p>
+                    For a target on another host, the server mapping is
+                    <code>host:target_port:server_port</code>. The final number is the identifier
+                    requested by the client, not another listening port. For example,
+                    <code>--port db.internal:5432:5432</code> maps identifier <code>5432</code>
+                    to <code>db.internal:5432</code>.
+                </p>
+                <p>
+                    Forwarded ports on the client listen on loopback only. Add <code>--global</code>
+                    only if other machines should be able to connect through that client, and
+                    restrict access with its firewall. The server's permitted targets limit
+                    destinations; they do not authenticate clients. Restrict access to the tunnel
+                    server as well, and retain the forwarded application's own authentication.
+                </p>
+
+                <h3 id="adding-links">Adding links</h3>
                 <p>
                     The TCP transport tries the usable combinations of local interfaces and resolved
                     server addresses. Repeat <code>--tcp</code> for additional targets, or pass
@@ -181,7 +240,222 @@ faq:
             </div>
         </section>
 
-        <section id="monitor" class="section alt">
+        <section id="usage-recipes" class="section alt">
+            <div class="wrap narrow">
+                <h2>Usage recipes</h2>
+                <p>
+                    Run each recipe separately, stopping the previous tunnel processes before
+                    reusing their ports. Replace the example host names and addresses with your
+                    own. These recipes use SSH or HTTPS to protect the application traffic.
+                </p>
+                <ul>
+                    <li><a href="#multiple-services">Forward several services</a></li>
+                    <li><a href="#network-failover">Keep SSH running when a network link fails</a></li>
+                    <li><a href="#parallel-tcp">Use multiple TCP links on one path</a></li>
+                    <li><a href="#socks-proxies">Connect through SOCKS5 proxies</a></li>
+                    <li><a href="#bluetooth">SSH over Bluetooth</a></li>
+                    <li><a href="#usb">SSH over USB</a></li>
+                    <li><a href="#unattended">Run unattended</a></li>
+                </ul>
+
+                <h3 id="multiple-services" class="spaced">Forward several services</h3>
+                <p>
+                    Repeat <code>--port</code> to forward SSH and an HTTPS service from the same
+                    server. One client process exposes both services locally; each incoming
+                    application connection gets its own aggregated connection.
+                </p>
+                <figure class="code-single">
+                    <figcaption>Server</figcaption>
+                    <pre class="cmd"><code>agg-tunnel server --tcp <span class="port-tunnel">5000</span> --port <span class="port-target">22</span> --port <span class="port-target">443</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Client</figcaption>
+                    <pre class="cmd"><code>agg-tunnel client --tcp server.example:<span class="port-tunnel">5000</span> \
+    --port <span class="port-target">22</span>:<span class="port-local">2222</span> --port <span class="port-target">443</span>:<span class="port-local">8443</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Use the forwarded services</figcaption>
+                    <pre class="cmd"><code>ssh -p <span class="port-local">2222</span> localhost
+curl --connect-to service.example:443:127.0.0.1:<span class="port-local">8443</span> \
+    https://service.example/</code></pre>
+                </figure>
+                <p>
+                    Replace <code>service.example</code> with the name on your HTTPS certificate.
+                    Curl connects to the local forwarded port while retaining that name for the
+                    HTTP request and TLS verification.
+                </p>
+
+                <h3 id="network-failover" class="spaced">Keep SSH running when a network link fails</h3>
+                <p>
+                    If the same server is reachable through two networks, give the client both
+                    addresses. For example, <code>server-ethernet.example</code> and
+                    <code>server-wifi.example</code> can identify its Ethernet and Wi-Fi
+                    interfaces. Both must reach the same tunnel server, not two unrelated servers.
+                </p>
+                <figure class="code-single">
+                    <figcaption>Server</figcaption>
+                    <pre class="cmd"><code>agg-tunnel server --tcp <span class="port-tunnel">5000</span> --port <span class="port-target">22</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Client</figcaption>
+                    <pre class="cmd"><code>agg-tunnel client \
+    --tcp server-ethernet.example:<span class="port-tunnel">5000</span> \
+    --tcp server-wifi.example:<span class="port-tunnel">5000</span> \
+    --port <span class="port-target">22</span>:<span class="port-local">2222</span></code></pre>
+                </figure>
+                <p>
+                    Start <code>ssh -p 2222 localhost</code> and wait until the
+                    <a href="#monitor">monitor</a> shows active links through both networks.
+                    Disconnect one interface: the SSH session continues over the remaining links.
+                    You can also use the monitor's number keys to disable links without changing
+                    the machine's network configuration.
+                </p>
+                <p>
+                    A server name that resolves to several addresses can be supplied just once.
+                    Aggligator discovers usable paths from the client's interfaces to those
+                    addresses. If all links disappear, traffic pauses while the connection waits
+                    for a link to return, up to the configured timeout. See
+                    <a href="/aggligator/network-switching.html">connections that survive network
+                        changes</a> for the full behavior.
+                </p>
+
+                <h3 id="parallel-tcp" class="spaced">Use multiple TCP links on one path</h3>
+                <p>
+                    When individual TCP flows are held below the capacity of a network path,
+                    <code>--tcp-links 4</code> opens four parallel links per path. The application
+                    still sees one connection, but its data is distributed over those links.
+                </p>
+                <figure class="code-single">
+                    <figcaption>Server</figcaption>
+                    <pre class="cmd"><code>agg-tunnel server --tcp <span class="port-tunnel">5000</span> --port <span class="port-target">22</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Client</figcaption>
+                    <pre class="cmd"><code>agg-tunnel client --tcp server.example:<span class="port-tunnel">5000</span> \
+    --tcp-links 4 --port <span class="port-target">22</span>:<span class="port-local">2222</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Transfer a file through SSH</figcaption>
+                    <pre class="cmd"><code>scp -P <span class="port-local">2222</span> large-file.bin user@localhost:/tmp/</code></pre>
+                </figure>
+                <p>
+                    Replace <code>user</code> with your server account and choose a destination
+                    you can write to. While the transfer runs, the monitor shows the parallel
+                    links and their rates. Compare with <code>--tcp-links 1</code> on the same path.
+                    More links cannot exceed the path's total bandwidth and do not help when it
+                    is already saturated. The <a href="/aggligator/per-flow-limits.html">per-flow
+                        bandwidth guide</a> covers when this helps and how to tune it.
+                </p>
+
+                <h3 id="socks-proxies" class="spaced">Connect through SOCKS5 proxies</h3>
+                <p>
+                    Suppose two SOCKS5 proxies are already listening on
+                    <code>127.0.0.1:1081</code> and <code>127.0.0.1:1082</code>. Each must be
+                    able to reach the same tunnel server at <code>server.example:5000</code>.
+                    Aggligator combines their links; it does not start the proxy services itself.
+                </p>
+                <figure class="code-single">
+                    <figcaption>Server</figcaption>
+                    <pre class="cmd"><code>agg-tunnel server --tcp <span class="port-tunnel">5000</span> --port <span class="port-target">22</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Client</figcaption>
+                    <pre class="cmd"><code>agg-tunnel client \
+    --socks 127.0.0.1:1081 --socks 127.0.0.1:1082 \
+    --socks-target server.example:<span class="port-tunnel">5000</span> \
+    --port <span class="port-target">22</span>:<span class="port-local">2222</span></code></pre>
+                </figure>
+                <p>
+                    Open <code>ssh -p 2222 localhost</code> and check that the monitor shows a
+                    link through each proxy. Add <code>--socks-links 2</code> to open two links
+                    through each proxy. For resilience, the proxies need independent network paths;
+                    several links through one failed path cannot provide a backup.
+                </p>
+                <p>
+                    With an SSH dynamic proxy (<code>ssh -D</code>), all SOCKS connections through
+                    that proxy still share its one outer SSH connection. Use separate proxy or
+                    tunnel instances when you need independent outer flows. The
+                    <a href="/aggligator/per-flow-limits.html">SOCKS5 and per-flow examples</a>
+                    explain the distinction.
+                </p>
+
+                <h3 id="bluetooth" class="spaced">SSH over Bluetooth</h3>
+                <p>
+                    Open an SSH session to a nearby Linux machine over Bluetooth alone: no Wi-Fi,
+                    Ethernet or IP connection between the machines is needed. This uses Bluetooth
+                    Classic RFCOMM, not Bluetooth Low Energy. Both machines need powered Bluetooth
+                    Classic adapters; pair them with your usual Bluetooth tools and make sure an
+                    SSH server is listening on port <code class="port-target">22</code>.
+                </p>
+                <p>
+                    Replace <code>00:11:22:33:44:55</code> with the server's Bluetooth adapter
+                    address. RFCOMM channel <code>7</code> must be available on the server.
+                    The client address requires the brackets and quotes shown below.
+                </p>
+                <figure class="code-single">
+                    <figcaption>Server</figcaption>
+                    <pre class="cmd"><code>agg-tunnel server --rfcomm 7 --port <span class="port-target">22</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Client</figcaption>
+                    <pre class="cmd"><code>agg-tunnel client --rfcomm '[00:11:22:33:44:55]:7' \
+    --port <span class="port-target">22</span>:<span class="port-local">2222</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Connect through Bluetooth</figcaption>
+                    <pre class="cmd"><code>ssh -p <span class="port-local">2222</span> localhost</code></pre>
+                </figure>
+                <p>
+                    SSH connects to the local forwarded port, and the tunnel carries its encrypted
+                    traffic over Bluetooth. The <a href="#monitor">monitor</a> shows the RFCOMM link.
+                </p>
+                <p>
+                    <strong>Also with TCP:</strong> Add <code>--tcp 5000</code> to the server command
+                    and <code>--tcp device.example:5000</code> to the client command. Both paths
+                    reach the same server, so the SSH session can continue over Bluetooth if the
+                    network link fails.
+                </p>
+
+                <h3 id="usb" class="spaced">SSH over USB</h3>
+                <p>
+                    Connect your computer to a Linux device's USB peripheral or OTG port with a
+                    data cable, then use SSH over that cable. No USB network interface or IP
+                    configuration is needed. The device must have a USB device controller (UDC);
+                    two ordinary host-only USB ports cannot be connected this way.
+                </p>
+                <p>
+                    An SSH server must be listening on the device's port
+                    <code class="port-target">22</code>. Run the tunnel server with permission to
+                    configure USB gadgets, and ensure the client has access to the USB device.
+                    Replace <code>device-hostname</code> below with the output of <code>hostname</code>
+                    on the device: the tunnel advertises that name as its USB serial number.
+                </p>
+                <figure class="code-single">
+                    <figcaption>Server on the Linux USB device</figcaption>
+                    <pre class="cmd"><code>agg-tunnel server --usb --port <span class="port-target">22</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Client on the USB host computer</figcaption>
+                    <pre class="cmd"><code>agg-tunnel client --usb device-hostname --port <span class="port-target">22</span>:<span class="port-local">2222</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Connect through USB</figcaption>
+                    <pre class="cmd"><code>ssh -p <span class="port-local">2222</span> localhost</code></pre>
+                </figure>
+                <p>
+                    The monitor should show a USB link to the device. SSH authenticates against
+                    the device's SSH server, just as it would over a network connection.
+                </p>
+                <p>
+                    <strong>Also with TCP:</strong> Add <code>--tcp 5000</code> to the server command
+                    and <code>--tcp device.example:5000</code> to the client command. The tunnel can
+                    use USB and the network together; if the cable is unplugged, the same SSH
+                    session can continue over an established TCP link.
+                </p>
+            </div>
+        </section>
+
+        <section id="monitor" class="section">
             <div class="wrap">
                 <h2>Link monitor</h2>
                 <p class="section-lead">
@@ -225,18 +499,35 @@ faq:
             </div>
         </section>
 
+        <section id="unattended" class="section alt">
+            <div class="wrap narrow">
+                <h2>Run unattended</h2>
+                <p>
+                    <code>--no-monitor</code> keeps output suitable for logs. It does not put the
+                    process in the background: run it under systemd on Linux or your platform's
+                    service manager, with a restart policy and captured output.
+                </p>
+                <figure class="code-single">
+                    <figcaption>Server</figcaption>
+                    <pre class="cmd"><code>agg-tunnel server --no-monitor --tcp <span class="port-tunnel">5000</span> --port <span class="port-target">22</span></code></pre>
+                </figure>
+                <figure class="code-single">
+                    <figcaption>Client</figcaption>
+                    <pre class="cmd"><code>agg-tunnel client --no-monitor --tcp server.example:<span class="port-tunnel">5000</span> \
+    --port <span class="port-target">22</span>:<span class="port-local">2222</span></code></pre>
+                </figure>
+                <p>
+                    Check the service's logs and connect with <code>ssh -p 2222 localhost</code>.
+                    Link failures are handled inside the running tunnel. Restarting the utility
+                    itself closes existing application connections; supervision restores the
+                    listener for new connections, not the old SSH session.
+                </p>
+                <p>
+                    For configuration files, diagnostic dumps and other options, see the
+                    <a href="/aggligator/agg-tunnel-cli.html#agg-tunnel">command-line reference</a>.
+                </p>
+            </div>
+        </section>
+
         {% include faq.html %}
     </main>
-
-    <script>
-        document.documentElement.classList.add("js");
-        for (const button of document.querySelectorAll("button[data-copy]")) {
-            button.addEventListener("click", async () => {
-                try {
-                    await navigator.clipboard.writeText(button.dataset.copy);
-                    button.classList.add("copied");
-                    setTimeout(() => button.classList.remove("copied"), 1500);
-                } catch {}
-            });
-        }
-    </script>

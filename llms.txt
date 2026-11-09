@@ -60,7 +60,11 @@ built on Tokio.
   distributing a connection across multiple TCP flows or SOCKS5 proxies when
   individual flows are throttled or limited by high latency.
 - [agg-tunnel](https://remoc.rs/aggligator/tunnel.html): forward TCP ports of
-  existing, unmodified applications over an aggregated connection.
+  existing, unmodified applications over an aggregated connection, or use SSH over
+  Bluetooth or USB without an IP network.
+- [agg-tunnel command-line reference](https://remoc.rs/aggligator/agg-tunnel-cli.html):
+  generated subcommands, options and defaults, including optional Bluetooth and USB
+  transport features.
 - [API documentation](https://docs.rs/aggligator)
 
 ## Postbag

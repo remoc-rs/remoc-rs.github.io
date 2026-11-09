@@ -67,6 +67,62 @@ use Search Console and Bing Webmaster Tools to inspect indexing and actual query
 impressions. A local build, sitemap submission or IndexNow acceptance cannot verify
 or guarantee rankings; search engines must recrawl the deployed pages first.
 
+## Tunnel usage recipes
+
+The `agg-tunnel` page keeps its SSH quick start and adds goal-based recipes for
+multiple services, failover, parallel TCP links, SOCKS5 proxies, SSH over Bluetooth,
+SSH over USB, and unattended operation. Task shortcuts near the top link directly
+to the relevant sections. The install section offers the default Cargo command and
+`cargo install aggligator-util --all-features`, labeled Linux-only.
+The Bluetooth and USB recipes start with
+the direct link; combining it with TCP is a side note. Keep installation details
+in the install section and command-line reference, not in the recipes.
+Check commands against the CLI in the Aggligator
+checkout. Bluetooth requires the `bluer` feature; the client RFCOMM address is
+`'[00:11:22:33:44:55]:7'`. USB needs a Linux peripheral-capable server with a UDC;
+the client selects its USB serial number, which is the device's hostname.
+A server target on another host uses
+`host:target_port:server_port`, with the final number acting as the client-requested
+identifier. Keep prerequisite and access-control notes beside the relevant examples.
+
+## Copying commands
+
+The base layout loads `copy-commands.js` for all pages. It adds copy buttons to
+`pre.cmd > code` blocks and handles the existing `button[data-copy]` installation
+buttons. Mark example output with `data-no-copy` on its `pre`; help text without a
+`code` child and source listings are not treated as commands. Keep shell prompts
+out of command blocks so their contents can be pasted directly into a terminal.
+Buttons are hidden without JavaScript or the Clipboard API; copy failures show a
+message asking the reader to select and copy the command manually.
+
+## Tunnel command-line reference
+
+Regenerate the reference from the current Aggligator source checkout, not from its
+possibly outdated checked-in Markdown documentation:
+
+```
+python3 _tools/render_tunnel_cli.py ../aggligator
+```
+
+The script builds and runs `agg-tunnel --help` and each subcommand's `--help`
+through Cargo with the lockfile, then writes `aggligator/agg-tunnel-cli.html`.
+It preserves the plain-text help in preformatted blocks with man-page-style
+headings, wrapping long lines without changing their text. Generate on Linux with the build
+prerequisites for Bluetooth and USB installed: the explicit `bluer,usb-host,usb-device`
+feature set includes all optional transport flags. The page shows the package
+version and the Linux-only `cargo install aggligator-util --all-features` command.
+
+Run this before deploying updates to the utility's CLI. To rebuild from current
+source and verify the checked-in reference without writing it:
+
+```
+python3 _tools/render_tunnel_cli.py ../aggligator --check
+```
+
+Do not edit the generated page by hand. Change CLI help in
+`aggligator-util/src/bin/agg-tunnel.rs`, or the page wrapper in the generator, then
+regenerate and run the strict Jekyll build.
+
 ## Social cards
 
 The three 1200 by 630 social preview images are rendered from editable SVG sources:

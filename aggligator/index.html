@@ -450,18 +450,3 @@ connector.add(<span class="t">UsbConnector</span>::new(|dev, _| dev.vendor_id() 
         </section>
 
     </main>
-
-    <script>
-        // The only script on this page: copying the install command. The button stays
-        // hidden unless this runs, so it is never a control that does nothing.
-        document.documentElement.classList.add("js");
-        for (const button of document.querySelectorAll("button[data-copy]")) {
-            button.addEventListener("click", async () => {
-                try {
-                    await navigator.clipboard.writeText(button.dataset.copy);
-                    button.classList.add("copied");
-                    setTimeout(() => button.classList.remove("copied"), 1500);
-                } catch {}
-            });
-        }
-    </script>
