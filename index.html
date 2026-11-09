@@ -1,12 +1,12 @@
 ---
 layout: base
 project: remoc
-title: "Remoc: Rust RPC with remote channels and objects"
+title: "Remoc: Rust-native RPC with channels and remote objects"
 description: >-
-  Remoc is an RPC library for Rust with trait-based RPC, typed remote channels and
-  objects, remote functions and observable collections over one connection.
+  Rust-native RPC using Rust traits and Serde types, without a separate schema.
+  Pass typed channels and remote objects over one connection.
 social_description: >-
-  Rust RPC where calls can pass typed channels and remote objects that remain usable
+  Rust-native RPC where calls can pass typed channels and remote objects that remain usable
   after they return, all over one connection.
 canonical: /
 schema: software
@@ -19,12 +19,13 @@ nav: home
         <div class="hero-inner">
             <img class="hero-logo" src="logo.png" alt="Remoc logo: a pink squid" width="467" height="482">
             <h1>Remoc</h1>
-            <p class="tagline">Rust RPC with remote channels and objects over one connection.</p>
+            <p class="tagline">Rust-native RPC with remote channels and objects over one connection.</p>
             <p class="lead">
                 Remoc turns Rust traits marked with
                 <a href="https://docs.rs/remoc/latest/remoc/rtc/index.html"><code>#[rtc::remote]</code></a>
-                into remotely callable interfaces, generating their clients and servers. Unlike
-                conventional RPC, arguments and return values can contain
+                into remotely callable interfaces, generating their clients and servers.
+                Arguments and results use Serde types, without a separate schema.
+                Unlike conventional RPC, arguments and return values can contain
                 <a href="https://docs.rs/remoc/latest/remoc/rch/index.html">Tokio-style remote channels</a>
                 and remote&nbsp;objects that remain usable after the call.
             </p>

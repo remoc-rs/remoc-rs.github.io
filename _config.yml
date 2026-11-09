@@ -1,6 +1,6 @@
 # Site-wide values, available to the templates as `site.*`.
 title: Remoc
-description: Rust RPC with remote channels and objects over one connection.
+description: Rust-native RPC with remote channels and objects over one connection.
 url: https://remoc.rs
 repo: https://github.com/remoc-rs/remoc
 docs: https://docs.rs/remoc
@@ -10,7 +10,7 @@ docs: https://docs.rs/remoc
 projects:
   - id: remoc
     name: Remoc
-    summary: RPC and typed channels between Rust programs
+    summary: Rust-native RPC and typed channels
     url: /
     logo: /logo.png
     social_image: /social/remoc.png
@@ -19,7 +19,6 @@ projects:
     branch: master
     crate: remoc
     links:
-      - { title: Guides, url: /#topics }
       - { title: Examples, url: /examples/channels.html }
       - { title: Benchmarks, url: /benchmarks.html }
       - { title: Comparison, url: /comparison.html }

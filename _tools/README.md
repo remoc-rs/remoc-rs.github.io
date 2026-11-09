@@ -47,6 +47,10 @@ multiplexing for sharing one connection, and server push for bidirectional RPC a
 client callbacks. The comparison also covers Rust traits and Serde without a
 separate protobuf schema.
 
+The homepage describes Remoc as Rust-native RPC: interfaces use Rust traits and Serde
+types without a separate schema. Keep specialized guide and example titles focused on
+their own subjects rather than repeating this positioning everywhere.
+
 Keep the front-matter title and description, visible headings, and links from the
 homepage and example pages consistent with each guide's subject. Reuse the complete
 examples under `examples/`; their source listings in `_includes/example-*.html` are
