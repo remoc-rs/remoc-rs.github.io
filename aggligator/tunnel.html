@@ -232,10 +232,24 @@ faq:
                     platform, clients can also add links through SOCKS5 proxies (with
                     <code>--socks-links</code> for multiple links per proxy), USB or Bluetooth.
                 </p>
+                <h3 id="tuning-throughput" class="spaced">Tuning throughput</h3>
                 <p>
-                    <code>--compress</code> on both ends compresses the links using zstd.
-                    This only helps when the forwarded data is compressible; SSH traffic, for
-                    example, is encrypted and does not become smaller.
+                    <strong>Congestion control:</strong> On links with packet loss, such as
+                    cellular or Wi-Fi links, BBR can improve throughput compared with
+                    loss-based congestion control. Use <code>--quic-congestion bbr</code>
+                    for QUIC links or, on Linux, <code>--tcp-congestion bbr</code> for TCP
+                    links. Set the option on both client and server to tune traffic in both
+                    directions. Linux TCP needs BBR support in the kernel; if provided as
+                    a module, load <code>tcp_bbr</code> first. QUIC's BBR implementation
+                    does not require that kernel module.
+                </p>
+                <p>
+                    <strong>Compression:</strong> Add <code>--compress</code> on both ends
+                    to compress TCP, QUIC and SOCKS5 links using zstd. The optional level
+                    defaults to 1; for example, <code>--compress 3</code> selects level 3.
+                    Compression is not supported on Bluetooth or USB links. It only helps
+                    when the forwarded data is compressible; SSH and HTTPS traffic is
+                    already encrypted and does not benefit from it.
                 </p>
             </div>
         </section>
